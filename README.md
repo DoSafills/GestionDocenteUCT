@@ -1,2 +1,2 @@
 # GestionDocenteUCT
-Prollecto de Integracion II
+Proyecto de Integracion II
