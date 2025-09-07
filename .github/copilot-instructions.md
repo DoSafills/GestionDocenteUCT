@@ -57,7 +57,20 @@ project/
 │   │   └── external_api.py        # Cliente para API externa (si lo ocupan)
 │   │
 │   ├── application/
-│   │   ├── services.py            # Casos de uso (ej: generar horario, confirmar)
+│   │   ├── services/
+│   │   │   ├── __init__.py
+│   │   │   ├── docente_service.py
+│   │   │   ├── asignatura_service.py
+│   │   │   ├── seccion_service.py
+│   │   │   ├── sala_service.py
+│   │   │   ├── edificio_service.py
+│   │   │   ├── campus_service.py
+│   │   │   ├── clase_service.py
+│   │   │   ├── restriccion_service.py
+│   │   │   ├── reportehoras_service.py
+│   │   │   ├── reporte_service.py
+│   │   │   └── bloque_service.py
+│   │   │
 │   │   └── crud.py                # Orquesta repositorios en operaciones de alto nivel
 │   │
 │   └── main.py
@@ -90,3 +103,10 @@ project/
 - Seguir patrones establecidos en la estructura
 - No crear apios REST o endpoints, solo la lógica y estructura del backend
 - Documentar funciones y clases con docstrings
+- BD PostgreSQL
+- Frontend React Vite
+- Inyeccion de Dependencias
+- ORM SQLAlchemy
+- Validaciones con Pydantic
+- Testing con Pytest
+- 
