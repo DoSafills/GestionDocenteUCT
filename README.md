@@ -56,11 +56,8 @@
 ### 🎨 Técnicas
 - 🏗️ **Clean Architecture** con separación de capas
 - 🔒 **Type Safety** con Pydantic y SQLAlchemy 2.0
-- 🧪 **Testing Completo** con pytest
 - 📦 **Inyección de Dependencias**
-- 🔄 **Migrations** con Alembic
 - 📊 **PostgreSQL** como motor de base de datos
-
 ---
 
 ## 🛠️ Tecnologías
@@ -81,15 +78,6 @@ Framework:     React 18+
 Build Tool:    Vite 5+
 Language:      TypeScript/JavaScript
 Styling:       CSS Modules / Styled Components
-```
-
-### DevOps & Tools
-```yaml
-Formateo:      Black + isort
-Linting:       Flake8 + mypy
-Pre-commit:    Hooks automatizados
-CI/CD:         GitHub Actions (próximamente)
-Containerización: Docker (próximamente)
 ```
 
 ---
@@ -172,27 +160,6 @@ cp .env.example .env
 nano .env
 ```
 
-```env
-# Configuración mínima requerida
-DATABASE_USER=postgres
-DATABASE_PASSWORD=tu_password
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_NAME=gestion_docente_uct
-```
-
-### 5️⃣ Configurar Base de Datos
-```bash
-# Crear base de datos
-createdb gestion_docente_uct
-
-# Ejecutar migraciones
-alembic upgrade head
-
-# Inicializar tablas (desarrollo)
-python -c "from app.config.database import init_db; init_db()"
-```
-
 ### 6️⃣ Ejecutar Tests
 ```bash
 # Tests completos
@@ -207,37 +174,6 @@ pytest tests/test_docente.py -v
 
 ---
 
-## 📊 Base de Datos
-
-### Modelo de Datos Principal
-
-```mermaid
-erDiagram
-    DOCENTE ||--o{ CLASE : imparte
-    CLASE }o--|| SECCION : pertenece
-    SECCION }o--|| ASIGNATURA : es_de
-    CLASE }o--|| SALA : se_realiza_en
-    SALA }o--|| EDIFICIO : ubicada_en
-    EDIFICIO }o--|| CAMPUS : pertenece_a
-    
-    DOCENTE {
-        string docente_rut PK
-        string nombre
-        string email UK
-        string pass_hash
-        int max_horas_docencia
-    }
-    
-    CLASE {
-        int clase_id PK
-        uuid seccion_id
-        string docente_rut FK
-        string sala_codigo
-        int bloque_id
-        string estado
-    }
-```
-
 ### Categorías de Docentes
 
 | Categoría | Horas Mínimas | Horas Máximas |
@@ -245,16 +181,6 @@ erDiagram
 | 🟢 **Jornada Completa** | 40 horas | 44 horas |
 | 🟡 **Media Jornada** | 20 horas | 39 horas |
 | 🔴 **Jornada Parcial** | 4 horas | 19 horas |
-
----
-
-## 🧪 Testing
-
-### Cobertura Actual
-- 🎯 **Objetivo**: 90%+ cobertura
-- ✅ **Domain Layer**: 95%+
-- ✅ **Application Layer**: 90%+
-- ⚠️ **Infrastructure Layer**: 85%+
 
 ---
 
