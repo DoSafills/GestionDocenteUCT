@@ -1,15 +1,7 @@
 """Modelo ORM de Docente"""
-from sqlalchemy import Column, Integer, String, Table, ForeignKey
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from app.config.database import Base
-
-# Tabla intermedia para la relación Many-to-Many
-docente_clase = Table(
-    'docente_clase',
-    Base.metadata,
-    Column('docente_rut', String, ForeignKey('docentes.docente_rut'), primary_key=True),
-    Column('clase_id', Integer, ForeignKey('clases.clase_id'), primary_key=True)
-)
 
 class Docente(Base):
     __tablename__ = "docentes"
@@ -20,5 +12,5 @@ class Docente(Base):
     pass_hash = Column(String(128))
     max_horas_docencia = Column(Integer)
     
-    # Relación Many-to-Many con Clases
-    clases = relationship("Clase", secondary=docente_clase, back_populates="docentes")
+    # Relación One-to-Many con Clases (un docente puede tener muchas clases)
+    clases = relationship("Clase", back_populates="docente", cascade="all, delete-orphan")

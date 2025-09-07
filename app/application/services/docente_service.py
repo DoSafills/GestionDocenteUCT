@@ -54,7 +54,8 @@ class DocenteService:
         # Crear docente
         nuevo_docente = self.docente_repo.crear_docente(docente_data)
         
-        return DocenteResponse.model_validate(nuevo_docente)
+        # Convertir a response con manejo seguro de clases
+        return self._docente_to_response(nuevo_docente)
     
     def obtener_docente(self, docente_rut: str) -> Optional[DocenteResponse]:
         """
@@ -70,7 +71,36 @@ class DocenteService:
         if not docente:
             return None
         
-        return DocenteResponse.model_validate(docente)
+        return self._docente_to_response(docente)
+    
+    def _docente_to_response(self, docente: Docente) -> DocenteResponse:
+        """
+        Convierte un modelo Docente a DocenteResponse manejando las clases.
+        
+        Args:
+            docente: Instancia del modelo Docente
+            
+        Returns:
+            DocenteResponse con datos convertidos
+        """
+        # Convertir clases a formato dict simple
+        clases_dict = []
+        for clase in docente.clases:
+            clases_dict.append({
+                "clase_id": clase.clase_id,
+                "seccion_id": str(clase.seccion_id) if clase.seccion_id else None,
+                "sala_codigo": clase.sala_codigo,
+                "bloque_id": clase.bloque_id,
+                "estado": clase.estado
+            })
+        
+        return DocenteResponse(
+            docente_rut=docente.docente_rut,
+            nombre=docente.nombre,
+            email=docente.email,
+            max_horas_docencia=docente.max_horas_docencia,
+            clases=clases_dict
+        )
     
     def listar_docentes(self, skip: int = 0, limit: int = 100) -> List[DocenteResponse]:
         """
@@ -84,7 +114,7 @@ class DocenteService:
             Lista de docentes
         """
         docentes = self.docente_repo.listar_docentes(skip, limit)
-        return [DocenteResponse.model_validate(docente) for docente in docentes]
+        return [self._docente_to_response(docente) for docente in docentes]
     
     def buscar_docentes(self, termino_busqueda: str) -> List[DocenteResponse]:
         """
@@ -97,7 +127,7 @@ class DocenteService:
             Lista de docentes que coinciden
         """
         docentes = self.docente_repo.buscar_docentes_por_nombre(termino_busqueda)
-        return [DocenteResponse.model_validate(docente) for docente in docentes]
+        return [self._docente_to_response(docente) for docente in docentes]
     
     def actualizar_docente(self, docente_rut: str, datos_actualizacion: DocenteUpdate) -> Optional[DocenteResponse]:
         """
@@ -120,7 +150,7 @@ class DocenteService:
         if not docente_actualizado:
             return None
         
-        return DocenteResponse.model_validate(docente_actualizado)
+        return self._docente_to_response(docente_actualizado)
     
     def eliminar_docente(self, docente_rut: str) -> bool:
         """
@@ -137,8 +167,15 @@ class DocenteService:
         if not docente:
             return False
         
+        # Con la nueva relación, las clases se desasignan automáticamente por CASCADE
+        # pero podemos verificar si queremos mantener la validación
         if docente.clases:
-            raise ValueError("No se puede eliminar un docente que tiene clases asignadas")
+            # Opción 1: Desasignar todas las clases automáticamente
+            for clase in docente.clases:
+                clase.docente_rut = None
+            
+            # Opción 2: Lanzar error (mantener validación original)
+            # raise ValueError("No se puede eliminar un docente que tiene clases asignadas")
         
         return self.docente_repo.eliminar_docente(docente_rut)
     
@@ -156,6 +193,7 @@ class DocenteService:
         if not docente:
             raise ValueError(f"No existe docente con RUT: {docente_rut}")
         
+        # Contar clases directamente desde la relación
         total_clases = len(docente.clases)
         categoria = DocenteFactory.obtener_categoria_docente(docente.max_horas_docencia)
         

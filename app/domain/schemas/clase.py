@@ -1,7 +1,6 @@
 """Esquema de Clase, para validacion de datos"""
 from typing import List, Optional
 from pydantic import BaseModel, Field
-from docente import DocenteBase
 
 class ClaseBase(BaseModel):
     nombre: str = Field(..., max_length=100, example="Matemáticas I")
@@ -19,7 +18,8 @@ class ClaseUpdate(BaseModel):
 
 class ClaseResponse(ClaseBase):
     clase_id: int
-    docentes: List["DocenteBase"] = []
+    # Usar una estructura simple sin referencia a DocenteBase por ahora
+    docentes: List[dict] = []
     
     class Config:
         from_attributes = True

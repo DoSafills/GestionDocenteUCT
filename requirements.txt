@@ -1,0 +1,44 @@
+# Core Framework Dependencies
+sqlalchemy>=2.0.23
+psycopg2-binary>=2.9.9
+pydantic>=2.5.0
+pydantic[email]>=2.5.0
+python-dotenv>=1.0.0
+
+# Development and Testing
+pytest>=7.4.3
+pytest-asyncio>=0.21.1
+pytest-cov>=4.1.0
+pytest-xdist>=3.5.0
+pytest-mock>=3.12.0
+
+# Database Migrations
+alembic>=1.13.1
+
+# Utilities and Validation
+email-validator>=2.1.0
+python-multipart>=0.0.6
+typing-extensions>=4.8.0
+
+# Optional: FastAPI if you decide to add REST endpoints later
+# fastapi>=0.104.1
+# uvicorn[standard]>=0.24.0
+
+# Optional: Data manipulation and analysis
+# pandas>=2.1.4
+# numpy>=1.26.2
+
+# Optional: Logging and monitoring
+# structlog>=23.2.0
+# python-json-logger>=2.0.7
+
+# Optional: Security and authentication
+# passlib[bcrypt]>=1.7.4
+# python-jose[cryptography]>=3.3.0
+
+# Development tools (optional)
+# black>=23.11.0
+# isort>=5.12.0
+# flake8>=6.1.0
+# mypy>=1.7.1
+# pre-commit>=3.6.0

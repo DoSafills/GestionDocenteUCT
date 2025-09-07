@@ -193,7 +193,7 @@ class DocenteRepository:
     
     def asignar_clase_a_docente(self, docente_rut: str, clase_id: int) -> bool:
         """
-        Asigna una clase a un docente.
+        Asigna una clase a un docente actualizando la foreign key.
         
         Args:
             docente_rut: RUT del docente
@@ -204,25 +204,28 @@ class DocenteRepository:
         """
         from app.domain.models.clase import Clase
         
+        # Verificar que el docente existe
         docente = self.obtener_docente_por_rut(docente_rut)
         if not docente:
             return False
         
+        # Obtener la clase y verificar que existe
         clase = self.db.query(Clase).filter(Clase.clase_id == clase_id).first()
         if not clase:
             return False
         
-        # Verificar si ya está asignado
-        if clase in docente.clases:
+        # Verificar que la clase no esté ya asignada a otro docente
+        if clase.docente_rut is not None:
             return False
         
-        docente.clases.append(clase)
+        # Asignar la clase al docente
+        clase.docente_rut = docente_rut
         self.db.commit()
         return True
     
     def desasignar_clase_de_docente(self, docente_rut: str, clase_id: int) -> bool:
         """
-        Desasigna una clase de un docente.
+        Desasigna una clase de un docente estableciendo la foreign key en NULL.
         
         Args:
             docente_rut: RUT del docente
@@ -233,17 +236,47 @@ class DocenteRepository:
         """
         from app.domain.models.clase import Clase
         
-        docente = self.obtener_docente_por_rut(docente_rut)
-        if not docente:
-            return False
-        
+        # Obtener la clase
         clase = self.db.query(Clase).filter(Clase.clase_id == clase_id).first()
-        if not clase or clase not in docente.clases:
+        if not clase:
             return False
         
-        docente.clases.remove(clase)
+        # Verificar que la clase esté asignada al docente especificado
+        if clase.docente_rut != docente_rut:
+            return False
+        
+        # Desasignar la clase
+        clase.docente_rut = None
         self.db.commit()
         return True
+    
+    def obtener_clases_asignadas(self, docente_rut: str) -> List:
+        """
+        Obtiene todas las clases asignadas a un docente.
+        
+        Args:
+            docente_rut: RUT del docente
+            
+        Returns:
+            Lista de clases asignadas al docente
+        """
+        from app.domain.models.clase import Clase
+        
+        return self.db.query(Clase).filter(Clase.docente_rut == docente_rut).all()
+    
+    def contar_clases_asignadas(self, docente_rut: str) -> int:
+        """
+        Cuenta el número de clases asignadas a un docente.
+        
+        Args:
+            docente_rut: RUT del docente
+            
+        Returns:
+            Número de clases asignadas
+        """
+        from app.domain.models.clase import Clase
+        
+        return self.db.query(Clase).filter(Clase.docente_rut == docente_rut).count()
     
     def close(self):
         """Cierra la sesión de base de datos."""
