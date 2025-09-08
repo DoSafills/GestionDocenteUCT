@@ -103,6 +103,43 @@ Styling:       CSS Modules / Styled Components
 └── 🎨 frontend/           # Aplicación React (próximamente)
 ```
 
+##📌 Propuesta de Estructura
+GDUCT/
+├── backend/
+│   ├── fastapi_app/          # codigo FastAPI
+│   │   ├── main.py           # punto de entrada FastAPI
+│   │   ├── api/              # rutas/endpoints
+│   │   ├── models/           # Pydantic models
+│   │   ├── services/         # lógica de negocio (consultas SQL, reglas)
+│   │   ├── db/               # conexión BD y sesiones
+│   │   └── config.py         # variables de entorno
+│   ├── cpp_modules/          # codigo C++ 
+│   │   ├── CMakeLists.txt
+│   │   ├── restricciones.cpp
+│   │   └── horarios.cpp
+│   ├── tests/                # pruebas unitarias backend
+│   └── requirements.txt      # dependencias Python (FastAPI, psycopg2, etc.)
+│   
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/       # UI generica (Botones, Card, etc.)
+│   │   ├── pages/            # vistas principales (Login, Dashboard, Horarios)
+│   │   ├── services/         # llamadas a API (mock ahora, fetch después)
+│   │   ├── hooks/            # custom hooks
+│   │   ├── context/          # estados globales (ej: AuthContext, HorariosContext)
+│   │   └── App.jsx
+│   ├── public/
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.js
+│
+├── db/
+    ├── scripts/              # SQL inicial (el DDL que ya definimos)
+    │   └── 001_init.sql
+    ├── migrations/           # migraciones  (002_add_x.sql)
+    └── seeds/                # datos de prueba (campus, salas, docentes)
+
 ### Principios Arquitectónicos
 
 - **🎯 Domain-Driven Design**: El dominio dicta la estructura
