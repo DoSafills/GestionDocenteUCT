@@ -102,8 +102,10 @@ Styling:       CSS Modules / Styled Components
 ├── 📚 docs/               # Documentación
 └── 🎨 frontend/           # Aplicación React (próximamente)
 ```
+---
 
 ##📌 Propuesta de Estructura
+```
 GDUCT/
 ├── backend/
 │   ├── fastapi_app/          # codigo FastAPI
@@ -139,6 +141,7 @@ GDUCT/
     │   └── 001_init.sql
     ├── migrations/           # migraciones  (002_add_x.sql)
     └── seeds/                # datos de prueba (campus, salas, docentes)
+```
 
 ### Principios Arquitectónicos
 
