@@ -272,6 +272,7 @@ sphinx-build -b html docs/ docs/_build/
 ### 📋 Gestión de Proyecto
 - [📋 **Backlog**](https://www.notion.so/Gesti-n-Docente-UCT-GDU-25bca7fc8b6f80d49880e67f7b985edb?source=copy_link) - Notion Board
 - [📁 **Drive**](https://drive.google.com/drive/folders/1r1rkUVznRMGfj4wYYARBF_iQPvK_hOJ6?usp=sharing) - Documentos compartidos
+- [📁 **BD**](https://supabase.com/dashboard/project/xsjbyoanshfdobndkdmw/editor/17308?schema=public )- BD compartida como server
 
 ### 🛠️ Herramientas de Desarrollo
 - [📊 **Diagrama ER**](https://www.mermaidchart.com/app/projects/bd96d597-d74a-46ab-898d-4e1683352121/diagrams/a9fbfefb-fe41-4325-93e9-fb365b497c2f/version/v0.1/edit) - Mermaid Chart
