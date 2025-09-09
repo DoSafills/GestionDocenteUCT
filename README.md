@@ -107,22 +107,32 @@ Styling:       CSS Modules / Styled Components
 ##📌 Propuesta de Estructura
 ```
 GDUCT/
-├── backend/
-│   ├── fastapi_app/          # codigo FastAPI
-│   │   ├── main.py           # punto de entrada FastAPI
-│   │   ├── api/              # rutas/endpoints
-│   │   ├── models/           # Pydantic models
-│   │   ├── services/         # lógica de negocio (consultas SQL, reglas)
-│   │   ├── db/               # conexión BD y sesiones
-│   │   └── config.py         # variables de entorno
-│   ├── cpp_modules/          # codigo C++ 
-│   │   ├── CMakeLists.txt
-│   │   ├── restricciones.cpp
-│   │   └── horarios.cpp
-│   ├── tests/                # pruebas unitarias backend
-│   └── requirements.txt      # dependencias Python (FastAPI, psycopg2, etc.)
-│   
-│
+backend/
+ ├── app/
+ │   ├── __init__.py
+ │   ├── main.py          # punto de entrada FastAPI
+ │   ├── db.py            # conexión a PostgreSQL
+ │   ├── routes/          # controladores de rutas (API endpoints)
+ │   │   ├── __init__.py
+ │   │   ├── docentes.py
+ │   │   ├── salas.py
+ │   │   └── clases.py
+ │   ├── models/          # esquemas Pydantic / ORM
+ │   │   ├── __init__.py
+ │   │   ├── docente.py
+ │   │   ├── sala.py
+ │   │   └── clase.py
+ │   ├── services/        # lógica de negocio (ej: validaciones, reportes)
+ │   │   ├── __init__.py
+ │   │   └── carga_docente.py
+ │   └── utils/           # utilidades (logs, helpers)
+ │       └── logger.py
+ ├── tests/               # pruebas unitarias
+ ├── requirements.txt     # dependencias del proyecto
+ ├── .env.example         # variables de entorno de ejemplo
+ └── README.md            # documentación inicial
+
+
 ├── frontend/
 │   ├── src/
 │   │   ├── components/       # UI generica (Botones, Card, etc.)
