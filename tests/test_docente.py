@@ -3,10 +3,6 @@ Tests de integración para el módulo de docentes.
 Cubre el flujo completo desde service hasta repository.
 """
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from app.config.database import Base
-from app.domain.models.docente import Docente
 from app.domain.schemas.docente import DocenteCreate, DocenteUpdate
 from app.domain.factories.docente_factory import DocenteFactory
 from app.infrastructure.repositories.docente_repo import DocenteRepository
@@ -14,40 +10,30 @@ from app.application.services.docente_service import DocenteService
 
 
 @pytest.fixture
-def db_session():
-    """Fixture para crear una sesión de base de datos en memoria para tests."""
-    engine = create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(engine)
-    SessionLocal = sessionmaker(bind=engine)
-    session = SessionLocal()
-    
-    yield session
-    
-    session.close()
+def docente_data(sample_docente_data):
+    """
+    Fixture con datos de docente FIJOS para tests predecibles.
+    Usa sample_docente_data en lugar de unique_docente_data.
+    """
+    return sample_docente_data
+
+
+@pytest.fixture  
+def docente_data_unique(unique_docente_data):
+    """Fixture con datos únicos para tests que requieren múltiples docentes."""
+    return unique_docente_data
 
 
 @pytest.fixture
-def docente_data():
-    """Fixture con datos de docente válidos para tests."""
-    return DocenteCreate(
-        docente_rut="12345678-9",
-        nombre="Juan Pérez",
-        email="juan.perez@uct.cl",
-        pass_hash="hashed_password_123",
-        max_horas_docencia=40
-    )
+def docente_repo(clean_db):
+    """Fixture para repositorio de docentes con BD limpia."""
+    return DocenteRepository(clean_db)
 
 
 @pytest.fixture
-def docente_repo(db_session):
-    """Fixture para repositorio de docentes."""
-    return DocenteRepository(db_session)
-
-
-@pytest.fixture
-def docente_service(db_session):
-    """Fixture para servicio de docentes."""
-    return DocenteService(db_session)
+def docente_service(clean_db):
+    """Fixture para servicio de docentes con BD limpia."""
+    return DocenteService(clean_db)
 
 
 class TestDocenteFactory:
@@ -85,9 +71,10 @@ class TestDocenteRepository:
         """Test creación exitosa de docente."""
         docente = docente_repo.crear_docente(docente_data)
         
+        # Verificar usando los datos del fixture sample_docente_data
         assert docente.docente_rut == "12345678-9"
-        assert docente.nombre == "Juan Pérez"
-        assert docente.email == "juan.perez@uct.cl"
+        assert docente.nombre == "Profesor Test"
+        assert docente.email == "profesor.test@uct.cl"
         assert docente.max_horas_docencia == 40
     
     def test_crear_docente_rut_duplicado(self, docente_repo, docente_data):
@@ -103,7 +90,8 @@ class TestDocenteRepository:
         docente_obtenido = docente_repo.obtener_docente_por_rut("12345678-9")
         
         assert docente_obtenido is not None
-        assert docente_obtenido.docente_rut == docente_creado.docente_rut
+        assert docente_obtenido.docente_rut == "12345678-9"
+        assert docente_obtenido.nombre == "Profesor Test"
     
     def test_obtener_docente_por_rut_inexistente(self, docente_repo):
         """Test obtener docente inexistente por RUT."""
@@ -113,10 +101,10 @@ class TestDocenteRepository:
     def test_obtener_docente_por_email(self, docente_repo, docente_data):
         """Test obtener docente por email."""
         docente_repo.crear_docente(docente_data)
-        docente = docente_repo.obtener_docente_por_email("juan.perez@uct.cl")
+        docente = docente_repo.obtener_docente_por_email("profesor.test@uct.cl")
         
         assert docente is not None
-        assert docente.email == "juan.perez@uct.cl"
+        assert docente.email == "profesor.test@uct.cl"
     
     def test_listar_docentes_vacio(self, docente_repo):
         """Test listar docentes cuando no hay ninguno."""
@@ -144,9 +132,9 @@ class TestDocenteRepository:
         """Test búsqueda de docentes por nombre."""
         docente_repo.crear_docente(docente_data)
         
-        docentes = docente_repo.buscar_docentes_por_nombre("Juan")
+        docentes = docente_repo.buscar_docentes_por_nombre("Profesor")
         assert len(docentes) == 1
-        assert docentes[0].nombre == "Juan Pérez"
+        assert docentes[0].nombre == "Profesor Test"
         
         docentes = docente_repo.buscar_docentes_por_nombre("María")
         assert len(docentes) == 0
@@ -208,10 +196,10 @@ class TestDocenteService:
     def test_registrar_docente_exitoso(self, docente_service, docente_data):
         """Test registro exitoso de docente."""
         docente_response = docente_service.registrar_docente(docente_data)
-        
+
         assert docente_response.docente_rut == "12345678-9"
-        assert docente_response.nombre == "Juan Pérez"
-        assert docente_response.email == "juan.perez@uct.cl"
+        assert docente_response.nombre == "Profesor Test"
+        assert docente_response.email == "profesor.test@uct.cl"
         assert docente_response.max_horas_docencia == 40
     
     def test_registrar_docente_rut_duplicado(self, docente_service, docente_data):
@@ -228,7 +216,7 @@ class TestDocenteService:
         docente_data2 = DocenteCreate(
             docente_rut="98765432-1",
             nombre="María González",
-            email="juan.perez@uct.cl",  # Email duplicado
+            email="profesor.test@uct.cl",  # Email duplicado
             pass_hash="hashed_password_456",
             max_horas_docencia=20
         )
@@ -262,9 +250,9 @@ class TestDocenteService:
         """Test búsqueda de docentes."""
         docente_service.registrar_docente(docente_data)
         
-        docentes = docente_service.buscar_docentes("Juan")
+        docentes = docente_service.buscar_docentes("Profesor")
         assert len(docentes) == 1
-        assert docentes[0].nombre == "Juan Pérez"
+        assert docentes[0].nombre == "Profesor Test"
     
     def test_actualizar_docente_exitoso(self, docente_service, docente_data):
         """Test actualización exitosa de docente."""
@@ -297,7 +285,7 @@ class TestDocenteService:
         estadisticas = docente_service.obtener_estadisticas_docente("12345678-9")
         
         assert estadisticas["docente_rut"] == "12345678-9"
-        assert estadisticas["nombre"] == "Juan Pérez"
+        assert estadisticas["nombre"] == "Profesor Test"
         assert estadisticas["categoria"] == "Jornada Completa"
         assert estadisticas["max_horas_docencia"] == 40
         assert estadisticas["total_clases"] == 0

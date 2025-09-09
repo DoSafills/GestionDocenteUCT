@@ -6,11 +6,11 @@ from sqlalchemy.dialects.postgresql import UUID
 from app.config.database import Base
 
 class Clase(Base):
-    __tablename__ = "clases"
+    __tablename__ = "clase"
     
     clase_id = Column(Integer, primary_key=True, index=True)
     seccion_id = Column(UUID, unique=True, index=True)
-    docente_rut = Column(String, ForeignKey('docentes.docente_rut'), nullable=True, index=True)
+    docente_rut = Column(String, ForeignKey('docente.docente_rut'), nullable=True, index=True)
     sala_codigo = Column(String(20), nullable=False)
     bloque_id = Column(Integer, nullable=False)
     estado = Column(String(20), nullable=False)

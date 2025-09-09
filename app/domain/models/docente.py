@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from app.config.database import Base
 
 class Docente(Base):
-    __tablename__ = "docentes"
+    __tablename__ = "docente"
 
     docente_rut = Column(String, primary_key=True, index=True)
     nombre = Column(String(70), index=True)

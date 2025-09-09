@@ -3,27 +3,16 @@ Configuración de conexión a base de datos PostgreSQL con SQLAlchemy 2.0
 """
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
-import os
-from urllib.parse import quote_plus
-
-# Configuración de PostgreSQL
-DATABASE_USER = os.getenv("DATABASE_USER", "postgres")
-DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD", "postgres")
-DATABASE_HOST = os.getenv("DATABASE_HOST", "localhost")
-DATABASE_PORT = os.getenv("DATABASE_PORT", "5432")
-DATABASE_NAME = os.getenv("DATABASE_NAME", "gestion_docente_uct")
-
-# URL de conexión para PostgreSQL
-DATABASE_URL = f"postgresql://{DATABASE_USER}:{quote_plus(DATABASE_PASSWORD)}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
+from .settings import settings
 
 # Configuración del engine con pool de conexiones para PostgreSQL
 engine = create_engine(
-    DATABASE_URL,
+    settings.database_url,
     pool_size=10,
     max_overflow=20,
     pool_pre_ping=True,
     pool_recycle=300,
-    echo=os.getenv("SQL_DEBUG", "false").lower() == "true"
+    echo=settings.SQL_DEBUG
 )
 
 # Configuración de sesión
