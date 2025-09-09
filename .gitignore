@@ -1,0 +1,49 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environment
+venv/
+.env/
+.envrc
+*.env
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.sublime-workspace
+*.sublime-project
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Database files
+*.db
+*.sqlite3
+
+# Test output
+.coverage
+htmlcov/
+*.log
+
+# Node modules (for frontend)
+node_modules/
+dist/
+build/
+
+# Python egg files
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Migrations
+migrations/
+
+# Others
+*.bak
+*.tmp
