@@ -276,7 +276,7 @@ sphinx-build -b html docs/ docs/_build/
 
 ### 🛠️ Herramientas de Desarrollo
 - [📊 **Diagrama MER**](https://www.mermaidchart.com/app/projects/bd96d597-d74a-46ab-898d-4e1683352121/diagrams/a9fbfefb-fe41-4325-93e9-fb365b497c2f/version/v0.1/edit) - Mermaid Chart
-- [🎨 **Diseño UI**](https://www.figma.com/design/ZLHl9yM5ypwcp0QV7pWRFb/Dise%C3%B1o-GDU?node-id=0-1&t=fO9DcDzrdC0ghbuk-0) - Figma
+- [🎨 **Diseño UI**]([https://www.figma.com/design/ZLHl9yM5ypwcp0QV7pWRFb/Dise%C3%B1o-GDU?node-id=0-1&t=fO9DcDzrdC0ghbuk-0](https://www.figma.com/design/ZLHl9yM5ypwcp0QV7pWRFb/Dise%C3%B1o-GDU?node-id=0-1&t=qBsDm82UdwTLwvX9-1)) - Figma
 
 ---
 
