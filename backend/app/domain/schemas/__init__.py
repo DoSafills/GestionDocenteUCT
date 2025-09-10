@@ -1,0 +1,11 @@
+from .docente import DocenteIn, DocenteOut
+from .asignatura import AsignaturaIn, AsignaturaOut
+from .seccion import SeccionIn, SeccionOut
+from .sala import SalaIn, SalaOut
+from .edificio import EdificioIn, EdificioOut
+from .campus import CampusIn, CampusOut
+from .clase import ClaseIn, ClaseOut
+from .restriccion import RestriccionIn, RestriccionOut
+from .reporte import ReporteIn, ReporteOut
+from .reportehoras import ReporteDetalleHorasIn, ReporteDetalleHorasOut
+from .bloque import BloqueIn, BloqueOut
