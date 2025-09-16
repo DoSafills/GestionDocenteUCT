@@ -1,0 +1,192 @@
+/* === Global Styles === */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin: 0;
+    padding-top: 10%;
+    font-family: Arial, sans-serif;
+    background: #ffffff;    /* Fondo blanco */
+    color: #222222;         /* Texto oscuro para buena legibilidad */
+}
+
+/* Centra imágenes y videos */
+img, video {
+    display: block;
+    margin: 0 auto;
+}
+
+/* Transición suave para enlaces y botones */
+a, button {
+    transition: all 0.3s ease;
+}
+
+/* Estilo visible para enfoque de accesibilidad en links y botones */
+a:focus,
+button:focus,
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid #1E5F74; /* Borde verde */
+    outline-offset: 2px;
+}
+
+/* === Header === */
+/* Header principal fijo */
+#mainHeader, .header {
+    position: fixed;
+    top: 30px;
+    left: 30px;
+    right: 30px;
+    background-color: #0F182D;
+    color: white;
+    padding: 15px 100px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10000;
+    border-bottom: 2px solid #1E5F74;
+    border-radius: 15px; /* ajusta el valor a tu gusto */
+    transition: height 0.6s ease;
+}
+
+
+/* Altura y padding inicial para #mainHeader */
+#mainHeader {
+    height: 100px;
+}
+
+/* Altura y padding inicial para .header (si usas ambas clases) */
+.header {
+    height: 190px;
+}
+
+/* Logo dentro del header */
+#mainHeader img, .header img {
+    height: 70px;
+    max-height: 100%;
+    object-fit: contain;
+    transition: height 0.3s ease;
+}
+
+/* Navbar dentro del header */
+#mainHeader nav, .header nav {
+    font-size: 18px;
+    padding: 10px 0;
+    transition: all 0.6s ease;
+
+    display: flex;
+    align-items: center;
+
+    max-width: 60%;
+    flex-shrink: 1;
+    overflow-x: auto; /* Para que no se corte en pantallas pequeñas */
+}
+
+/* Navbar ul */
+#mainHeader nav ul, .header nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;        /* Menú en fila */
+    gap: 10px;            /* Separación entre ítems */
+}
+
+/* Navbar li */
+#mainHeader nav ul li, .header nav ul li {
+    margin: 0;            /* Sin margen lateral, controlamos con gap */
+}
+
+/* Navbar links */
+#mainHeader nav ul li a, .header nav ul li a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 12px;
+    display: block;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    white-space: nowrap; /* Evita que el texto se divida */
+}
+
+/* Hover en links de navegación */
+#mainHeader nav ul li a:hover, .header nav ul li a:hover {
+    background-color: #1E5F74;
+    color: #1a1a1a;
+}
+
+/* Header compacto */
+#mainHeader.compact {
+    height: 80px;
+}
+
+.header.compact {
+    height: 80px;
+}
+
+/* Logo reducido cuando header es compacto */
+#mainHeader.compact img, .header.compact img {
+    height: 64px; /* 80 * 0.8 */
+}
+
+/* Navbar reducido cuando header es compacto */
+#mainHeader.compact nav, .header.compact nav {
+    font-size: 14px;
+    padding: 5px 0;
+}
+
+/* Ajuste padding-top para contenido principal para evitar ocultamiento debajo del header */
+main, .mainContent {
+    padding-top: 190px; /* Igual a la altura inicial del header */
+    transition: padding-top 0.6s ease;
+}
+
+/* Ajuste padding-top cuando header compacto */
+.header.compact + main,
+.header.compact + .mainContent,
+#mainHeader.compact + main,
+#mainHeader.compact + .mainContent {
+    padding-top: 80px;
+}
+
+/* === Navigation Responsive === */
+/* Para pantallas mayores a 600px: menú en fila y toggle oculto */
+@media (min-width: 600px) {
+    nav ul {
+        flex-direction: row;
+    }
+
+    nav ul li {
+        margin: 0 10px;
+    }
+
+    .menu-toggle {
+        display: none;
+    }
+}
+
+/* Para pantallas menores a 600px: menú oculto por defecto, toggle visible */
+@media (max-width: 599px) {
+    .menu-toggle {
+        display: block;
+        cursor: pointer;
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: white;
+    }
+
+    nav ul {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    nav ul.show {
+        display: flex;
+    }
+}
