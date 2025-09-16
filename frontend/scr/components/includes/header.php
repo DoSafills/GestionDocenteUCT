@@ -3,13 +3,9 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 ?>
-  <link id="stylesheet" rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css">
-  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-thin-solid/css/uicons-thin-solid.css">
-
 <header class="header" id="mainHeader">
   <a href="index.php">
-    <img src="imagenes/logo.png" alt="Logo">
+    <img src="scr/components/img/logo.png" alt="Logo">
   </a>
   <nav>
     <ul>
