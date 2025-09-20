@@ -75,9 +75,10 @@ Testing:       pytest 7.4.3+
 ### Frontend
 ```yaml
 Framework:     React 18+
-Build Tool:    Vite 5+
-Language:      TypeScript/JavaScript
-Styling:       CSS Modules / Styled Components
+Build Tool:    Vite (v5+)
+Language:      TypeScript
+Styling:       CSS / TailwindCSS
+UI Library:    Radix UI + Lucide Icons + Sonner
 ```
 
 ---
