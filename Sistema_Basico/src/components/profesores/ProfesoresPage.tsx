@@ -3,11 +3,13 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Card, CardContent, CardHeader} from "../ui/card";
 import { Badge } from "../ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,DialogDescription } from "../ui/dialog";
+
 import { Label } from "../ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Plus, Search, Edit, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+
 
 const BASE_URL = "http://localhost/gestionuctscripts";
 const ENDPOINT = `${BASE_URL}/docentes.php`;
