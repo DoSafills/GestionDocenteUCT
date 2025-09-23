@@ -1,28 +1,33 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Card, CardContent, CardHeader} from "../ui/card";
+import { Card, CardContent, CardHeader } from "../ui/card";
 import { Badge } from "../ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,DialogDescription } from "../ui/dialog";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+} from "../ui/dialog";
 import { Label } from "../ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Plus, Search, Edit, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
-
-const BASE_URL = "http://localhost/gestionuctscripts";
+const BASE_URL = "http://localhost/gestionuctscripts"; 
 const ENDPOINT = `${BASE_URL}/docentes.php`;
 
-export type Docente = {
+export type Profesor = {
   docente_rut: string;
   nombre: string;
   email: string;
-  pass_hash: string; 
+  pass_hash: string;
   max_horas_docencia: number;
 };
 
-const vacio: Docente = {
+const vacio: Profesor = {
   docente_rut: "",
   nombre: "",
   email: "",
@@ -31,22 +36,27 @@ const vacio: Docente = {
 };
 
 export function ProfesoresPage() {
-  const [items, setItems] = useState<Docente[]>([]);
+  const [items, setItems] = useState<Profesor[]>([]);
   const [cargando, setCargando] = useState(false);
   const [busqueda, setBusqueda] = useState("");
   const [modalAbierto, setModalAbierto] = useState(false);
-  const [editando, setEditando] = useState<Docente | null>(null);
-  const [form, setForm] = useState<Docente>({ ...vacio });
+  const [editando, setEditando] = useState<Profesor | null>(null);
+  const [form, setForm] = useState<Profesor>({ ...vacio });
 
   const listar = async () => {
     try {
       setCargando(true);
       const res = await fetch(`${ENDPOINT}?action=list`, { method: "GET", credentials: "include" });
-      const json = await res.json();
-      if (!res.ok || json?.ok === false) throw new Error(json?.message || "Error al cargar");
-      setItems(json.data ?? []);
+      const text = await res.text();
+      let json: any;
+      try { json = JSON.parse(text); } catch { throw new Error("Respuesta no-JSON del servidor"); }
+      const ok = json?.ok ?? json?.success ?? false;
+      const data = json?.data ?? json?.rows ?? (Array.isArray(json) ? json : []);
+      if (!res.ok || ok === false) throw new Error(json?.message || "Error al cargar");
+      if (!Array.isArray(data)) throw new Error("Formato inesperado de 'data'");
+      setItems(data);
     } catch (e: any) {
-      toast.error(e.message || "No se pudo obtener la lista de docentes");
+      toast.error(e.message || "No se pudo obtener la lista de profesores");
     } finally {
       setCargando(false);
     }
@@ -60,19 +70,19 @@ export function ProfesoresPage() {
     setModalAbierto(true);
   };
 
-  const abrirEditar = (d: Docente) => {
-    setEditando(d);
-    setForm({ ...d });
+  const abrirEditar = (p: Profesor) => {
+    setEditando(p);
+    setForm({ ...p });
     setModalAbierto(true);
   };
 
   const cerrarModal = () => setModalAbierto(false);
 
-  const validar = (d: Docente) => {
-    if (!d.docente_rut) return "El RUT es obligatorio";
-    if (!d.nombre) return "El nombre es obligatorio";
-    if (!d.email) return "El email es obligatorio";
-    if (String(d.max_horas_docencia).trim() === "" || Number.isNaN(Number(d.max_horas_docencia))) return "max_horas_docencia inválido";
+  const validar = (p: Profesor) => {
+    if (!p.docente_rut) return "El RUT es obligatorio";
+    if (!p.nombre) return "El nombre es obligatorio";
+    if (!p.email) return "El email es obligatorio";
+    if (String(p.max_horas_docencia).trim() === "" || Number.isNaN(Number(p.max_horas_docencia))) return "Máx. horas inválido";
     return null;
   };
 
@@ -97,7 +107,7 @@ export function ProfesoresPage() {
       });
       const json = await res.json();
       if (!res.ok || json?.ok === false) throw new Error(json?.message || "No se pudo guardar");
-      toast.success(editando ? "Docente actualizado" : "Docente creado");
+      toast.success(editando ? "Profesor actualizado" : "Profesor creado");
       cerrarModal();
       listar();
     } catch (e: any) {
@@ -106,7 +116,7 @@ export function ProfesoresPage() {
   };
 
   const eliminar = async (rut: string) => {
-    if (!confirm(`¿Eliminar docente ${rut}?`)) return;
+    if (!confirm(`¿Eliminar profesor ${rut}?`)) return;
     try {
       const payload = new URLSearchParams({ action: "delete", id: rut });
       const res = await fetch(ENDPOINT, {
@@ -117,7 +127,7 @@ export function ProfesoresPage() {
       });
       const json = await res.json();
       if (!res.ok || json?.ok === false) throw new Error(json?.message || "No se pudo eliminar");
-      toast.success("Docente eliminado");
+      toast.success("Profesor eliminado");
       listar();
     } catch (e: any) {
       toast.error(e.message || "Error al eliminar");
@@ -127,10 +137,10 @@ export function ProfesoresPage() {
   const filtrados = useMemo(() => {
     const q = busqueda.toLowerCase().trim();
     if (!q) return items;
-    return items.filter(d =>
-      d.docente_rut.toLowerCase().includes(q) ||
-      d.nombre.toLowerCase().includes(q) ||
-      d.email.toLowerCase().includes(q)
+    return items.filter(p =>
+      p.docente_rut.toLowerCase().includes(q) ||
+      p.nombre.toLowerCase().includes(q) ||
+      p.email.toLowerCase().includes(q)
     );
   }, [items, busqueda]);
 
@@ -138,7 +148,7 @@ export function ProfesoresPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl">Gestión de Docentes</h2>
+          <h2 className="text-3xl">Gestión de Profesores</h2>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={listar} disabled={cargando}>
@@ -146,16 +156,17 @@ export function ProfesoresPage() {
           </Button>
           <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
             <DialogTrigger asChild>
-              <Button onClick={abrirCrear}>
-                <Plus className="w-4 h-4 mr-2" /> Nuevo Docente
-              </Button>
+              <button onClick={abrirCrear} className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+                <Plus className="w-4 h-4 mr-2" /> Nuevo Profesor
+              </button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>{editando ? "Editar Docente" : "Crear Docente"}</DialogTitle>
+                <DialogTitle className="text-black">{editando ? "Editar Profesor" : "Crear Profesor"}</DialogTitle>
+                <DialogDescription className="text-black">Completa los datos del profesor y guarda los cambios.</DialogDescription>
               </DialogHeader>
 
-              <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="grid grid-cols-2 gap-4 pt-2 text-black">
                 <div className="space-y-2">
                   <Label htmlFor="rut">RUT *</Label>
                   <Input id="rut" value={form.docente_rut}
@@ -171,7 +182,7 @@ export function ProfesoresPage() {
                 <div className="space-y-2 col-span-2">
                   <Label htmlFor="email">Email *</Label>
                   <Input id="email" type="email" value={form.email}
-                         placeholder="docente@universidad.cl"
+                         placeholder="profesor@universidad.cl"
                          onChange={(e) => setForm({ ...form, email: e.target.value })} />
                 </div>
                 <div className="space-y-2">
@@ -187,7 +198,7 @@ export function ProfesoresPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex justify-end gap-3 pt-4 text-black">
                 <Button variant="outline" onClick={cerrarModal}>Cancelar</Button>
                 <Button onClick={guardar}>{editando ? "Actualizar" : "Crear"}</Button>
               </div>
@@ -221,18 +232,18 @@ export function ProfesoresPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtrados.map((d) => (
-                  <TableRow key={d.docente_rut}>
-                    <TableCell>{d.docente_rut}</TableCell>
-                    <TableCell>{d.nombre}</TableCell>
-                    <TableCell>{d.email}</TableCell>
-                    <TableCell>{d.max_horas_docencia}</TableCell>
+                {filtrados.map((p) => (
+                  <TableRow key={p.docente_rut}>
+                    <TableCell>{p.docente_rut}</TableCell>
+                    <TableCell>{p.nombre}</TableCell>
+                    <TableCell>{p.email}</TableCell>
+                    <TableCell>{p.max_horas_docencia}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
-                        <Button size="sm" variant="ghost" onClick={() => abrirEditar(d)}>
+                        <Button size="sm" variant="ghost" onClick={() => abrirEditar(p)}>
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={() => eliminar(d.docente_rut)}>
+                        <Button size="sm" variant="ghost" onClick={() => eliminar(p.docente_rut)}>
                           <Trash2 className="w-4 h-4 text-destructive" />
                         </Button>
                       </div>
@@ -242,7 +253,7 @@ export function ProfesoresPage() {
                 {filtrados.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                      {cargando ? "Cargando..." : "No hay docentes"}
+                      {cargando ? "Cargando..." : "No hay profesores"}
                     </TableCell>
                   </TableRow>
                 )}
