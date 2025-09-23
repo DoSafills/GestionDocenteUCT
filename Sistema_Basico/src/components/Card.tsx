@@ -5,8 +5,8 @@ type Props = {
 
 function Card({ title, value }: Props) {
   return (
-    <div className="bg-gray-800 text-white p-4 rounded-lg shadow flex flex-col">
-      <span className="text-gray-400 text-sm">{title}</span>
+    <div className="bg-gray-100 text-black p-4 rounded-lg shadow flex flex-col">
+      <span className="text-gray-600 text-sm">{title}</span>
       <span className="text-2xl font-bold mt-2">{value}</span>
     </div>
   );
