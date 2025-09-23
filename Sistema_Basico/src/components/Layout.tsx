@@ -31,8 +31,9 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col text-black">
-      {/* Header */}
+    // Agregamos pt-24 para dejar espacio al header flotante
+    <div className="min-h-screen bg-background flex flex-col text-black pt-24">
+      {/* Header flotante con bordes redondeados */}
       <Header />
 
       <div className="flex flex-1">
