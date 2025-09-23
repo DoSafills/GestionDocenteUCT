@@ -75,9 +75,10 @@ Testing:       pytest 7.4.3+
 ### Frontend
 ```yaml
 Framework:     React 18+
-Build Tool:    Vite 5+
-Language:      TypeScript/JavaScript
-Styling:       CSS Modules / Styled Components
+Build Tool:    Vite (v5+)
+Language:      TypeScript
+Styling:       CSS / TailwindCSS
+UI Library:    Radix UI + Lucide Icons + Sonner
 ```
 
 ---
@@ -276,7 +277,9 @@ sphinx-build -b html docs/ docs/_build/
 
 ### 🛠️ Herramientas de Desarrollo
 - [📊 **Diagrama MER**](https://www.mermaidchart.com/app/projects/bd96d597-d74a-46ab-898d-4e1683352121/diagrams/a9fbfefb-fe41-4325-93e9-fb365b497c2f/version/v0.1/edit) - Mermaid Chart
-- [🎨 **Diseño UI**]([https://www.figma.com/design/ZLHl9yM5ypwcp0QV7pWRFb/Dise%C3%B1o-GDU?node-id=0-1&t=fO9DcDzrdC0ghbuk-0](https://www.figma.com/design/ZLHl9yM5ypwcp0QV7pWRFb/Dise%C3%B1o-GDU?node-id=0-1&t=qBsDm82UdwTLwvX9-1)) - Figma
+- [🎨 **Diseño UI**](https://www.figma.com/design/ZLHl9yM5ypwcp0QV7pWRFb/Dise%C3%B1o-GDU?node-id=0-1&t=fO9DcDzrdC0ghbuk-0) - Figma
+- [🎨 **Diseño WEP**](https://www.figma.com/make/xi62Kb8N7yaeMaY1EEec2B/Formulario-de-Inscripci%C3%B3n-de-Curso--Copia-?node-id=0-1&t=IAqWj93MdqmtyBEn-1) -Figma
+- [🎨 **WEP**](https://vercel.com/new?teamSlug=richards-projects-462388e8) - Versel
 
 ---
 
