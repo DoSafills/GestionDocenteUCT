@@ -11,7 +11,7 @@ import {
   GraduationCap,
   Calendar
 } from "lucide-react";
-import Header from "./Header"; // Importa tu Header real
+import Header from "./Header";
 
 interface LayoutProps {
   children: ReactNode;
@@ -31,16 +31,16 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col text-black">
       {/* Header */}
       <Header />
 
       <div className="flex flex-1">
         {/* Sidebar */}
-        <aside className="w-64 bg-card border-r min-h-[calc(100vh-80px)]">
+        <aside className="w-64 bg-card border-r min-h-[calc(100vh-80px)] text-black">
           <Card className="m-4 border-0 shadow-none">
             <CardContent className="p-4 space-y-2">
-              <h3 className="text-sm text-muted-foreground mb-4">NAVEGACIÓN</h3>
+              <h3 className="text-sm mb-4">NAVEGACIÓN</h3>
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = currentPage === item.id;
@@ -49,7 +49,7 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
                   <Button
                     key={item.id}
                     variant={isActive ? "default" : "ghost"}
-                    className={`w-full justify-start gap-3 transition-colors duration-200 ${
+                    className={`w-full justify-start gap-3 transition-colors duration-200 text-black ${
                       isActive ? "bg-primary text-primary-foreground" : "hover:bg-primary/10"
                     }`}
                     onClick={() => onPageChange(item.id)}
@@ -65,7 +65,7 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 text-black">
           {children}
         </main>
       </div>
