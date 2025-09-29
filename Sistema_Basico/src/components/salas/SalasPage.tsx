@@ -202,7 +202,7 @@ export function SalasPage() {
           <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
             <DialogTrigger asChild>
               <div>
-                <Button variant="outline" onClick={resetFormularioEdificio}>
+                <Button variant="default" onClick={resetFormularioEdificio}>
                   <Plus className="w-4 h-4 mr-2" />
                   Agregar Edificio
                 </Button>
@@ -211,13 +211,15 @@ export function SalasPage() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
-                  {editandoEdificio ? "Editar Edificio" : "Agregar Nuevo Edificio"}
+                  <span style={{color: '#000', fontWeight: 'bold', fontSize: '1.25rem', letterSpacing: '0.5px', WebkitTextStroke: '0.1px #000', textShadow: '0 0 1px #000', background: 'transparent', zIndex: 10}}>
+                    {editandoEdificio ? "Editar Edificio" : "Agregar Nuevo Edificio"}
+                  </span>
                 </DialogTitle>
               </DialogHeader>
               
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="nombre">Nombre del Edificio *</Label>
+                  <Label htmlFor="nombre" style={{color: '#000', fontWeight: 'bold', background: 'transparent', zIndex: 10}}>Nombre del Edificio *</Label>
                   <Input
                     id="nombre"
                     value={formularioEdificio.nombre}
@@ -227,7 +229,7 @@ export function SalasPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="codigo">Código *</Label>
+                  <Label htmlFor="codigo" style={{color: '#000', fontWeight: 'bold', background: 'transparent', zIndex: 10}}>Código *</Label>
                   <Input
                     id="codigo"
                     value={formularioEdificio.codigo}
@@ -237,7 +239,7 @@ export function SalasPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="direccion">Dirección</Label>
+                  <Label htmlFor="direccion" style={{color: '#000', fontWeight: 'bold', background: 'transparent', zIndex: 10}}>Dirección</Label>
                   <Input
                     id="direccion"
                     value={formularioEdificio.direccion}
@@ -250,7 +252,7 @@ export function SalasPage() {
                   <Button variant="outline" onClick={() => setModalAbierto(false)}>
                     Cancelar
                   </Button>
-                  <Button onClick={handleSubmitEdificio}>
+                 <Button className="!bg-blue-500 !text-white !hover:bg-blue-600" onClick={handleSubmitEdificio}>
                     {editandoEdificio ? "Actualizar" : "Agregar"} Edificio
                   </Button>
                 </div>
