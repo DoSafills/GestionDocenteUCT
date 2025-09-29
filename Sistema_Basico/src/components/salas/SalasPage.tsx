@@ -224,17 +224,17 @@ export function SalasPage() {
                     id="nombre"
                     value={formularioEdificio.nombre}
                     onChange={(e) => setFormularioEdificio(prev => ({ ...prev, nombre: e.target.value }))}
-                    placeholder="Edificio de Ciencias"
+                    placeholder="Edificio Biblioteca"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="codigo" style={{color: '#000', fontWeight: 'bold', background: 'transparent', zIndex: 10}}>Código *</Label>
+                  <Label htmlFor="codigo" style={{color: '#000', fontWeight: 'bold', zIndex: 10}}>Código *</Label>
                   <Input
                     id="codigo"
                     value={formularioEdificio.codigo}
                     onChange={(e) => setFormularioEdificio(prev => ({ ...prev, codigo: e.target.value }))}
-                    placeholder="CS"
+                    placeholder="CSF - CJP"
                   />
                 </div>
                 
@@ -244,13 +244,13 @@ export function SalasPage() {
                     id="direccion"
                     value={formularioEdificio.direccion}
                     onChange={(e) => setFormularioEdificio(prev => ({ ...prev, direccion: e.target.value }))}
-                    placeholder="Av. Universidad 123"
+                    placeholder="Av. Alemania - Av. Rudecindo Ortega"
                   />
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4">
-                  <Button variant="outline" onClick={() => setModalAbierto(false)}>
-                    Cancelar
+                  <Button className="!bg-gray-200 !text-black !hover:bg-gray-300 dark:!bg-gray-700 dark:!text-white dark:!hover:bg-gray-600" onClick={() => setModalAbierto(false)}>
+                     Cancelar
                   </Button>
                  <Button className="!bg-blue-500 !text-white !hover:bg-blue-600" onClick={handleSubmitEdificio}>
                     {editandoEdificio ? "Actualizar" : "Agregar"} Edificio
