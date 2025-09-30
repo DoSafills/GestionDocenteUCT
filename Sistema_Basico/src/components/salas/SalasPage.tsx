@@ -223,7 +223,13 @@ export function SalasPage() {
                   <Input
                     id="nombre"
                     value={formularioEdificio.nombre}
-                    onChange={(e) => setFormularioEdificio(prev => ({ ...prev, nombre: e.target.value }))}
+                    onChange={(e) => {
+                      setFormularioEdificio(prev => {
+                        const nuevo = { ...prev, nombre: e.target.value };
+                        console.log('Nombre del Edificio:', nuevo.nombre);
+                        return nuevo;
+                      });
+                    }}
                     placeholder="Edificio Biblioteca"
                   />
                 </div>
