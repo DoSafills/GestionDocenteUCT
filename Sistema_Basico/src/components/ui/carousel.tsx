@@ -120,7 +120,7 @@ function Carousel({
     >
       <div
         onKeyDownCapture={handleKeyDown}
-        className={cn("relative", className)}
+        className={cn("relative text-black", className)} // Se añadió `text-black`
         role="region"
         aria-roledescription="carousel"
         data-slot="carousel"
@@ -143,7 +143,7 @@ function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
     >
       <div
         className={cn(
-          "flex",
+          "flex text-black", // Se añadió `text-black`
           orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
           className,
         )}
@@ -162,7 +162,7 @@ function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
       aria-roledescription="slide"
       data-slot="carousel-item"
       className={cn(
-        "min-w-0 shrink-0 grow-0 basis-full",
+        "min-w-0 shrink-0 grow-0 basis-full text-black", // Se añadió `text-black`
         orientation === "horizontal" ? "pl-4" : "pt-4",
         className,
       )}
@@ -185,7 +185,7 @@ function CarouselPrevious({
       variant={variant}
       size={size}
       className={cn(
-        "absolute size-8 rounded-full",
+        "absolute size-8 rounded-full text-black", // Se añadió `text-black`
         orientation === "horizontal"
           ? "top-1/2 -left-12 -translate-y-1/2"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
@@ -215,7 +215,7 @@ function CarouselNext({
       variant={variant}
       size={size}
       className={cn(
-        "absolute size-8 rounded-full",
+        "absolute size-8 rounded-full text-black", // Se añadió `text-black`
         orientation === "horizontal"
           ? "top-1/2 -right-12 -translate-y-1/2"
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
