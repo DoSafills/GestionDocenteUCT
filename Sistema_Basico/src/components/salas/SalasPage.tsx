@@ -267,7 +267,7 @@ export function SalasPage() {
           </Dialog>
 
           <Dialog open={modalSalaAbierto} onOpenChange={setModalSalaAbierto}>
-            <DialogContent>
+            <DialogContent className="!bg-white !text-black">
               <DialogHeader>
                 <DialogTitle>
                   {editandoSala.sala ? "Editar Sala" : "Agregar Nueva Sala"}
@@ -505,7 +505,7 @@ export function SalasPage() {
                         <CardContent className="space-y-3">
                           <div className="flex items-center gap-2 text-sm">
                             <Users className="w-4 h-4 text-muted-foreground" />
-                            <span>Capacidad: {sala.capacidad} personas</span>
+                            <span>Capacidad: {sala.capacidad} Personas</span>
                           </div>
                           
                           {sala.equipamiento.length > 0 && (
@@ -525,11 +525,11 @@ export function SalasPage() {
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
                                 <Calendar className="w-4 h-4 text-muted-foreground" />
-                                <p className="text-sm">Asignaturas programadas:</p>
+                                <p className="text-sm">Asignaturas Programadas:</p>
                               </div>
                               <div className="space-y-1">
                                 {asignaturasEnSala.map(asignatura => (
-                                  <div key={asignatura.id} className="text-xs p-2 bg-muted rounded">
+                                  <div key={asignatura.id} className="text-xs p-2 rounded" style={{ backgroundColor: "#e4e4e7" }}>
                                     <div className="flex justify-between items-center">
                                       <span className="font-medium">{asignatura.codigo}</span>
                                       <Badge variant="outline" className="text-xs">
