@@ -3,10 +3,13 @@
 // Tipos básicos
 export interface Profesor {
   id: string;
+  docente_rut: string; // ej: 12345678-9
   nombre: string;
-  apellido: string;
+  apellido?: string;
   email: string;
-  telefono: string;
+  telefono?: string;
+  pass_hash: string;
+  max_horas_docencia: number;
   especialidad: string[];
   disponibilidad: {
     dias: string[];
@@ -18,20 +21,64 @@ export interface Profesor {
   fechaContratacion: string;
 }
 
+// Alias para compatibilidad
+export interface Docente extends Profesor {}
+
+// Tipos basados en el diagrama de base de datos
+export interface Campus {
+  id: string;
+  codigo: string;
+  nombre: string;
+}
+
 export interface Edificio {
   id: string;
   nombre: string;
   codigo: string;
   direccion: string;
+  campus_codigo: string;
   salas: Sala[];
+}
+
+export interface Seccion {
+  id: string;
+  seccion_id: string;
+  numero: string;
+  codigo: string;
+  ano: number;
+  semestre: number;
+  asignatura_codigo: string;
+  cupos: number;
+}
+
+export interface Bloque {
+  id: string;
+  bloque_id: string;
+  dia_semana: number; // 1-7 (Lunes=1, Domingo=7)
+  hora_inicio: string;
+  hora_fin: string;
+}
+
+export interface Clase {
+  id: string;
+  clase_id: string;
+  seccion_id: string;
+  docente_rut: string;
+  sala_codigo: string;
+  bloque_id: string;
+  estado: 'Programado' | 'Activo' | 'ETC';
 }
 
 export interface Sala {
   id: string;
+  codigo: string; // ej: CS01_125
   numero: string;
   edificioId: string;
+  edificio_codigo: string;
   capacidad: number;
-  tipo: 'aula' | 'laboratorio' | 'auditorio' | 'sala_computacion';
+  tipo: 'TALLER' | 'LAB' | 'ATC';
+  piso: number;
+  estado: 'DISPONIBLE' | 'NO_DISPONIBLE';
   equipamiento: string[];
   disponible: boolean;
   horarios: HorarioSala[];

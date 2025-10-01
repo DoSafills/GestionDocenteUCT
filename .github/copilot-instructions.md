@@ -109,4 +109,4 @@ project/
 - ORM SQLAlchemy
 - Validaciones con Pydantic
 - Testing con Pytest
-- 
+- Codigo limpio

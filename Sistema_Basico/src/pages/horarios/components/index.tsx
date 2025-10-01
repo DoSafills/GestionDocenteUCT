@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
+import { Button, Input, Card, CardContent } from "../../../components/ui";
+
 import {
-  Card,
-  CardContent,
   CardHeader,
   CardTitle,
-} from "../ui/card";
-import { Badge } from "../ui/badge";
+} from "../../../components/ui/card";
+
+import { Badge } from "../../../components/ui/badge";
+
 import {
   Dialog,
   DialogContent,
@@ -15,17 +15,22 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
-import { Label } from "../ui/label";
+} from "../../../components/ui/dialog";
+
+import { Label } from "../../../components/ui/label";
+
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { Textarea } from "../ui/textarea";
-import { Switch } from "../ui/switch";
+} from "../../../components/ui/select";
+
+import { Textarea } from "../../../components/ui/textarea";
+
+import { Switch } from "../../../components/ui/switch";
+
 import {
   Plus,
   Search,
@@ -37,15 +42,27 @@ import {
   User,
   Eye,
   AlertCircle,
+  XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
-import type { HorarioManual } from "../../types";
+import type { HorarioManual } from "../../../types";
 import {
   horariosManualMock,
   profesoresMock,
   edificiosMock,
   asignaturasMock,
-} from "../../data/mock-data";
+} from "../../../data/mock-data";
+
+import { ModalConfirmacion } from "./ModalConfirmacion";
+import type {
+  FormularioHorario,
+  EstadoConfirmacion
+} from "./type";
+
+import {
+  FORMULARIO_INICIAL,
+  CONFIRMACION_INICIAL
+} from "./type";
 
 export function HorariosPage() {
   const [horarios, setHorarios] = useState<HorarioManual[]>(
@@ -60,21 +77,10 @@ export function HorariosPage() {
   const [editandoHorario, setEditandoHorario] =
     useState<HorarioManual | null>(null);
 
-  const [formulario, setFormulario] = useState({
-    titulo: "",
-    descripcion: "",
-    salaId: "",
-    dia: "",
-    horaInicio: "",
-    horaFin: "",
-    profesorId: "",
-    asignaturaId: "",
-    color: "#3B82F6",
-    estado: "activo" as "activo" | "cancelado" | "reprogramado",
-    recurrente: false,
-    fechaInicio: "",
-    fechaFin: "",
-  });
+  const [formulario, setFormulario] = useState<FormularioHorario>(FORMULARIO_INICIAL);
+  
+  // Estado para el modal de confirmación
+  const [confirmacion, setConfirmacion] = useState<EstadoConfirmacion>(CONFIRMACION_INICIAL);
 
   // Obtener todas las salas de todos los edificios
   const todasLasSalas = edificiosMock.flatMap((edificio) =>
@@ -185,21 +191,7 @@ export function HorariosPage() {
   };
 
   const resetFormulario = () => {
-    setFormulario({
-      titulo: "",
-      descripcion: "",
-      salaId: "",
-      dia: "",
-      horaInicio: "",
-      horaFin: "",
-      profesorId: "",
-      asignaturaId: "",
-      color: "#3B82F6",
-      estado: "activo",
-      recurrente: false,
-      fechaInicio: "",
-      fechaFin: "",
-    });
+    setFormulario(FORMULARIO_INICIAL);
     setEditandoHorario(null);
   };
 
@@ -223,10 +215,56 @@ export function HorariosPage() {
     setModalAbierto(true);
   };
 
-  const eliminarHorario = (id: string) => {
-    setHorarios((prev) => prev.filter((h) => h.id !== id));
-    toast.success("Horario eliminado exitosamente");
+  // Función para solicitar confirmación de eliminación
+  const solicitarEliminarHorario = (horario: HorarioManual) => {
+    setConfirmacion({
+      abierto: true,
+      horarioId: horario.id,
+      titulo: horario.titulo,
+      tipo: "eliminar"
+    });
   };
+
+  // Función para confirmar la eliminación
+  const confirmarEliminarHorario = () => {
+    if (confirmacion.horarioId) {
+      setHorarios((prev) => prev.filter((h) => h.id !== confirmacion.horarioId));
+      toast.success("Horario eliminado exitosamente");
+    }
+    setConfirmacion(CONFIRMACION_INICIAL);
+  };
+
+  // Función para cancelar la eliminación
+  const cancelarEliminarHorario = () => {
+    setConfirmacion(CONFIRMACION_INICIAL);
+  };
+
+  // Función para solicitar cancelación de horario
+  const solicitarCancelarHorario = (horario: HorarioManual) => {
+    setConfirmacion({
+      abierto: true,
+      horarioId: horario.id,
+      titulo: horario.titulo,
+      tipo: "cancelar"
+    });
+  };
+
+  // Función para confirmar cancelación de horario
+  const confirmarCancelarHorario = () => {
+    if (confirmacion.horarioId) {
+      cambiarEstadoHorario(confirmacion.horarioId, "cancelado");
+    }
+    setConfirmacion(CONFIRMACION_INICIAL);
+  };
+
+  // Función para reprogramar horario
+  const reprogramarHorario = (horario: HorarioManual) => {
+    // Cambiar estado y abrir editor
+    cambiarEstadoHorario(horario.id, "reprogramado");
+    editarHorario(horario);
+  };
+
+
 
   const cambiarEstadoHorario = (
     id: string,
@@ -430,13 +468,33 @@ export function HorariosPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => editarHorario(horario)}
+                    title="Editar horario"
                   >
                     <Edit className="w-4 h-4" />
+                  </Button>
+                  {horario.estado === "activo" && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => solicitarCancelarHorario(horario)}
+                      title="Cancelar horario"
+                    >
+                      <XCircle className="w-4 h-4 text-yellow-600" />
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => reprogramarHorario(horario)}
+                    title="Reprogramar horario"
+                  >
+                    <Calendar className="w-4 h-4 text-blue-600" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => eliminarHorario(horario.id)}
+                    onClick={() => solicitarEliminarHorario(horario)}
+                    title="Eliminar horario"
                   >
                     <Trash2 className="w-4 h-4 text-destructive" />
                   </Button>
@@ -1020,6 +1078,28 @@ export function HorariosPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Modal de confirmación para eliminación y cancelación */}
+      <ModalConfirmacion
+        abierto={confirmacion.abierto}
+        onConfirmar={
+          confirmacion.tipo === "eliminar" 
+            ? confirmarEliminarHorario 
+            : confirmarCancelarHorario
+        }
+        onCancelar={cancelarEliminarHorario}
+        titulo={
+          confirmacion.tipo === "eliminar" 
+            ? "Eliminar Horario" 
+            : "Cancelar Horario"
+        }
+        mensaje={
+          confirmacion.tipo === "eliminar"
+            ? `¿Estás seguro de que deseas eliminar el horario "${confirmacion.titulo}"? Esta acción no se puede deshacer.`
+            : `¿Estás seguro de que deseas cancelar el horario "${confirmacion.titulo}"? Podrás reactivarlo más tarde.`
+        }
+        tipo={confirmacion.tipo || "eliminar"}
+      />
     </div>
   );
 }
