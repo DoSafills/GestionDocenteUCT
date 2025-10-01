@@ -25,3 +25,6 @@ npm install --legacy-peer-deps @types/react @types/react-dom
 
 # Dependencias de desarrollo adicionales (opcional)
 npm install --legacy-peer-deps vite-plugin-svgr
+
+# axion pa conectarse a la api
+npm install axios

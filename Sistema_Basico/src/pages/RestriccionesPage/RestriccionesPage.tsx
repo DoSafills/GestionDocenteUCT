@@ -7,7 +7,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../componen
 import { Label } from "../../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Textarea } from "../../components/ui/textarea";
-import { Switch } from "../../components/ui/switch";
 import { Plus, Edit, Trash2, XCircle, CheckCircle, Clock, Shield, BookOpen, Settings, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import type { RestriccionAcademica } from "../../types";
@@ -73,6 +72,12 @@ export function RestriccionesPage() {
       toast.error("Para restricciones de prerrequisito se requieren asignatura origen y destino");
       return;
     }
+
+    const confirmMessage = editandoRestriccion
+      ? "¿Está seguro de que quiere actualizar esta restricción?"
+      : "¿Está seguro de que quiere agregar esta restricción?";
+    
+    if (!window.confirm(confirmMessage)) return;
 
     const parametros: any = {};
     switch (formulario.tipo) {
@@ -162,6 +167,7 @@ export function RestriccionesPage() {
   };
 
   const eliminarRestriccion = (id: string) => {
+    if (!window.confirm("¿Está seguro de que quiere eliminar esta restricción?")) return;
     setRestricciones(prev => prev.filter(r => r.id !== id));
     toast.success("Restricción eliminada exitosamente");
   };
@@ -325,8 +331,8 @@ export function RestriccionesPage() {
             </SelectContent>
           </Select>
 
-          <Button onClick={() => setModalAbierto(true)} variant="secondary">
-            <Plus className="w-4 h-4 mr-2" /> Nueva Restricción
+          <Button onClick={() => setModalAbierto(true)} variant="secondary" className="flex items-center gap-2">
+            <Plus className="w-4 h-4" /> Nueva Restricción
           </Button>
         </div>
       </div>
@@ -347,14 +353,16 @@ export function RestriccionesPage() {
             <CardContent className="space-y-2">
               <p>{r.descripcion}</p>
               <p className="text-xs text-gray-500">{r.mensaje}</p>
+
+              {/* Botones reemplazados */}
               <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => editarRestriccion(r)}>
+                <Button size="sm" variant="outline" onClick={() => editarRestriccion(r)} className="flex items-center gap-2">
                   <Edit className="w-4 h-4" /> Editar
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => eliminarRestriccion(r.id)}>
+                <Button size="sm" variant="outline" onClick={() => eliminarRestriccion(r.id)} className="flex items-center gap-2">
                   <Trash2 className="w-4 h-4" /> Eliminar
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => toggleActivarRestriccion(r.id)}>
+                <Button size="sm" variant="outline" onClick={() => toggleActivarRestriccion(r.id)} className="flex items-center gap-2">
                   {r.activa ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
                   {r.activa ? "Desactivar" : "Activar"}
                 </Button>
@@ -364,17 +372,16 @@ export function RestriccionesPage() {
         ))}
       </div>
 
-      {/* Modal */}
+      {/* Modal para agregar/editar */}
       <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{editandoRestriccion ? "Editar Restricción" : "Nueva Restricción"}</DialogTitle>
           </DialogHeader>
-
           <div className="space-y-4">
-            <div className="space-y-2">
+            <div>
               <Label>Tipo de Restricción</Label>
-              <Select value={formulario.tipo} onValueChange={(v) => setFormulario(prev => ({ ...prev, tipo: v as any }))}>
+              <Select value={formulario.tipo} onValueChange={(v: RestriccionAcademica["tipo"]) => setFormulario(prev => ({ ...prev, tipo: v }))}>
                 <SelectTrigger><SelectValue placeholder="Seleccionar tipo" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="prerrequisito">Prerrequisito</SelectItem>
@@ -386,47 +393,35 @@ export function RestriccionesPage() {
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div>
               <Label>Descripción</Label>
-              <Textarea
-                value={formulario.descripcion}
-                onChange={(e) => setFormulario(prev => ({ ...prev, descripcion: e.target.value }))}
-              />
+              <Textarea value={formulario.descripcion} onChange={(e) => setFormulario(prev => ({ ...prev, descripcion: e.target.value }))} />
             </div>
 
-            <div className="space-y-2">
+            <div>
               <Label>Mensaje</Label>
-              <Input
-                value={formulario.mensaje}
-                onChange={(e) => setFormulario(prev => ({ ...prev, mensaje: e.target.value }))}
-              />
+              <Textarea value={formulario.mensaje} onChange={(e) => setFormulario(prev => ({ ...prev, mensaje: e.target.value }))} />
             </div>
 
-            <div className="space-y-2">
-              <Label>Prioridad</Label>
-              <Input
-                type="range"
-                min={0} max={1} step={0.01}
-                value={formulario.prioridadFloat}
-                onChange={(e) => setFormulario(prev => ({ ...prev, prioridadFloat: parseFloat(e.target.value) }))}
-              />
-              <p className="text-sm">Nivel: {prioridadDesdeFloat(formulario.prioridadFloat)}</p>
+            <div>
+              <Label>Prioridad (0 baja - 1 alta)</Label>
+              <Input type="range" min={0} max={1} step={0.01} value={formulario.prioridadFloat} onChange={(e) => setFormulario(prev => ({ ...prev, prioridadFloat: parseFloat(e.target.value) }))} />
             </div>
 
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={formulario.activa}
-                onCheckedChange={(checked) => setFormulario(prev => ({ ...prev, activa: checked }))}
-              />
-              <span>Activa</span>
+            <div>
+              <Label>Activa</Label>
+              <Select value={formulario.activa ? "true" : "false"} onValueChange={(v) => setFormulario(prev => ({ ...prev, activa: v === "true" }))}>
+                <SelectTrigger><SelectValue placeholder="Estado" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="true">Activa</SelectItem>
+                  <SelectItem value="false">Inactiva</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {renderParametrosEspecificos()}
 
-            <div className="flex justify-end gap-2">
-              <Button variant="secondary" onClick={() => { resetFormulario(); setModalAbierto(false); }}>Cancelar</Button>
-              <Button onClick={handleSubmit}>{editandoRestriccion ? "Actualizar" : "Agregar"}</Button>
-            </div>
+            <Button onClick={handleSubmit} className="w-full">{editandoRestriccion ? "Actualizar" : "Agregar"}</Button>
           </div>
         </DialogContent>
       </Dialog>

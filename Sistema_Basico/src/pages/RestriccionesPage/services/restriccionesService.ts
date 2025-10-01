@@ -1,5 +1,5 @@
 import api from "./api";
-import type { RestriccionAcademica } from "../types";
+import type { RestriccionAcademica } from "../../../types";
 
 // Listar todas
 export const obtenerRestricciones = () =>
