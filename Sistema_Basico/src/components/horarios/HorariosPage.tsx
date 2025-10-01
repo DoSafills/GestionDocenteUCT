@@ -611,7 +611,7 @@ export function HorariosPage() {
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar sala" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white dark:bg-zinc-900">
                         {todasLasSalas.map((sala) => (
                           <SelectItem
                             key={sala.id}
@@ -639,7 +639,7 @@ export function HorariosPage() {
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar día" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white dark:bg-zinc-900">
                         {diasSemana.map((dia) => (
                           <SelectItem key={dia} value={dia}>
                             {dia}
@@ -698,7 +698,7 @@ export function HorariosPage() {
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar profesor" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white dark:bg-zinc-900">
                         <SelectItem value="no_profesor">
                           Sin asignar
                         </SelectItem>
@@ -732,7 +732,7 @@ export function HorariosPage() {
                       <SelectTrigger>
                         <SelectValue placeholder="Relacionar con asignatura" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white dark:bg-zinc-900">
                         <SelectItem value="no_asignatura">
                           Sin relacionar
                         </SelectItem>
@@ -788,7 +788,7 @@ export function HorariosPage() {
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white dark:bg-zinc-900">
                         <SelectItem value="activo">
                           Activo
                         </SelectItem>
@@ -894,7 +894,7 @@ export function HorariosPage() {
               <SelectTrigger>
                 <SelectValue placeholder="Filtrar por sala" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white dark:bg-zinc-900">
                 <SelectItem value="todos">
                   Todas las salas
                 </SelectItem>
@@ -913,7 +913,7 @@ export function HorariosPage() {
               <SelectTrigger>
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white dark:bg-zinc-900">
                 <SelectItem value="todos">
                   Todos los estados
                 </SelectItem>

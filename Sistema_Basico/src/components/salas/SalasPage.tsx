@@ -285,7 +285,7 @@ export function SalasPage() {
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona un edificio" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white dark:bg-zinc-900">
                       {edificios.map(edificio => (
                         <SelectItem key={edificio.id} value={edificio.id}>
                           {edificio.nombre} ({edificio.codigo})
@@ -326,7 +326,7 @@ export function SalasPage() {
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white dark:bg-zinc-900">
                       <SelectItem value="aula">Aula</SelectItem>
                       <SelectItem value="laboratorio">Laboratorio</SelectItem>
                       <SelectItem value="auditorio">Auditorio</SelectItem>
@@ -389,7 +389,7 @@ export function SalasPage() {
               <SelectTrigger>
                 <SelectValue placeholder="Filtrar por edificio" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white dark:bg-zinc-900">
                 <SelectItem value="todos">Todos los edificios</SelectItem>
                 {edificios.map(edificio => (
                   <SelectItem key={edificio.id} value={edificio.id}>
@@ -403,7 +403,7 @@ export function SalasPage() {
               <SelectTrigger>
                 <SelectValue placeholder="Filtrar por tipo" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white dark:bg-zinc-900">
                 <SelectItem value="todos">Todos los tipos</SelectItem>
                 <SelectItem value="aula">Aula</SelectItem>
                 <SelectItem value="laboratorio">Laboratorio</SelectItem>
