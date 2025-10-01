@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Layout } from "./components/Layout";
 import { DashboardPage } from "./components/dashboard/DashboardPage";
-import { ProfesoresPage } from "./components/profesores/ProfesoresPage";
+import { ProfesoresPage } from "./pages/ProfesoresPage/ProfesoresPage";
 import { SalasPage } from "./components/salas/SalasPage";
 import { AsignaturasPage } from "./components/asignaturas/AsignaturasPage";
 import { HorariosPage } from "./components/horarios/HorariosPage";

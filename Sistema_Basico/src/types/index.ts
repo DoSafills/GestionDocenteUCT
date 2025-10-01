@@ -1,21 +1,24 @@
-// Tipos principales para el sistema académico
+export type DiaSemana =
+  | "LUNES" | "MARTES" | "MIERCOLES"
+  | "JUEVES" | "VIERNES" | "SABADO"
+  
+export interface RestriccionHorario {
+  id: number;
+  docente_id: number;
+  dia_semana: DiaSemana | number;
+  hora_inicio: string;
+  hora_fin: string;
+  esta_disponible: boolean;
+  descripcion?: string;
+  esta_activa: boolean;
+}
 
-// Tipos básicos
-export interface Profesor {
-  id: string;
-  nombre: string;
-  apellido: string;
-  email: string;
-  telefono: string;
-  especialidad: string[];
-  disponibilidad: {
-    dias: string[];
-    horasInicio: string;
-    horasFin: string;
-  };
-  experiencia: number; // años
-  estado: 'activo' | 'inactivo';
-  fechaContratacion: string;
+export interface RestriccionHorarioGuardar {
+  dia_semana: DiaSemana | number;
+  hora_inicio: string;
+  hora_fin: string;
+  esta_disponible: boolean;
+  esta_activa: boolean;
 }
 
 export interface Edificio {
