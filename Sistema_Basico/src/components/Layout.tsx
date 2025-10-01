@@ -31,8 +31,9 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col text-black">
-      {/* Header */}
+    // Aseguramos que el texto de todo el layout sea negro
+    <div className="min-h-screen bg-background text-black flex flex-col pt-24">
+      {/* Header flotante con bordes redondeados */}
       <Header />
 
       <div className="flex flex-1">
@@ -40,7 +41,7 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
         <aside className="w-64 bg-card border-r min-h-[calc(100vh-80px)] text-black">
           <Card className="m-4 border-0 shadow-none">
             <CardContent className="p-4 space-y-2">
-              <h3 className="text-sm mb-4">NAVEGACIÓN</h3>
+              <h3 className="text-sm mb-4 text-black">NAVEGACIÓN</h3> {/* Título en negro */}
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = currentPage === item.id;
