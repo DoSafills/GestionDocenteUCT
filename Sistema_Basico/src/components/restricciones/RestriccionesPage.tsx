@@ -213,7 +213,7 @@ export function RestriccionesPage() {
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar asignatura" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white dark:bg-zinc-900">
                   {asignaturasMock.map(asig => (
                     <SelectItem key={asig.id} value={asig.codigo}>
                       {asig.codigo} - {asig.nombre}
@@ -229,7 +229,7 @@ export function RestriccionesPage() {
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar asignatura" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white dark:bg-zinc-900">
                   {asignaturasMock.map(asig => (
                     <SelectItem key={asig.id} value={asig.codigo}>
                       {asig.codigo} - {asig.nombre}
@@ -251,7 +251,7 @@ export function RestriccionesPage() {
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar asignatura" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white dark:bg-zinc-900">
                   {asignaturasMock.map(asig => (
                     <SelectItem key={asig.id} value={asig.codigo}>
                       {asig.codigo} - {asig.nombre}
@@ -267,7 +267,7 @@ export function RestriccionesPage() {
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar tipo" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white dark:bg-zinc-900">
                   <SelectItem value="aula">Aula</SelectItem>
                   <SelectItem value="laboratorio">Laboratorio</SelectItem>
                   <SelectItem value="auditorio">Auditorio</SelectItem>
@@ -288,7 +288,7 @@ export function RestriccionesPage() {
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar asignatura" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white dark:bg-zinc-900">
                   {asignaturasMock.map(asig => (
                     <SelectItem key={asig.id} value={asig.codigo}>
                       {asig.codigo} - {asig.nombre}
@@ -318,7 +318,7 @@ export function RestriccionesPage() {
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar día" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white dark:bg-zinc-900">
                   <SelectItem value="todos">Todos los días</SelectItem>
                   {diasSemana.map(dia => (
                     <SelectItem key={dia} value={dia}>{dia}</SelectItem>
@@ -387,7 +387,7 @@ export function RestriccionesPage() {
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white dark:bg-zinc-900">
                       <SelectItem value="prerrequisito">Prerrequisito</SelectItem>
                       <SelectItem value="sala_prohibida">Sala Prohibida</SelectItem>
                       <SelectItem value="horario_conflicto">Conflicto de Horario</SelectItem>
@@ -424,7 +424,7 @@ export function RestriccionesPage() {
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white dark:bg-zinc-900">
                         <SelectItem value="alta">Alta</SelectItem>
                         <SelectItem value="media">Media</SelectItem>
                         <SelectItem value="baja">Baja</SelectItem>
@@ -483,7 +483,7 @@ export function RestriccionesPage() {
               <SelectTrigger>
                 <SelectValue placeholder="Filtrar por tipo" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white dark:bg-zinc-900">
                 <SelectItem value="todos">Todos los tipos</SelectItem>
                 <SelectItem value="prerrequisito">Prerrequisito</SelectItem>
                 <SelectItem value="sala_prohibida">Sala Prohibida</SelectItem>
@@ -497,7 +497,7 @@ export function RestriccionesPage() {
               <SelectTrigger>
                 <SelectValue placeholder="Filtrar por prioridad" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white dark:bg-zinc-900">
                 <SelectItem value="todos">Todas las prioridades</SelectItem>
                 <SelectItem value="alta">Alta</SelectItem>
                 <SelectItem value="media">Media</SelectItem>
@@ -509,7 +509,7 @@ export function RestriccionesPage() {
               <SelectTrigger>
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white dark:bg-zinc-900">
                 <SelectItem value="todos">Todos los estados</SelectItem>
                 <SelectItem value="activa">Activas</SelectItem>
                 <SelectItem value="inactiva">Inactivas</SelectItem>

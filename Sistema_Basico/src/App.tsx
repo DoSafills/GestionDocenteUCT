@@ -1,4 +1,5 @@
-import { useState } from "react";
+// src/App.tsx
+import React, { useEffect, useState } from "react";
 import { Layout } from "./components/Layout";
 import { DashboardPage } from "./components/dashboard/DashboardPage";
 import { ProfesoresPage } from "./components/profesores/ProfesoresPage";
@@ -7,55 +8,70 @@ import { AsignaturasPage } from "./components/asignaturas/AsignaturasPage";
 import { HorariosPage } from "./components/horarios/HorariosPage";
 import { RestriccionesPage } from "./components/restricciones/RestriccionesPage";
 import { CursosPage } from "./components/cursos/CursosPage";
-import { Login } from "./components/Login/Login";
-import { Registro } from "./components/Registro/Registro"; 
+import LoginForm from "./components/Login/Loginpage"; // export default
+import { AuthProvider, useAuth } from "./context/AuthContext";
+
+// Define tu union para navegación
+type Pagina =
+  | "login"
+  | "dashboard"
+  | "profesores"
+  | "salas"
+  | "asignaturas"
+  | "horarios"
+  | "restricciones"
+  | "cursos";
 
 export default function App() {
-  const [paginaActual, setPaginaActual] = useState("login");
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
+  );
+}
 
-  const renderPagina = () => {
+function MainApp() {
+  const [paginaActual, setPaginaActual] = useState<Pagina>("login");
+  const { isAuthenticated } = useAuth();
+
+  // Redirige según autenticación
+  useEffect(() => {
+    if (!isAuthenticated) setPaginaActual("login");
+    else if (paginaActual === "login") setPaginaActual("dashboard");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
+
+  const renderPrivado = () => {
     switch (paginaActual) {
-      case "login":
-        return (
-          <Login
-            onLoginSuccess={() => setPaginaActual("dashboard")}
-            onShowRegistro={() => setPaginaActual("registro")} 
-          />
-        );
-      case "registro":
-        return (
-          <Registro
-            onShowLogin={() => setPaginaActual("login")} 
-          />
-        );
-      case "dashboard":
-        return <DashboardPage />;
-      case "profesores":
-        return <ProfesoresPage />;
-      case "salas":
-        return <SalasPage />;
-      case "asignaturas":
-        return <AsignaturasPage />;
-      case "horarios":
-        return <HorariosPage />;
-      case "restricciones":
-        return <RestriccionesPage />;
-      case "cursos":
-        return <CursosPage />;
-      default:
-        return <Login
-          onLoginSuccess={() => setPaginaActual("dashboard")}
-          onShowRegistro={() => setPaginaActual("registro")}
-        />;
+      case "dashboard": return <DashboardPage />;
+      case "profesores": return <ProfesoresPage />;
+      case "salas": return <SalasPage />;
+      case "asignaturas": return <AsignaturasPage />;
+      case "horarios": return <HorariosPage />;
+      case "restricciones": return <RestriccionesPage />;
+      case "cursos": return <CursosPage />;
+      default: return <DashboardPage />;
     }
   };
 
+  // Si NO hay sesión: solo Login
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-sm">
+          <LoginForm onSuccess={() => setPaginaActual("dashboard")} />
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ Opción 2: wrapper que castea a Pagina
   return (
     <Layout
-      currentPage={paginaActual}
-      onPageChange={setPaginaActual}
+      currentPage={paginaActual}                            // string compatible
+      onPageChange={(p) => setPaginaActual(p as Pagina)}    // <— wrapper
     >
-      {renderPagina()}
+      {renderPrivado()}
     </Layout>
   );
 }

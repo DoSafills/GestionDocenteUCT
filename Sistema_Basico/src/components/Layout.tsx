@@ -1,3 +1,4 @@
+// src/components/Layout.tsx
 import type { ReactNode } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
@@ -8,8 +9,11 @@ import {
   Settings, 
   Home,
   GraduationCap,
-  Calendar
+  Calendar,
+  LogOut    // <-- importamos ícono de lucide-react
 } from "lucide-react";
+import Header from "./Header";
+import { useAuth } from "../context/AuthContext"; // <-- importamos logout
 
 interface LayoutProps {
   children: ReactNode;
@@ -18,6 +22,8 @@ interface LayoutProps {
 }
 
 export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
+  const { logout } = useAuth(); // usamos el logout de tu contexto
+
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: Home },
     { id: "profesores", label: "Profesores", icon: Users },
@@ -29,57 +35,55 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col text-black">
       {/* Header */}
-      <header className="bg-primary text-primary-foreground py-4 shadow-sm">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <GraduationCap className="w-8 h-8" />
-              <div>
-                <h1 className="text-2xl">Sistema Académico</h1>
-                <p className="text-sm opacity-90">Gestión Integral de Cursos y Asignaturas</p>
-              </div>
-            </div>
-            
-            <div className="text-right">
-              <p className="text-sm opacity-90">Administrador</p>
-              <p className="text-xs opacity-75">Sistema v2.0</p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
-      <div className="flex">
+      <div className="flex flex-1">
         {/* Sidebar */}
-        <aside className="w-64 bg-card border-r min-h-[calc(100vh-80px)]">
-          <Card className="m-4 border-0 shadow-none">
-            <CardContent className="p-4 space-y-2">
-              <h3 className="text-sm text-muted-foreground mb-4">NAVEGACIÓN</h3>
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = currentPage === item.id;
-                
-                return (
-                  <Button
-                    key={item.id}
-                    variant={isActive ? "default" : "ghost"}
-                    className={`w-full justify-start gap-3 ${
-                      isActive ? "bg-primary text-primary-foreground" : ""
-                    }`}
-                    onClick={() => onPageChange(item.id)}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {item.label}
-                  </Button>
-                );
-              })}
+        <aside className="w-64 bg-card border-r min-h-[calc(100vh-80px)] text-black flex flex-col">
+          <Card className="m-4 border-0 shadow-none flex-1">
+            <CardContent className="p-4 space-y-2 flex flex-col h-full">
+              <div>
+                <h3 className="text-sm mb-4">NAVEGACIÓN</h3>
+                {menuItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = currentPage === item.id;
+                  
+                  return (
+                    <Button
+                      key={item.id}
+                      variant={isActive ? "default" : "ghost"}
+                      className={`w-full justify-start gap-3 transition-colors duration-200 text-black ${
+                        isActive ? "bg-primary text-primary-foreground" : "hover:bg-primary/10"
+                      }`}
+                      onClick={() => onPageChange(item.id)}
+                      aria-current={isActive ? "page" : undefined}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {item.label}
+                    </Button>
+                  );
+                })}
+              </div>
+
+              {/* Botón Logout en la parte inferior */}
+              <div className="mt-auto pt-4 border-t">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 text-red-600 hover:bg-red-50"
+                  onClick={logout}
+                >
+                  <LogOut className="w-4 h-4" />
+                  Cerrar sesión
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 text-black">
           {children}
         </main>
       </div>
