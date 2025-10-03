@@ -1,5 +1,58 @@
 // Tipos principales para el sistema académico
 
+
+export interface Docente {
+    id: number; // PK
+    nombre: string;
+    email: string;
+    password_hash: string;
+    esta_activo: boolean;
+    especialidad: string;
+}
+
+export interface Clase {
+    id: number; // PK
+    seccion_id: number;
+    docente_id: number; // FK
+    sala_id: number; // FK
+    bloque_id: number; // FK
+    estado: string;
+}
+
+export interface Bloque {
+  id: number;              // PK
+  dia_semana: number;      // 1 = Lunes, ..., 7 = Domingo
+  hora_inicio: string;     // formato "HH:MM:SS"
+  hora_fin: string;        // formato "HH:MM:SS"
+}
+
+export interface Seccion {
+  id: number;              // PK
+  codigo: string;
+  anio: number;
+  semestre: number;
+  asignatura_id: number;   // FK -> Asignatura.id
+  cupos: number;
+}
+
+export interface Sala {
+  id: number;              // PK
+  codigo: string;
+  capacidad: number;
+  tipo: string;            // ejemplo: "Laboratorio", "Aula", etc.
+  esta_disponible: boolean;
+  edificio_id: number;     // FK -> Edificio.id
+  equipamiento: string;    // lista o descripción de equipos
+}
+
+export interface Asignatura {
+  id: number;
+  codigo: string; // ej: MAT1105-07
+  nombre: string;
+  creditos: number;
+  semestre: number;
+}
+
 // Tipos básicos
 export interface Profesor {
   id: string;
@@ -24,17 +77,6 @@ export interface Edificio {
   codigo: string;
   direccion: string;
   salas: Sala[];
-}
-
-export interface Sala {
-  id: string;
-  numero: string;
-  edificioId: string;
-  capacidad: number;
-  tipo: 'aula' | 'laboratorio' | 'auditorio' | 'sala_computacion';
-  equipamiento: string[];
-  disponible: boolean;
-  horarios: HorarioSala[];
 }
 
 export interface HorarioSala {
@@ -67,27 +109,6 @@ export interface HorarioManual {
   fechaFin?: string;
 }
 
-export interface Asignatura {
-  id: string;
-  codigo: string; // ej: MAT1105-07
-  nombre: string;
-  creditos: number;
-  semestre: number;
-  carrera: string;
-  profesorId?: string;
-  salaId?: string;
-  horarios: {
-    dia: string;
-    horaInicio: string;
-    horaFin: string;
-  }[];
-  prerrequisitos: string[]; // códigos de asignaturas
-  cupos: number;
-  inscritos: number;
-  estado: 'planificada' | 'programada' | 'en_curso' | 'finalizada';
-  descripcion: string;
-}
-
 export interface RestriccionAcademica {
   id: string;
   tipo: 'prerrequisito' | 'sala_prohibida' | 'horario_conflicto' | 'capacidad' | 'profesor_especialidad' | 'secuencia_temporal';
@@ -103,7 +124,6 @@ export interface RestriccionAcademica {
     diaRestriccion?: string;
     horaInicioRestriccion?: string;
     horaFinRestriccion?: string;
-    [key: string]: any;
   };
   mensaje: string;
   fechaCreacion: string;
