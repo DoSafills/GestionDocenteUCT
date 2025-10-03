@@ -1,4 +1,4 @@
-// src/components/Login/Loginpage.tsx
+// src/pages/LoginPage/index.tsx
 import React, { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -14,12 +14,8 @@ export default function LoginForm() {
     setErr(null);
     setLoading(true);
     try {
-      
       await login(email, password);
-      
-      
     } catch (error: any) {
-      // apiFetch lanza Error con { status, data }
       const msg =
         error?.data?.message ||
         error?.message ||
@@ -54,7 +50,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={loading || !email || !password}
-        className="w-full border rounded px-3 py-2"
+        className="w-full border rounded px-3 py-2 bg-blue-500 text-white disabled:opacity-50"
       >
         {loading ? "Ingresando..." : "Ingresar"}
       </button>
