@@ -1,7 +1,8 @@
+// NUEVOS TIPOS EN BASE AL MER
 export type DiaSemana =
   | "LUNES" | "MARTES" | "MIERCOLES"
   | "JUEVES" | "VIERNES" | "SABADO"
-  
+
 export interface RestriccionHorario {
   id: number;
   docente_id: number;
@@ -19,6 +20,51 @@ export interface RestriccionHorarioGuardar {
   hora_fin: string;
   esta_disponible: boolean;
   esta_activa: boolean;
+}
+
+export interface Docente {
+  id: number;
+  nombre: string;
+  email: string;
+  password_hash: string;
+  esta_activo: boolean;
+  especialidad: string;
+}
+
+export interface Estudiante {
+  id: number;
+  nombre: string;
+  email: string;
+  pass_hash: string;
+  carrera: string;
+}
+
+export interface Admin {
+  id: number;
+  nombre: string;
+  email: string;
+  pass_hash: string;
+  super_admin: boolean;
+}
+
+// Tipos principales para el sistema académico
+
+// Tipos básicos
+export interface Profesor {
+  id: string;
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono: string;
+  especialidad: string[];
+  disponibilidad: {
+    dias: string[];
+    horasInicio: string;
+    horasFin: string;
+  };
+  experiencia: number; // años
+  estado: 'activo' | 'inactivo';
+  fechaContratacion: string;
 }
 
 export interface Edificio {
@@ -114,18 +160,18 @@ export interface RestriccionAcademica {
 }
 
 // Tipos heredados del sistema anterior (adaptados)
-export interface Estudiante {
-  id?: string;
-  nombre: string;
-  apellido: string;
-  email: string;
-  telefono: string;
-  edad: number;
-  carrera: string;
-  semestre: number;
-  asignaturasAprobadas: string[];
-  asignaturasInscritas: string[];
-}
+// export interface Estudiante {
+//   id?: string;
+//   nombre: string;
+//   apellido: string;
+//   email: string;
+//   telefono: string;
+//   edad: number;
+//   carrera: string;
+//   semestre: number;
+//   asignaturasAprobadas: string[];
+//   asignaturasInscritas: string[];
+// }
 
 export interface Curso {
   id: string;
@@ -190,3 +236,4 @@ export interface ValidacionAsignatura {
   advertencias: string[];
   conflictos: ConflictoHorario[];
 }
+

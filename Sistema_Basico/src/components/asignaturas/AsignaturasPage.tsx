@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "../ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Textarea } from "../ui/textarea";
-import { Plus, Search, BookOpen, User, MapPin, Calendar, Edit, Trash2, Clock, Users } from "lucide-react";
+import { Plus, Search, BookOpen, User, MapPin, Edit, Trash2, Clock, Users } from "lucide-react";
 import { toast } from "sonner";
 import type { Asignatura } from "../../types";
 import { asignaturasMock, profesoresMock, edificiosMock } from "../../data/mock-data";
@@ -268,7 +268,7 @@ export function AsignaturasPage() {
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white dark:bg-zinc-900">
                         <SelectItem value="planificada">Planificada</SelectItem>
                         <SelectItem value="programada">Programada</SelectItem>
                         <SelectItem value="en_curso">En Curso</SelectItem>
@@ -321,7 +321,7 @@ export function AsignaturasPage() {
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar profesor" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white dark:bg-zinc-900">
                         <SelectItem value="">Sin asignar</SelectItem>
                         {profesoresMock.filter(p => p.estado === 'activo').map(profesor => (
                           <SelectItem key={profesor.id} value={profesor.id}>
@@ -338,7 +338,7 @@ export function AsignaturasPage() {
                       <SelectTrigger>
                         <SelectValue placeholder="Seleccionar sala" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white dark:bg-zinc-900">
                         <SelectItem value="">Sin asignar</SelectItem>
                         {todasLasSalas.filter(s => s.disponible).map(sala => (
                           <SelectItem key={sala.id} value={sala.id}>
@@ -371,7 +371,7 @@ export function AsignaturasPage() {
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccionar día" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-white dark:bg-zinc-900">
                           {diasSemana.map(dia => (
                             <SelectItem key={dia} value={dia}>{dia}</SelectItem>
                           ))}
