@@ -1,189 +1,251 @@
+// NUEVOS TIPOS EN BASE AL MER
+export type DiaSemana = 'LUNES' | 'MARTES' | 'MIERCOLES' | 'JUEVES' | 'VIERNES' | 'SABADO';
+
+export interface Clase {
+    id: number;
+    seccion_id: number;
+    docente_id: number;
+    sala_id: number;
+    bloque_id: number;
+    estado: string;
+}
+
+export interface RestriccionHorario {
+    id: number;
+    docente_id: number;
+    dia_semana: DiaSemana | number;
+    hora_inicio: string;
+    hora_fin: string;
+    esta_disponible: boolean;
+    descripcion?: string;
+    esta_activa: boolean;
+}
+
+export interface RestriccionHorarioGuardar {
+    dia_semana: DiaSemana | number;
+    hora_inicio: string;
+    hora_fin: string;
+    esta_disponible: boolean;
+    esta_activa: boolean;
+}
+
+export interface Docente {
+    id: number;
+    nombre: string;
+    email: string;
+    password_hash: string;
+    esta_activo: boolean;
+    especialidad: string;
+}
+
+export interface Estudiante {
+    id: number;
+    nombre: string;
+    email: string;
+    pass_hash: string;
+    carrera: string;
+}
+
+export interface Admin {
+    id: number;
+    nombre: string;
+    email: string;
+    pass_hash: string;
+    super_admin: boolean;
+}
+
 // Tipos principales para el sistema académico
 
 // Tipos básicos
 export interface Profesor {
-  id: string;
-  nombre: string;
-  apellido: string;
-  email: string;
-  telefono: string;
-  especialidad: string[];
-  disponibilidad: {
-    dias: string[];
-    horasInicio: string;
-    horasFin: string;
-  };
-  experiencia: number; // años
-  estado: 'activo' | 'inactivo';
-  fechaContratacion: string;
-}
-
-export interface Edificio {
-  id: string;
-  nombre: string;
-  codigo: string;
-  direccion: string;
-  salas: Sala[];
-}
-
-export interface Sala {
-  id: string;
-  numero: string;
-  edificioId: string;
-  capacidad: number;
-  tipo: 'aula' | 'laboratorio' | 'auditorio' | 'sala_computacion';
-  equipamiento: string[];
-  disponible: boolean;
-  horarios: HorarioSala[];
-}
-
-export interface HorarioSala {
-  id: string;
-  salaId: string;
-  asignaturaId: string;
-  dia: string;
-  horaInicio: string;
-  horaFin: string;
-  profesorId: string;
-}
-
-// Nuevo tipo para horarios manuales
-export interface HorarioManual {
-  id: string;
-  salaId: string;
-  titulo: string;
-  descripcion?: string;
-  dia: string;
-  horaInicio: string;
-  horaFin: string;
-  profesorId?: string;
-  asignaturaId?: string;
-  color?: string;
-  estado: 'activo' | 'cancelado' | 'reprogramado';
-  fechaCreacion: string;
-  creadoPor: string;
-  recurrente: boolean;
-  fechaInicio?: string;
-  fechaFin?: string;
-}
-
-export interface Asignatura {
-  id: string;
-  codigo: string; // ej: MAT1105-07
-  nombre: string;
-  creditos: number;
-  semestre: number;
-  carrera: string;
-  profesorId?: string;
-  salaId?: string;
-  horarios: {
-    dia: string;
-    horaInicio: string;
-    horaFin: string;
-  }[];
-  prerrequisitos: string[]; // códigos de asignaturas
-  cupos: number;
-  inscritos: number;
-  estado: 'planificada' | 'programada' | 'en_curso' | 'finalizada';
-  descripcion: string;
-}
-
-export interface RestriccionAcademica {
-  id: string;
-  tipo: 'prerrequisito' | 'sala_prohibida' | 'horario_conflicto' | 'capacidad' | 'profesor_especialidad' | 'secuencia_temporal';
-  descripcion: string;
-  activa: boolean;
-  prioridad: 'alta' | 'media' | 'baja';
-  parametros: {
-    asignaturaOrigen?: string;
-    asignaturaDestino?: string;
-    salaProhibida?: string;
-    profesorRequerido?: string;
-    especialidadRequerida?: string;
-    diaRestriccion?: string;
-    horaInicioRestriccion?: string;
-    horaFinRestriccion?: string;
-    [key: string]: any;
-  };
-  mensaje: string;
-  fechaCreacion: string;
-  creadoPor: string;
-}
-
-// Tipos heredados del sistema anterior (adaptados)
-export interface Estudiante {
-  id?: string;
-  nombre: string;
-  apellido: string;
-  email: string;
-  telefono: string;
-  edad: number;
-  carrera: string;
-  semestre: number;
-  asignaturasAprobadas: string[];
-  asignaturasInscritas: string[];
-}
-
-export interface Curso {
-  id: string;
-  nombre: string;
-  descripcion: string;
-  instructor: string;
-  duracion: string;
-  precio: number;
-  nivel: 'Principiante' | 'Intermedio' | 'Avanzado';
-  cuposTotal: number;
-  cuposDisponibles: number;
-  fechaInicio: string;
-  fechaFinInscripcion: string;
-  categoria: string;
-  imagen: string;
-  restricciones: Restricciones;
-}
-
-export interface Restricciones {
-  edadMinima?: number;
-  edadMaxima?: number;
-  prerrequisitos?: string[];
-  nivelMinimo?: 'Principiante' | 'Intermedio' | 'Avanzado';
-  experienciaMinima?: string;
-  documentosRequeridos?: string[];
-}
-
-export interface Inscripcion {
-  cursoId: string;
-  estudiante: {
+    id: string;
     nombre: string;
     apellido: string;
     email: string;
     telefono: string;
-    edad: number;
-    cursosCompletados: string[];
+    especialidad: string[];
+    disponibilidad: {
+        dias: string[];
+        horasInicio: string;
+        horasFin: string;
+    };
+    experiencia: number; // años
+    estado: 'activo' | 'inactivo';
+    fechaContratacion: string;
+}
+
+export interface Edificio {
+    id: string;
+    nombre: string;
+    codigo: string;
+    direccion: string;
+    salas: Sala[];
+}
+
+export interface Sala {
+    id: string;
+    numero: string;
+    edificioId: string;
+    capacidad: number;
+    tipo: 'aula' | 'laboratorio' | 'auditorio' | 'sala_computacion';
+    equipamiento: string[];
+    disponible: boolean;
+    horarios: HorarioSala[];
+}
+
+export interface HorarioSala {
+    id: string;
+    salaId: string;
+    asignaturaId: string;
+    dia: string;
+    horaInicio: string;
+    horaFin: string;
+    profesorId: string;
+}
+
+// Nuevo tipo para horarios manuales
+export interface HorarioManual {
+    id: string;
+    salaId: string;
+    titulo: string;
+    descripcion?: string;
+    dia: string;
+    horaInicio: string;
+    horaFin: string;
+    profesorId?: string;
+    asignaturaId?: string;
+    color?: string;
+    estado: 'activo' | 'cancelado' | 'reprogramado';
+    fechaCreacion: string;
+    creadoPor: string;
+    recurrente: boolean;
+    fechaInicio?: string;
+    fechaFin?: string;
+}
+
+export interface Asignatura {
+    id: string;
+    codigo: string; // ej: MAT1105-07
+    nombre: string;
+    creditos: number;
+    semestre: number;
+    carrera: string;
+    profesorId?: string;
+    salaId?: string;
+    horarios: {
+        dia: string;
+        horaInicio: string;
+        horaFin: string;
+    }[];
+    prerrequisitos: string[]; // códigos de asignaturas
+    cupos: number;
+    inscritos: number;
+    estado: 'planificada' | 'programada' | 'en_curso' | 'finalizada';
+    descripcion: string;
+}
+
+export interface RestriccionAcademica {
+    id: string;
+    tipo:
+        | 'prerrequisito'
+        | 'sala_prohibida'
+        | 'horario_conflicto'
+        | 'capacidad'
+        | 'profesor_especialidad'
+        | 'secuencia_temporal';
+    descripcion: string;
+    activa: boolean;
+    prioridad: 'alta' | 'media' | 'baja';
+    parametros: {
+        asignaturaOrigen?: string;
+        asignaturaDestino?: string;
+        salaProhibida?: string;
+        profesorRequerido?: string;
+        especialidadRequerida?: string;
+        diaRestriccion?: string;
+        horaInicioRestriccion?: string;
+        horaFinRestriccion?: string;
+        [key: string]: any;
+    };
+    mensaje: string;
+    fechaCreacion: string;
+    creadoPor: string;
+}
+
+// Tipos heredados del sistema anterior (adaptados)
+// export interface Estudiante {
+//   id?: string;
+//   nombre: string;
+//   apellido: string;
+//   email: string;
+//   telefono: string;
+//   edad: number;
+//   carrera: string;
+//   semestre: number;
+//   asignaturasAprobadas: string[];
+//   asignaturasInscritas: string[];
+// }
+
+export interface Curso {
+    id: string;
+    nombre: string;
+    descripcion: string;
+    instructor: string;
+    duracion: string;
+    precio: number;
     nivel: 'Principiante' | 'Intermedio' | 'Avanzado';
-  };
-  fecha: string;
+    cuposTotal: number;
+    cuposDisponibles: number;
+    fechaInicio: string;
+    fechaFinInscripcion: string;
+    categoria: string;
+    imagen: string;
+    restricciones: Restricciones;
+}
+
+export interface Restricciones {
+    edadMinima?: number;
+    edadMaxima?: number;
+    prerrequisitos?: string[];
+    nivelMinimo?: 'Principiante' | 'Intermedio' | 'Avanzado';
+    experienciaMinima?: string;
+    documentosRequeridos?: string[];
+}
+
+export interface Inscripcion {
+    cursoId: string;
+    estudiante: {
+        nombre: string;
+        apellido: string;
+        email: string;
+        telefono: string;
+        edad: number;
+        cursosCompletados: string[];
+        nivel: 'Principiante' | 'Intermedio' | 'Avanzado';
+    };
+    fecha: string;
 }
 
 export interface ValidacionResult {
-  esValida: boolean;
-  errores: string[];
-  advertencias: string[];
+    esValida: boolean;
+    errores: string[];
+    advertencias: string[];
 }
 
 // Tipos para conflictos y validaciones
 export interface ConflictoHorario {
-  id: string;
-  tipo: 'profesor_multiple' | 'sala_multiple' | 'estudiante_multiple';
-  descripcion: string;
-  asignaturas: string[];
-  gravedad: 'critico' | 'advertencia' | 'informativo';
-  sugerencias: string[];
+    id: string;
+    tipo: 'profesor_multiple' | 'sala_multiple' | 'estudiante_multiple';
+    descripcion: string;
+    asignaturas: string[];
+    gravedad: 'critico' | 'advertencia' | 'informativo';
+    sugerencias: string[];
 }
 
 export interface ValidacionAsignatura {
-  asignaturaId: string;
-  esValida: boolean;
-  errores: string[];
-  advertencias: string[];
-  conflictos: ConflictoHorario[];
+    asignaturaId: string;
+    esValida: boolean;
+    errores: string[];
+    advertencias: string[];
+    conflictos: ConflictoHorario[];
 }
