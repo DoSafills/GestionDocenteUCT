@@ -6,55 +6,78 @@ import { toast } from 'sonner';
 
 import type { Asignatura } from './types';
 import { AsignaturaCard } from './components/AsignaturaCard';
+import { AsignaturaFormDialog } from './components/AsignaturaFormDialog';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 
 import { asignaturasMock } from '@data/asignaturas';
-import { seccionesMock } from '@data/secciones';
-import { bloquesMock } from '@data/bloques';
-import { clasesMock } from '@data/clases';
-import { salasMock } from '@data/salas';
-import { docentesMock } from '@data/docentes';
 
 export function AsignaturasPage() {
     const [asignaturas, setAsignaturas] = useState<Asignatura[]>(asignaturasMock);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [selectedAsignaturaId, setSelectedAsignaturaId] = useState<number | undefined>(undefined);
 
-    const handleEliminar = (id: number) => {
-        setAsignaturas((prev) => prev.filter((a) => a.id !== id));
-        toast.success('Asignatura eliminada');
+    const [alertOpen, setAlertOpen] = useState(false);
+    const [selectedEliminarId, setSelectedEliminarId] = useState<number | undefined>(undefined);
+
+    const handleAgregar = () => {
+        setSelectedAsignaturaId(undefined);
+        setDialogOpen(true);
+    };
+
+    const handleEditar = (id: number) => {
+        setSelectedAsignaturaId(id);
+        setDialogOpen(true);
+    };
+
+    const handleEliminarClick = (id: number) => {
+        setSelectedEliminarId(id);
+        setAlertOpen(true);
+    };
+
+    const handleEliminarConfirm = () => {
+        if (selectedEliminarId !== undefined) {
+            setAsignaturas((prev) => prev.filter((a) => a.id !== selectedEliminarId));
+            toast.success('Asignatura eliminada');
+            setSelectedEliminarId(undefined);
+            setAlertOpen(false);
+        }
+    };
+
+    const handleSubmit = (data: Omit<Asignatura, 'id'>) => {
+        if (selectedAsignaturaId) {
+            setAsignaturas((prev) => prev.map((a) => (a.id === selectedAsignaturaId ? { ...a, ...data } : a)));
+            toast.success('Asignatura actualizada');
+        } else {
+            const newId = Math.max(...asignaturas.map((a) => a.id), 0) + 1;
+            setAsignaturas((prev) => [...prev, { id: newId, ...data }]);
+            toast.success('Asignatura agregada');
+        }
+        setDialogOpen(false);
     };
 
     return (
         <div className='space-y-6'>
-            {/* Header */}
             <div className='flex justify-between items-center'>
                 <div>
                     <h2 className='text-3xl'>Gestión de Asignaturas</h2>
                     <p className='text-muted-foreground'>Administra las asignaturas y sus secciones</p>
                 </div>
-                <Button onClick={() => {}}>
+                <Button onClick={handleAgregar}>
                     <Plus className='w-4 h-4 mr-2' />
                     Nueva Asignatura
                 </Button>
             </div>
 
-            {/* Lista */}
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                 {asignaturas.length > 0 ? (
-                    asignaturas.map((asig) => {
-                        const secciones = seccionesMock.filter((s) => s.asignatura_id === asig.id);
-                        return (
-                            <AsignaturaCard
-                                key={asig.id}
-                                asignatura={asig}
-                                secciones={secciones}
-                                clases={clasesMock}
-                                docentes={docentesMock}
-                                salas={salasMock}
-                                bloques={bloquesMock}
-                                onEditar={() => {}}
-                                onEliminar={() => handleEliminar(asig.id)}
-                            />
-                        );
-                    })
+                    asignaturas.map((asig) => (
+                        <AsignaturaCard
+                            key={asig.id}
+                            asignatura={asig}
+                            onEditar={() => handleEditar(asig.id)}
+                            onEliminar={() => handleEliminarClick(asig.id)}
+                        />
+                    ))
                 ) : (
                     <Card>
                         <CardContent className='text-center py-12'>
@@ -66,7 +89,24 @@ export function AsignaturasPage() {
                 )}
             </div>
 
-            {/* Dialog */}
+            <AsignaturaFormDialog
+                open={dialogOpen}
+                onOpenChange={setDialogOpen}
+                onSubmit={handleSubmit}
+                asignaturaId={selectedAsignaturaId}
+            />
+
+            <ConfirmDialog
+                open={alertOpen}
+                onOpenChange={setAlertOpen}
+                onConfirm={handleEliminarConfirm}
+                title='Eliminar Asignatura'
+                description={`¿Estás seguro de que deseas eliminar la asignatura "${
+                    asignaturas.find((a) => a.id === selectedEliminarId)?.codigo ?? ''
+                }"? Esta acción no se puede deshacer.`}
+                confirmText='Eliminar'
+                variant='destructive'
+            />
         </div>
     );
 }

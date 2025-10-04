@@ -1,44 +1,44 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
-import { Edit, Trash2, User, MapPin, Clock } from 'lucide-react';
+import { Edit, Trash2, User, MapPin, Clock, BookOpen } from 'lucide-react';
 
-import type { Asignatura, Docente, Sala, Seccion, Clase, Bloque } from '@/types';
+import type { Asignatura } from '../types';
+import { seccionesMock } from '@/data/secciones';
+import { clasesMock } from '@/data/clases';
+import { docentesMock } from '@/data/docentes';
+import { salasMock } from '@/data/salas';
+import { bloquesMock } from '@/data/bloques';
 
-interface Props {
-    asignatura: Asignatura;
-    secciones: Seccion[];
-    clases: Clase[];
-    docentes: Docente[];
-    salas: Sala[];
-    bloques: Bloque[];
-    onEditar: () => void;
-    onEliminar: () => void;
-}
-
-const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const diasSemana = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
 
 export function AsignaturaCard({
     asignatura,
-    secciones,
-    clases,
-    docentes,
-    salas,
-    bloques,
     onEditar,
     onEliminar,
-}: Props) {
+}: {
+    asignatura: Asignatura;
+    onEditar: () => void;
+    onEliminar: () => void;
+}) {
+    // Obtener secciones de la asignatura
+    const secciones = seccionesMock.filter((s) => s.asignatura_id === asignatura.id);
+
     return (
         <Card className='hover:shadow-lg transition-shadow'>
-            <CardHeader className='flex flex-row justify-between items-start'>
+            <CardHeader className='flex justify-between items-start'>
                 <div>
-                    <CardTitle>{asignatura.codigo}</CardTitle>
+                    <CardTitle className='flex items-center gap-2'>
+                        <BookOpen className='w-5 h-5 text-primary' />
+                        {asignatura.codigo}
+                    </CardTitle>
                     <p className='text-muted-foreground'>{asignatura.nombre}</p>
                     <div className='flex gap-2 mt-2'>
                         <Badge variant='outline'>{asignatura.creditos} créditos</Badge>
-                        <Badge variant='secondary'>Sem {asignatura.semestre}</Badge>
+                        <Badge variant='outline'>Sem {asignatura.semestre}</Badge>
                     </div>
                 </div>
+
                 <div className='flex gap-1'>
                     <Button variant='ghost' size='sm' onClick={onEditar}>
                         <Edit className='w-4 h-4' />
@@ -52,10 +52,11 @@ export function AsignaturaCard({
             <CardContent className='space-y-4'>
                 {secciones.length > 0 ? (
                     secciones.map((seccion) => {
-                        const clasesSeccion = clases.filter((c) => c.seccion_id === seccion.id);
+                        const clasesSeccion = clasesMock.filter((c) => c.seccion_id === seccion.id);
+
                         return (
                             <div key={seccion.id} className='border rounded-md p-3 space-y-2'>
-                                <div className='flex items-center justify-between'>
+                                <div className='flex justify-between'>
                                     <span className='font-medium'>
                                         {seccion.codigo} ({seccion.cupos} cupos)
                                     </span>
@@ -65,9 +66,9 @@ export function AsignaturaCard({
                                 </div>
 
                                 {clasesSeccion.map((clase) => {
-                                    const docente = docentes.find((d) => d.id === clase.docente_id);
-                                    const sala = salas.find((s) => s.id === clase.sala_id);
-                                    const bloque = bloques.find((b) => b.id === clase.bloque_id);
+                                    const docente = docentesMock.find((d) => d.id === clase.docente_id);
+                                    const sala = salasMock.find((s) => s.id === clase.sala_id);
+                                    const bloque = bloquesMock.find((b) => b.id === clase.bloque_id);
 
                                     return (
                                         <div
