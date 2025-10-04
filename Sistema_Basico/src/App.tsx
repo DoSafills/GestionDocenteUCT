@@ -9,6 +9,7 @@ import { RestriccionesPage } from "./components/restricciones/RestriccionesPage"
 import { CursosPage } from "./components/cursos/CursosPage";
 import LoginForm from "./pages/LoginPage/index";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { Toaster } from "sonner";
 
 type Pagina =
   | "dashboard"
@@ -33,6 +34,7 @@ export default function App() {
   return (
     <AuthProvider>
       <MainApp />
+      <Toaster richColors position="top-right" expand />
     </AuthProvider>
   );
 }
@@ -60,4 +62,3 @@ function MainApp() {
     </Layout>
   );
 }
-
