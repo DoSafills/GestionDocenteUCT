@@ -1,4 +1,28 @@
-// NUEVOS TIPOS EN BASE AL MER
+// Tipos principales para el sistema académico
+
+export interface Campus {
+    id: number;
+    nombre: string;
+    direccion: string;
+}
+
+export interface Edificio {
+    id: number;
+    nombre: string;
+    tipo: string;
+    campus_id: number; // FK → Campus.id
+}
+
+export interface Sala {
+    id: number;
+    codigo: string;
+    capacidad: number;
+    tipo: string;
+    esta_disponible: boolean;
+    edificio_id: number; // FK → Edificio.id
+    equipamiento: string;
+}
+
 export interface Docente {
     id: number; // PK
     nombre: string;
@@ -51,15 +75,6 @@ export interface Asignatura {
     semestre: number;
 }
 
-export interface Docente {
-    id: number;
-    nombre: string;
-    email: string;
-    password_hash: string;
-    esta_activo: boolean;
-    especialidad: string;
-}
-
 export interface Estudiante {
     id: number;
     nombre: string;
@@ -75,8 +90,6 @@ export interface Admin {
     pass_hash: string;
     super_admin: boolean;
 }
-
-// Tipos principales para el sistema académico
 
 // Tipos básicos
 export interface Profesor {
@@ -94,25 +107,6 @@ export interface Profesor {
     experiencia: number; // años
     estado: 'activo' | 'inactivo';
     fechaContratacion: string;
-}
-
-export interface Edificio {
-    id: string;
-    nombre: string;
-    codigo: string;
-    direccion: string;
-    salas: Sala[];
-}
-
-export interface Sala {
-    id: string;
-    numero: string;
-    edificioId: string;
-    capacidad: number;
-    tipo: 'aula' | 'laboratorio' | 'auditorio' | 'sala_computacion';
-    equipamiento: string[];
-    disponible: boolean;
-    horarios: HorarioSala[];
 }
 
 export interface HorarioSala {
@@ -195,18 +189,18 @@ export interface RestriccionAcademica {
 }
 
 // Tipos heredados del sistema anterior (adaptados)
-// export interface Estudiante {
-//   id?: string;
-//   nombre: string;
-//   apellido: string;
-//   email: string;
-//   telefono: string;
-//   edad: number;
-//   carrera: string;
-//   semestre: number;
-//   asignaturasAprobadas: string[];
-//   asignaturasInscritas: string[];
-// }
+export interface Estudiante {
+    id?: string;
+    nombre: string;
+    apellido: string;
+    email: string;
+    telefono: string;
+    edad: number;
+    carrera: string;
+    semestre: number;
+    asignaturasAprobadas: string[];
+    asignaturasInscritas: string[];
+}
 
 export interface Curso {
     id: string;

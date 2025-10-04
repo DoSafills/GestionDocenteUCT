@@ -1,7 +1,7 @@
 // Datos mock para el sistema académico
-import type { Profesor, Edificio, Asignatura, RestriccionAcademica, HorarioManual } from '../types';
+import type { RestriccionAcademica } from '../types';
 
-export const profesoresMock: Profesor[] = [
+export const profesoresMock = [
     {
         id: 'prof_1',
         nombre: 'Carlos',
@@ -68,7 +68,7 @@ export const profesoresMock: Profesor[] = [
     },
 ];
 
-export const edificiosMock: Edificio[] = [
+export const edificiosMock = [
     {
         id: 'edif_1',
         nombre: 'Edificio de Ciencias',
@@ -155,7 +155,7 @@ export const edificiosMock: Edificio[] = [
     },
 ];
 
-export const asignaturasMock: Asignatura[] = [
+export const asignaturasMock = [
     {
         id: 'asig_1',
         codigo: 'MAT1105-07',
@@ -327,7 +327,7 @@ export const restriccionesMock: RestriccionAcademica[] = [
     },
 ];
 
-export const horariosManualMock: HorarioManual[] = [
+export const horariosManualMock = [
     {
         id: 'horario_1',
         salaId: 'sala_cs_101',

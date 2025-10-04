@@ -6,7 +6,6 @@ import { toast } from 'sonner';
 
 import type { Asignatura } from './types';
 import { AsignaturaCard } from './components/AsignaturaCard';
-import { AsignaturaFormDialog } from './components/AsignaturaFormDialog';
 
 import { asignaturasMock } from '@data/asignaturas';
 import { seccionesMock } from '@data/secciones';
@@ -17,20 +16,6 @@ import { docentesMock } from '@data/docentes';
 
 export function AsignaturasPage() {
     const [asignaturas, setAsignaturas] = useState<Asignatura[]>(asignaturasMock);
-    const [modalAbierto, setModalAbierto] = useState(false);
-    const [editando, setEditando] = useState<Asignatura | null>(null);
-
-    const handleGuardar = (asignatura: Asignatura) => {
-        if (editando) {
-            setAsignaturas((prev) => prev.map((a) => (a.id === editando.id ? asignatura : a)));
-            toast.success('Asignatura actualizada');
-        } else {
-            setAsignaturas((prev) => [...prev, asignatura]);
-            toast.success('Asignatura creada');
-        }
-        setModalAbierto(false);
-        setEditando(null);
-    };
 
     const handleEliminar = (id: number) => {
         setAsignaturas((prev) => prev.filter((a) => a.id !== id));
@@ -45,7 +30,7 @@ export function AsignaturasPage() {
                     <h2 className='text-3xl'>Gestión de Asignaturas</h2>
                     <p className='text-muted-foreground'>Administra las asignaturas y sus secciones</p>
                 </div>
-                <Button onClick={() => setModalAbierto(true)}>
+                <Button onClick={() => {}}>
                     <Plus className='w-4 h-4 mr-2' />
                     Nueva Asignatura
                 </Button>
@@ -65,10 +50,7 @@ export function AsignaturasPage() {
                                 docentes={docentesMock}
                                 salas={salasMock}
                                 bloques={bloquesMock}
-                                onEditar={() => {
-                                    setEditando(asig);
-                                    setModalAbierto(true);
-                                }}
+                                onEditar={() => {}}
                                 onEliminar={() => handleEliminar(asig.id)}
                             />
                         );
@@ -85,12 +67,6 @@ export function AsignaturasPage() {
             </div>
 
             {/* Dialog */}
-            <AsignaturaFormDialog
-                open={modalAbierto}
-                onOpenChange={setModalAbierto}
-                onGuardar={handleGuardar}
-                editando={editando}
-            />
         </div>
     );
 }
