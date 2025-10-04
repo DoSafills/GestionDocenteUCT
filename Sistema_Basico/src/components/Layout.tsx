@@ -21,10 +21,7 @@ interface LayoutProps {
   onPageChange: (page: string) => void;
 }
 
-export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
-  const { logout } = useAuth(); // usamos el logout de tu contexto
-
-  const menuItems = [
+const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: Home },
     { id: "profesores", label: "Profesores", icon: Users },
     { id: "salas", label: "Salas y Edificios", icon: Building },
@@ -32,7 +29,10 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
     { id: "horarios", label: "Horarios", icon: Calendar },
     { id: "restricciones", label: "Restricciones", icon: Settings },
     { id: "cursos", label: "Cursos Extensión", icon: GraduationCap }
-  ];
+];
+
+export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
+  const { logout } = useAuth(); // usamos el logout de tu contexto
 
   return (
     <div className="min-h-screen bg-background flex flex-col text-black">
@@ -55,8 +55,7 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
                       key={item.id}
                       variant={isActive ? "default" : "ghost"}
                       className={`w-full justify-start gap-3 transition-colors duration-200 text-black ${
-                        isActive ? "bg-primary text-primary-foreground" : "hover:bg-primary/10"
-                      }`}
+                        isActive ? "bg-primary text-primary-foreground" : "hover:bg-primary/10"}`}
                       onClick={() => onPageChange(item.id)}
                       aria-current={isActive ? "page" : undefined}
                     >
