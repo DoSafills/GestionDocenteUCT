@@ -19,7 +19,18 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["*"],
+      "@components/*": ["components/*"],
+      "@pages/*": ["pages/*"],
+      "@utils/*": ["utils/*"],
+      "@types/*": ["types/*"],
+      "@api/*": ["api/*"],
+      "@data/*": ["data/*"],
+      "@endpoints/*": ["endpoints/*"]
+    }
   },
   "include": ["vite.config.ts"]
 }
