@@ -1,8 +1,7 @@
-// src/App.tsx
 import { useState } from "react";
 import { Layout } from "./components/Layout";
 import { DashboardPage } from "./components/dashboard/DashboardPage";
-import { ProfesoresPage } from "./components/profesores/ProfesoresPage";
+import { ProfesoresPage } from "./pages/ProfesoresPage/ProfesoresPage";
 import { SalasPage } from "./components/salas/SalasPage";
 import { AsignaturasPage } from "./components/asignaturas/AsignaturasPage";
 import { HorariosPage } from "./components/horarios/HorariosPage";
@@ -10,6 +9,7 @@ import { RestriccionesPage } from "./components/restricciones/RestriccionesPage"
 import { CursosPage } from "./components/cursos/CursosPage";
 import LoginForm from "./pages/LoginPage/index";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { Toaster } from "sonner";
 
 type Pagina =
   | "dashboard"
@@ -34,6 +34,7 @@ export default function App() {
   return (
     <AuthProvider>
       <MainApp />
+      <Toaster richColors position="top-right" expand />
     </AuthProvider>
   );
 }

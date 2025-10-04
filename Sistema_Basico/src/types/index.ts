@@ -1,4 +1,27 @@
 // NUEVOS TIPOS EN BASE AL MER
+export type DiaSemana =
+  | "LUNES" | "MARTES" | "MIERCOLES"
+  | "JUEVES" | "VIERNES" | "SABADO"
+
+export interface RestriccionHorario {
+  id: number;
+  docente_id: number;
+  dia_semana: DiaSemana | number;
+  hora_inicio: string;
+  hora_fin: string;
+  esta_disponible: boolean;
+  descripcion?: string;
+  esta_activa: boolean;
+}
+
+export interface RestriccionHorarioGuardar {
+  dia_semana: DiaSemana | number;
+  hora_inicio: string;
+  hora_fin: string;
+  esta_disponible: boolean;
+  esta_activa: boolean;
+}
+
 export interface Docente {
   id: number;
   nombre: string;
@@ -213,3 +236,4 @@ export interface ValidacionAsignatura {
   advertencias: string[];
   conflictos: ConflictoHorario[];
 }
+
