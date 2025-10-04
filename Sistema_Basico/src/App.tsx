@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Layout } from "./components/Layout";
 import { DashboardPage } from "./components/dashboard/DashboardPage";
 import { ProfesoresPage } from "./components/profesores/ProfesoresPage";
-import { SalasPage } from "./components/salas/SalasPage";
+import { EdificiosPage } from "./pages/EdificiosPage/index";
 import { AsignaturasPage } from "./components/asignaturas/AsignaturasPage";
 import { HorariosPage } from "./components/horarios/HorariosPage";
 import { RestriccionesPage } from "./components/restricciones/RestriccionesPage";
@@ -18,7 +18,7 @@ export default function App() {
       case "profesores":
         return <ProfesoresPage />;
       case "salas":
-        return <SalasPage />;
+        return <EdificiosPage/>;
       case "asignaturas":
         return <AsignaturasPage />;
       case "horarios":
