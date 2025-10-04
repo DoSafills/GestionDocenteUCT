@@ -1,4 +1,4 @@
-import type { Sala } from '@/types';
+import type { Sala } from '@pages/AsignaturasPage/types';
 
 export const salasMock: Sala[] = [
     {

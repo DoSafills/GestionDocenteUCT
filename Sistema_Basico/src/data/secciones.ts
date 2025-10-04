@@ -1,4 +1,4 @@
-import type { Seccion } from '@/types';
+import type { Seccion } from '@pages/AsignaturasPage/types';
 
 export const seccionesMock: Seccion[] = [
     // MAT101 - Cálculo I

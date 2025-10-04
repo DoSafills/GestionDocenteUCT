@@ -1,4 +1,4 @@
-import type { Asignatura } from '@/types';
+import type { Asignatura } from '@pages/AsignaturasPage/types';
 
 export const asignaturasMock: Asignatura[] = [
     { id: 1, codigo: 'MAT101', nombre: 'Cálculo I', creditos: 6, semestre: 1 },
