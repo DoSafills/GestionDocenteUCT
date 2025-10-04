@@ -1,13 +1,10 @@
+// src/context/AuthContext.tsx
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
-import { loginApi, refreshApi } from "../api/auth";
-import { setAccessToken } from "../auth/tokenStore";
-import { clearAllTokensOnClient } from "../api/http";
+import { setAccessToken, clearAccessToken } from "../auth/tokenStore";
+import { ENDPOINTS } from "../endpoints";
+import type { AuthContextType, LoginRequest, LoginResponse, RefreshResponse } from "../pages/LoginPage/types";
 
-type AuthContextType = {
-  isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-};
+const THIRTY_MIN_MS = 30 * 60 * 1000;
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -17,11 +14,31 @@ export const useAuth = () => {
   return ctx;
 };
 
-const THIRTY_MIN_MS = 30 * 60 * 1000;
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const refreshIntervalRef = useRef<number | null>(null);
+
+  const loginApi = async (payload: LoginRequest): Promise<LoginResponse> => {
+    const res = await fetch(ENDPOINTS.AUTH_LOGIN, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.message || res.statusText || "Login failed");
+    return data;
+  };
+
+  const refreshApi = async (refresh_token: string): Promise<RefreshResponse> => {
+    const res = await fetch(ENDPOINTS.AUTH_REFRESH, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.message || res.statusText || "Refresh failed");
+    return data;
+  };
 
   const clearRefreshInterval = () => {
     if (refreshIntervalRef.current !== null) {
@@ -32,13 +49,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const scheduleRefresh = () => {
     clearRefreshInterval();
-    // Requisito: fetch a /auth/refresh cada 30 minutos
     refreshIntervalRef.current = window.setInterval(async () => {
+      const refresh_token = localStorage.getItem("refresh_token");
+      if (!refresh_token) return logout();
       try {
-        const refresh_token = localStorage.getItem("refresh_token");
-        if (!refresh_token) return logout();
         const { access_token } = await refreshApi(refresh_token);
-        setAccessToken(access_token); // ⬅️ SOLO memoria
+        setAccessToken(access_token);
         setIsAuthenticated(true);
       } catch {
         logout();
@@ -48,20 +64,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     const { access_token, refresh_token } = await loginApi({ email, contrasena: password });
-    // Persistimos SOLO el refresh_token (7 días lo define el backend)
     localStorage.setItem("refresh_token", refresh_token);
-    setAccessToken(access_token);     // access token NO se persiste
+    setAccessToken(access_token);
     setIsAuthenticated(true);
     scheduleRefresh();
   };
 
   const logout = () => {
     clearRefreshInterval();
-    clearAllTokensOnClient(); // borra access (memoria) + refresh (localStorage)
+    clearAccessToken();
+    localStorage.removeItem("refresh_token");
     setIsAuthenticated(false);
   };
 
-  // Autologin: si hay refresh_token al montar, refrescamos para obtener access en memoria
+  // --- Autologin al montar ---
   useEffect(() => {
     const refresh_token = localStorage.getItem("refresh_token");
     if (!refresh_token) return;
@@ -80,7 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return clearRefreshInterval;
   }, []);
 
-  // Extra: al volver del background, intenta refrescar por si expiró
+  // --- Refresh al volver de background ---
   useEffect(() => {
     const onVisible = async () => {
       if (document.visibilityState !== "visible") return;
