@@ -13,7 +13,7 @@ import {
 } from "../../components/ui/dialog";
 import { Label } from "../../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { Switch } from "../../components/ui/switch";w
+import { Switch } from "../../components/ui/switch";
 import {
   Plus,
   Search,
@@ -23,9 +23,9 @@ import {
   User,
   RefreshCw,
   CalendarDays,
-  Clock,
   Pencil,
   Tags,
+  PlusCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -33,6 +33,7 @@ import { profesoresMock, restriccionesMock } from "./data/mock-profesores";
 import type { DiaSemana, RestriccionHorarioGuardar } from "../../types";
 import type { Docente } from "./types";
 
+import SelectorHora from "./components/SelectorHora";
 
 const DIA_LABEL: Record<DiaSemana, string> = {
   LUNES: "Lunes",
@@ -53,7 +54,6 @@ const hhmmToMin = (hhmm: string) => {
   return h * 60 + m;
 };
 
-
 function useDocentesListado() {
   const [items, setItems] = useState<Docente[]>([]);
   const listar = async () => setItems(profesoresMock as unknown as Docente[]);
@@ -68,7 +68,6 @@ function useDebouncedValue<T>(value: T, delay = 250) {
   }, [value, delay]);
   return debounced;
 }
-
 
 type Slot = { id: number; desde: string; hasta: string };
 type DiaConfig = { enabled: boolean; slots: Slot[]; editing: boolean };
@@ -107,14 +106,12 @@ function useFormulario() {
   return { open, setOpen, editando, setEditando, form, setForm, semana, setSemana, limpiar };
 }
 
-
 function validarSemana(semana: SemanaDisponibilidad): string | null {
   for (const d of ORD_DIAS) {
     const cfg = semana[d];
     if (!cfg?.enabled) continue;
     if (!cfg.slots.length) return `Agrega al menos una franja en ${DIA_LABEL[d]}`;
 
-    // formato/orden
     for (const s of cfg.slots) {
       if (!/^\d{2}:\d{2}$/.test(s.desde) || !/^\d{2}:\d{2}$/.test(s.hasta)) {
         return `Formato de hora inválido en ${DIA_LABEL[d]}`;
@@ -234,7 +231,7 @@ export function ProfesoresPage() {
 
   const guardar = () => {
     if (!form.nombre.trim()) return toast.error("El nombre es obligatorio");
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) return toast.error("Correo inválido");
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((form.email || "").trim())) return toast.error("Correo inválido");
     const err = validarSemana(semana);
     if (err) return toast.error(err);
 
@@ -333,7 +330,7 @@ export function ProfesoresPage() {
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       className="pl-9"
-                      value={form.email}
+                      value={(form.email || "").trim()}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
                     />
                   </div>
@@ -376,15 +373,15 @@ export function ProfesoresPage() {
                     <p className="font-medium">Disponibilidad semanal</p>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {ORD_DIAS.map((dia) => {
                       const cfg = semana[dia];
                       return (
                         <div key={dia} className="flex items-center gap-3 rounded-lg border p-3 bg-card/50">
-                          <div className="w-28 shrink-0 flex items-center gap-2">
+                          <div className="w-36 shrink-0 flex items-center gap-2">
                             <Switch checked={cfg.enabled} onCheckedChange={(v) => toggleDia(dia, v)} />
                             <span className="font-medium">{DIA_LABEL[dia]}</span>
-                          </div>
+                          </div>  
 
                           <div className="flex-1">
                             {cfg.enabled ? (
@@ -403,10 +400,16 @@ export function ProfesoresPage() {
                               <span className="text-sm text-muted-foreground">Ocupado todo el día</span>
                             )}
 
-                            {/* Editor inline por día */}
                             {cfg.editing && (
-                              <div className="mt-3 overflow-hidden rounded-lg border">
-                                <table className="w-full text-sm">
+                              <div className="mt-3 overflow-visible rounded-lg border">
+                                <table className="w-full text-sm table-fixed">
+                                  {/* columnas con ancho fijo */}
+                                  <colgroup>
+                                    <col className="w-35" />   {/* Desde */}
+                                    <col className="w-35" />   {/* Hasta */}
+                                    <col className="w-24" />   {/* Acciones */}
+                                  </colgroup>
+
                                   <thead className="bg-muted/50">
                                     <tr className="text-left">
                                       <th className="py-2 px-3">Desde</th>
@@ -414,39 +417,57 @@ export function ProfesoresPage() {
                                       <th className="py-2 px-3 text-center">Acciones</th>
                                     </tr>
                                   </thead>
+
                                   <tbody>
                                     {cfg.slots.map((s) => (
                                       <tr key={s.id} className="border-t">
                                         <td className="py-2 px-3">
-                                          <Input
-                                            type="time"
-                                            value={s.desde}
-                                            onChange={(e) => changeSlot(dia, s.id, "desde", e.target.value)}
+                                          <SelectorHora
+                                            valor={s.desde}
+                                            onChange={(v) => changeSlot(dia, s.id, "desde", v)}
                                           />
                                         </td>
                                         <td className="py-2 px-3">
-                                          <Input
-                                            type="time"
-                                            value={s.hasta}
-                                            onChange={(e) => changeSlot(dia, s.id, "hasta", e.target.value)}
+                                          <SelectorHora
+                                            valor={s.hasta}
+                                            onChange={(v) => changeSlot(dia, s.id, "hasta", v)}
                                           />
                                         </td>
                                         <td className="py-2 px-3 text-center">
-                                          <Button size="sm" variant="destructive" className="bg-red-600 hover:bg-red-700 text-white" onClick={() => removeSlot(dia, s.id)}>
-                                            Eliminar
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="p-2"
+                                            onClick={() => removeSlot(dia, s.id)}
+                                            title="Eliminar"
+                                          >
+                                            <Trash2 className="w-5 h-5 text-red-600" />
                                           </Button>
                                         </td>
                                       </tr>
                                     ))}
                                   </tbody>
+                                  <tfoot className="border-t">
+                                    <tr>
+                                      <td></td>      
+                                      <td></td>     
+                                      <td className="p-2 text-center">
+                                        <Button
+                                          size="sm"
+                                          onClick={() => addSlot(dia)}
+                                          className="gap-1 bg-blue-600 hover:bg-blue-700 text-white"
+                                          title="Agregar franja"
+                                        >
+                                          <PlusCircle className="w-4 h-4 text-white" /> 
+                                          Franja
+                                        </Button>
+                                      </td>
+                                    </tr>
+                                  </tfoot>
                                 </table>
-                                <div className="p-2">
-                                  <Button size="sm" onClick={() => addSlot(dia)}>Agregar franja</Button>
-                                </div>
                               </div>
                             )}
                           </div>
-
                           <div className="shrink-0">
                             <Button
                               size="sm"
@@ -463,10 +484,6 @@ export function ProfesoresPage() {
                       );
                     })}
                   </div>
-
-                  <p className="text-xs text-muted-foreground flex items-center gap-2">
-                    <Clock className="h-3 w-3" /> Domingo no se utiliza en este sistema.
-                  </p>
                 </div>
               </div>
 
@@ -505,6 +522,7 @@ export function ProfesoresPage() {
       </div>
 
       {/* Listado */}
+      {/* (sin cambios) */}
       {filtrados.length ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
           {filtrados.map((d) => {
@@ -595,7 +613,7 @@ export function ProfesoresPage() {
                       <span>Disponibilidad</span>
                     </div>
                     {rows.length ? (
-                      <div className="overflow-hidden rounded-lg border">
+                      <div className="overflow-visible rounded-lg border">
                         <table className="w-full text-xs">
                           <thead className="bg-muted/50">
                             <tr className="text-left">
@@ -636,7 +654,7 @@ export function ProfesoresPage() {
 
       {/* Dialog Confirmar Eliminación */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto bg-white text-gray-900:max-w-[460px] bg-white text-gray-900">
+        <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto bg-white text-gray-900">
           <DialogHeader>
             <DialogTitle>Eliminar docente</DialogTitle>
             <DialogDescription>
@@ -658,7 +676,7 @@ export function ProfesoresPage() {
             >
               Cancelar
             </Button>
-            <Button variant="destructive" className="bg-red-600 hover:bg-red-700 text-white"onClick={confirmarEliminar}>
+            <Button variant="destructive" className="bg-red-600 hover:bg-red-700 text-white" onClick={confirmarEliminar}>
               Eliminar
             </Button>
           </div>
