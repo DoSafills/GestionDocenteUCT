@@ -10,9 +10,9 @@ import { Textarea } from "../../components/ui/textarea";
 import { Alert, AlertDescription } from "../../components/ui/alert";
 import { Switch } from "../../components/ui/switch";
 import { Plus, Search, Settings, AlertTriangle, CheckCircle, XCircle, Edit, Trash2, Clock, Shield, BookOpen } from "lucide-react";
-import { toast } from "sonner";;
+import { toast } from "sonner";
 import type { RestriccionAcademica } from "../../types";
-import { restriccionesMock, asignaturasMock, profesoresMock, edificiosMock } from "../../data/mock-data";
+import { restriccionesMock, asignaturasMock, edificiosMock } from "../../data/mock-data";
 
 export function RestriccionesPage() {
   const [restricciones, setRestricciones] = useState<RestriccionAcademica[]>(restriccionesMock);
@@ -26,14 +26,12 @@ export function RestriccionesPage() {
   const [accionAConfirmar, setAccionAConfirmar] = useState<"crear" | "eliminar" | null>(null);
   const [restriccionObjetivo, setRestriccionObjetivo] = useState<RestriccionAcademica | null>(null);
 
-
   const [formulario, setFormulario] = useState({
     tipo: "prerrequisito" as RestriccionAcademica["tipo"],
     descripcion: "",
-    prioridad: "media" as "alta" | "media" | "baja",
+    prioridad: 0.5, // ✅ valor numérico (media)
     activa: true,
     mensaje: "",
-    // Parámetros específicos por tipo
     asignaturaOrigen: "",
     asignaturaDestino: "",
     salaProhibida: "",
@@ -44,60 +42,90 @@ export function RestriccionesPage() {
     horaFinRestriccion: ""
   });
 
-  // Obtener todas las salas de todos los edificios
-  const todasLasSalas = edificiosMock.flatMap(edificio => 
+  // =====================================
+  // Funciones auxiliares
+  // =====================================
+  const getPrioridadLabel = (valor: number) => {
+    if (valor <= 0.3) return "baja";
+    if (valor <= 0.7) return "media";
+    return "alta";
+  };
+
+  const getPrioridadColor = (valor: number) => {
+    if (valor <= 0.3) return "bg-green-100 text-green-800";
+    if (valor <= 0.7) return "bg-yellow-100 text-yellow-800";
+    return "bg-red-100 text-red-800";
+  };
+
+  // Obtener todas las salas
+  const todasLasSalas = edificiosMock.flatMap(edificio =>
     edificio.salas.map(sala => ({ ...sala, edificio }))
   );
 
-  const restriccionesFiltradas = restricciones.filter(restriccion => {
-    const coincideBusqueda = 
-      (restriccion.descripcion || "").toLowerCase().includes(busqueda.toLowerCase()) ||
-      (restriccion.mensaje || "").toLowerCase().includes(busqueda.toLowerCase()) ||
-      (restriccion.tipo || "").toLowerCase().includes(busqueda.toLowerCase());
-    
-    const coincideTipo = filtroTipo === "todos" || restriccion.tipo === filtroTipo;
-    const coincidePrioridad = filtroPrioridad === "todos" || restriccion.prioridad === filtroPrioridad;
-    const coincideActiva = filtroActiva === "todos" || 
-      (filtroActiva === "activa" && restriccion.activa) ||
-      (filtroActiva === "inactiva" && !restriccion.activa);
-    
+  // =====================================
+  // Filtrado
+  // =====================================
+  const restriccionesFiltradas = restricciones.filter(r => {
+    const coincideBusqueda =
+      (r.descripcion || "").toLowerCase().includes(busqueda.toLowerCase()) ||
+      (r.mensaje || "").toLowerCase().includes(busqueda.toLowerCase()) ||
+      (r.tipo || "").toLowerCase().includes(busqueda.toLowerCase());
+
+    const coincideTipo = filtroTipo === "todos" || r.tipo === filtroTipo;
+
+    const coincidePrioridad =
+      filtroPrioridad === "todos" ||
+      (filtroPrioridad === "baja" && r.prioridad <= 0.3) ||
+      (filtroPrioridad === "media" && r.prioridad > 0.3 && r.prioridad <= 0.7) ||
+      (filtroPrioridad === "alta" && r.prioridad > 0.7);
+
+    const coincideActiva =
+      filtroActiva === "todos" ||
+      (filtroActiva === "activa" && r.activa) ||
+      (filtroActiva === "inactiva" && !r.activa);
+
     return coincideBusqueda && coincideTipo && coincidePrioridad && coincideActiva;
   });
 
+  // =====================================
+  // Contadores de resumen
+  // =====================================
+  const totalActivas = restricciones.filter(r => r.activa).length;
+  const totalAlta = restricciones.filter(r => r.prioridad > 0.7).length;
+  const totalMedia = restricciones.filter(r => r.prioridad > 0.3 && r.prioridad <= 0.7).length;
+  const totalBaja = restricciones.filter(r => r.prioridad <= 0.3).length;
+  const total = restricciones.length;
+
+  // =====================================
+  // Handlers
+  // =====================================
   const handleSubmit = () => {
     if (!formulario.descripcion || !formulario.mensaje) {
       toast.error("Por favor completa los campos obligatorios");
       return;
     }
 
-    // Validar parámetros específicos según el tipo
-    if (formulario.tipo === "prerrequisito" && (!formulario.asignaturaOrigen || !formulario.asignaturaDestino)) {
-      toast.error("Para restricciones de prerrequisito se requieren asignatura origen y destino");
-      return;
-    }
-
     const parametros: any = {};
-    
-    // Agregar parámetros según el tipo
+
     switch (formulario.tipo) {
       case "prerrequisito":
       case "secuencia_temporal":
-        if (formulario.asignaturaOrigen) parametros.asignaturaOrigen = formulario.asignaturaOrigen;
-        if (formulario.asignaturaDestino) parametros.asignaturaDestino = formulario.asignaturaDestino;
+        parametros.asignaturaOrigen = formulario.asignaturaOrigen;
+        parametros.asignaturaDestino = formulario.asignaturaDestino;
         break;
       case "sala_prohibida":
-        if (formulario.asignaturaOrigen) parametros.asignaturaOrigen = formulario.asignaturaOrigen;
-        if (formulario.salaProhibida) parametros.salaProhibida = formulario.salaProhibida;
+        parametros.asignaturaOrigen = formulario.asignaturaOrigen;
+        parametros.salaProhibida = formulario.salaProhibida;
         break;
       case "profesor_especialidad":
-        if (formulario.asignaturaOrigen) parametros.asignaturaOrigen = formulario.asignaturaOrigen;
-        if (formulario.especialidadRequerida) parametros.especialidadRequerida = formulario.especialidadRequerida;
-        if (formulario.profesorRequerido) parametros.profesorRequerido = formulario.profesorRequerido;
+        parametros.asignaturaOrigen = formulario.asignaturaOrigen;
+        parametros.profesorRequerido = formulario.profesorRequerido;
+        parametros.especialidadRequerida = formulario.especialidadRequerida;
         break;
       case "horario_conflicto":
-        if (formulario.diaRestriccion) parametros.diaRestriccion = formulario.diaRestriccion;
-        if (formulario.horaInicioRestriccion) parametros.horaInicioRestriccion = formulario.horaInicioRestriccion;
-        if (formulario.horaFinRestriccion) parametros.horaFinRestriccion = formulario.horaFinRestriccion;
+        parametros.diaRestriccion = formulario.diaRestriccion;
+        parametros.horaInicioRestriccion = formulario.horaInicioRestriccion;
+        parametros.horaFinRestriccion = formulario.horaFinRestriccion;
         break;
     }
 
@@ -106,7 +134,7 @@ export function RestriccionesPage() {
       tipo: formulario.tipo,
       descripcion: formulario.descripcion,
       activa: formulario.activa,
-      prioridad: formulario.prioridad,
+      prioridad: formulario.prioridad, // ✅ ahora es float
       parametros,
       mensaje: formulario.mensaje,
       fechaCreacion: editandoRestriccion?.fechaCreacion || new Date().toISOString().split('T')[0],
@@ -118,19 +146,17 @@ export function RestriccionesPage() {
       toast.success("Restricción actualizada exitosamente");
     } else {
       abrirConfirmacion("crear", nuevaRestriccion);
-      setModalAbierto(false); // opcional, cierra el modal mientras se confirma
-
+      setModalAbierto(false);
     }
 
     resetFormulario();
-    setModalAbierto(false);
   };
 
   const resetFormulario = () => {
     setFormulario({
       tipo: "prerrequisito",
       descripcion: "",
-      prioridad: "media",
+      prioridad: 0.5, // ✅ default media
       activa: true,
       mensaje: "",
       asignaturaOrigen: "",
@@ -143,50 +169,6 @@ export function RestriccionesPage() {
       horaFinRestriccion: ""
     });
     setEditandoRestriccion(null);
-  };
-
-  const editarRestriccion = (restriccion: RestriccionAcademica) => {
-    setFormulario({
-      tipo: restriccion.tipo,
-      descripcion: restriccion.descripcion,
-      prioridad: restriccion.prioridad,
-      activa: restriccion.activa,
-      mensaje: restriccion.mensaje,
-      asignaturaOrigen: restriccion.parametros.asignaturaOrigen || "",
-      asignaturaDestino: restriccion.parametros.asignaturaDestino || "",
-      salaProhibida: restriccion.parametros.salaProhibida || "",
-      profesorRequerido: restriccion.parametros.profesorRequerido || "",
-      especialidadRequerida: restriccion.parametros.especialidadRequerida || "",
-      diaRestriccion: restriccion.parametros.diaRestriccion || "",
-      horaInicioRestriccion: restriccion.parametros.horaInicioRestriccion || "",
-      horaFinRestriccion: restriccion.parametros.horaFinRestriccion || ""
-    });
-    setEditandoRestriccion(restriccion);
-    setModalAbierto(true);
-  };
-
-  const eliminarRestriccion = (id: string) => {
-    setRestricciones(prev => prev.filter(r => r.id !== id));
-    toast.success("Restricción eliminada exitosamente");
-  };
-
-  const toggleActivarRestriccion = (id: string) => {
-    setRestricciones(prev => prev.map(r => 
-      r.id === id ? { ...r, activa: !r.activa } : r
-    ));
-    const restriccion = restricciones.find(r => r.id === id);
-    toast.success(`Restricción ${restriccion?.activa ? "desactivada" : "activada"} exitosamente`);
-  };
-
-  const getTipoIcon = (tipo: string) => {
-    switch (tipo) {
-      case "prerrequisito": return <BookOpen className="w-4 h-4" />;
-      case "sala_prohibida": return <Shield className="w-4 h-4" />;
-      case "horario_conflicto": return <Clock className="w-4 h-4" />;
-      case "profesor_especialidad": return <Settings className="w-4 h-4" />;
-      case "secuencia_temporal": return <AlertTriangle className="w-4 h-4" />;
-      default: return <Settings className="w-4 h-4" />;
-    }
   };
 
   const abrirConfirmacion = (accion: "crear" | "eliminar", restriccion?: RestriccionAcademica) => {
@@ -207,173 +189,28 @@ export function RestriccionesPage() {
     setRestriccionObjetivo(null);
   };
 
+  const toggleActivarRestriccion = (id: string) => {
+    setRestricciones(prev => prev.map(r =>
+      r.id === id ? { ...r, activa: !r.activa } : r
+    ));
+    const restriccion = restricciones.find(r => r.id === id);
+    toast.success(`Restricción ${restriccion?.activa ? "desactivada" : "activada"} exitosamente`);
+  };
 
-  const getPrioridadColor = (prioridad: string) => {
-    switch (prioridad) {
-      case "alta": return "bg-red-100 text-red-800";
-      case "media": return "bg-yellow-100 text-yellow-800";
-      case "baja": return "bg-green-100 text-green-800";
-      default: return "bg-gray-100 text-gray-800";
+  const getTipoIcon = (tipo: string) => {
+    switch (tipo) {
+      case "prerrequisito": return <BookOpen className="w-4 h-4" />;
+      case "sala_prohibida": return <Shield className="w-4 h-4" />;
+      case "horario_conflicto": return <Clock className="w-4 h-4" />;
+      case "profesor_especialidad": return <Settings className="w-4 h-4" />;
+      case "secuencia_temporal": return <AlertTriangle className="w-4 h-4" />;
+      default: return <Settings className="w-4 h-4" />;
     }
   };
 
-  const getAsignaturaNombre = (codigo: string) => {
-    const asignatura = asignaturasMock.find(a => a.codigo === codigo);
-    return asignatura ? `${asignatura.codigo} - ${asignatura.nombre}` : codigo;
-  };
-
-  const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
-
-  const renderParametrosEspecificos = () => {
-    switch (formulario.tipo) {
-      case "prerrequisito":
-      case "secuencia_temporal":
-        return (
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Asignatura Origen</Label>
-              <Select value={formulario.asignaturaOrigen} onValueChange={(value) => 
-                setFormulario(prev => ({ ...prev, asignaturaOrigen: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar asignatura" />
-                </SelectTrigger>
-                <SelectContent>
-                  {asignaturasMock.map(asig => (
-                    <SelectItem key={asig.id} value={asig.codigo}>
-                      {asig.codigo} - {asig.nombre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Asignatura Destino</Label>
-              <Select value={formulario.asignaturaDestino} onValueChange={(value) => 
-                setFormulario(prev => ({ ...prev, asignaturaDestino: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar asignatura" />
-                </SelectTrigger>
-                <SelectContent>
-                  {asignaturasMock.map(asig => (
-                    <SelectItem key={asig.id} value={asig.codigo}>
-                      {asig.codigo} - {asig.nombre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        );
-
-      case "sala_prohibida":
-        return (
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Asignatura</Label>
-              <Select value={formulario.asignaturaOrigen} onValueChange={(value) => 
-                setFormulario(prev => ({ ...prev, asignaturaOrigen: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar asignatura" />
-                </SelectTrigger>
-                <SelectContent>
-                  {asignaturasMock.map(asig => (
-                    <SelectItem key={asig.id} value={asig.codigo}>
-                      {asig.codigo} - {asig.nombre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Tipo de Sala Prohibida</Label>
-              <Select value={formulario.salaProhibida} onValueChange={(value) => 
-                setFormulario(prev => ({ ...prev, salaProhibida: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="aula">Aula</SelectItem>
-                  <SelectItem value="laboratorio">Laboratorio</SelectItem>
-                  <SelectItem value="auditorio">Auditorio</SelectItem>
-                  <SelectItem value="sala_computacion">Sala de Computación</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        );
-
-      case "profesor_especialidad":
-        return (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Asignatura</Label>
-              <Select value={formulario.asignaturaOrigen} onValueChange={(value) => 
-                setFormulario(prev => ({ ...prev, asignaturaOrigen: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar asignatura" />
-                </SelectTrigger>
-                <SelectContent>
-                  {asignaturasMock.map(asig => (
-                    <SelectItem key={asig.id} value={asig.codigo}>
-                      {asig.codigo} - {asig.nombre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Especialidad Requerida</Label>
-              <Input
-                value={formulario.especialidadRequerida}
-                onChange={(e) => setFormulario(prev => ({ ...prev, especialidadRequerida: e.target.value }))}
-                placeholder="Matemáticas, Física, etc."
-              />
-            </div>
-          </div>
-        );
-
-      case "horario_conflicto":
-        return (
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label>Día</Label>
-              <Select value={formulario.diaRestriccion} onValueChange={(value) => 
-                setFormulario(prev => ({ ...prev, diaRestriccion: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar día" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos los días</SelectItem>
-                  {diasSemana.map(dia => (
-                    <SelectItem key={dia} value={dia}>{dia}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Hora Inicio</Label>
-              <Input
-                type="time"
-                value={formulario.horaInicioRestriccion}
-                onChange={(e) => setFormulario(prev => ({ ...prev, horaInicioRestriccion: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Hora Fin</Label>
-              <Input
-                type="time"
-                value={formulario.horaFinRestriccion}
-                onChange={(e) => setFormulario(prev => ({ ...prev, horaFinRestriccion: e.target.value }))}
-              />
-            </div>
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
-
+  // =====================================
+  // Render
+  // =====================================
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -384,15 +221,13 @@ export function RestriccionesPage() {
             Define y administra las reglas que rigen la programación académica
           </p>
         </div>
-        
+
         <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
           <DialogTrigger asChild>
-            <div>
-              <Button onClick={resetFormulario}>
-                <Plus className="w-4 h-4 mr-2" />
-                Agregar Restricción
-              </Button>
-            </div>
+            <Button onClick={resetFormulario}>
+              <Plus className="w-4 h-4 mr-2" />
+              Agregar Restricción
+            </Button>
           </DialogTrigger>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
@@ -400,13 +235,13 @@ export function RestriccionesPage() {
                 {editandoRestriccion ? "Editar Restricción" : "Agregar Nueva Restricción"}
               </DialogTitle>
             </DialogHeader>
-            
+
             <div className="space-y-6">
               {/* Información básica */}
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>Tipo de Restricción</Label>
-                  <Select value={formulario.tipo} onValueChange={(value: any) => 
+                  <Select value={formulario.tipo} onValueChange={(value: any) =>
                     setFormulario(prev => ({ ...prev, tipo: value }))}>
                     <SelectTrigger>
                       <SelectValue />
@@ -443,8 +278,16 @@ export function RestriccionesPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Prioridad</Label>
-                    <Select value={formulario.prioridad} onValueChange={(value: any) => 
-                      setFormulario(prev => ({ ...prev, prioridad: value }))}>
+                    <Select
+                      value={getPrioridadLabel(formulario.prioridad)}
+                      onValueChange={(value: string) => {
+                        let prioridad = 0.5;
+                        if (value === "baja") prioridad = 0.2;
+                        if (value === "media") prioridad = 0.5;
+                        if (value === "alta") prioridad = 0.9;
+                        setFormulario(prev => ({ ...prev, prioridad }));
+                      }}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -455,6 +298,7 @@ export function RestriccionesPage() {
                       </SelectContent>
                     </Select>
                   </div>
+
                   <div className="space-y-2">
                     <Label>Estado</Label>
                     <div className="flex items-center space-x-2 h-10">
@@ -468,12 +312,6 @@ export function RestriccionesPage() {
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Parámetros específicos */}
-              <div className="space-y-4">
-                <h4>Parámetros Específicos</h4>
-                {renderParametrosEspecificos()}
               </div>
 
               <div className="flex justify-end gap-3 pt-4">
@@ -502,7 +340,7 @@ export function RestriccionesPage() {
                 className="pl-10"
               />
             </div>
-            
+
             <Select value={filtroTipo} onValueChange={setFiltroTipo}>
               <SelectTrigger>
                 <SelectValue placeholder="Filtrar por tipo" />
@@ -543,47 +381,62 @@ export function RestriccionesPage() {
         </CardContent>
       </Card>
 
-      {/* Resumen de restricciones */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Resumen */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               <div>
-                <p className="text-2xl font-bold">{restricciones.filter(r => r.activa).length}</p>
+                <p className="text-2xl font-bold">{totalActivas}</p>
                 <p className="text-sm text-muted-foreground">Activas</p>
               </div>
             </div>
           </CardContent>
         </Card>
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-red-500 rounded-full"></div>
               <div>
-                <p className="text-2xl font-bold">{restricciones.filter(r => r.prioridad === 'alta').length}</p>
+                <p className="text-2xl font-bold">{totalAlta}</p>
                 <p className="text-sm text-muted-foreground">Alta Prioridad</p>
               </div>
             </div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+              <div>
+                <p className="text-2xl font-bold">{totalMedia}</p>
+                <p className="text-sm text-muted-foreground">Media Prioridad</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
               <div>
-                <p className="text-2xl font-bold">{restricciones.filter(r => r.tipo === 'prerrequisito').length}</p>
-                <p className="text-sm text-muted-foreground">Prerrequisitos</p>
+                <p className="text-2xl font-bold">{totalBaja}</p>
+                <p className="text-sm text-muted-foreground">Baja Prioridad</p>
               </div>
             </div>
           </CardContent>
         </Card>
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
               <div>
-                <p className="text-2xl font-bold">{restricciones.length}</p>
+                <p className="text-2xl font-bold">{total}</p>
                 <p className="text-sm text-muted-foreground">Total</p>
               </div>
             </div>
@@ -608,7 +461,7 @@ export function RestriccionesPage() {
                         {restriccion.tipo.replace('_', ' ')}
                       </Badge>
                       <Badge className={getPrioridadColor(restriccion.prioridad)}>
-                        {restriccion.prioridad}
+                        {getPrioridadLabel(restriccion.prioridad)}
                       </Badge>
                       <div className="flex items-center gap-1">
                         {restriccion.activa ? (
@@ -624,29 +477,17 @@ export function RestriccionesPage() {
                   </div>
                 </div>
                 <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleActivarRestriccion(restriccion.id)}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => toggleActivarRestriccion(restriccion.id)}>
                     {restriccion.activa ? (
                       <XCircle className="w-4 h-4 text-red-600" />
                     ) : (
                       <CheckCircle className="w-4 h-4 text-green-600" />
                     )}
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => editarRestriccion(restriccion)}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => setEditandoRestriccion(restriccion) || setModalAbierto(true)}>
                     <Edit className="w-4 h-4" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => abrirConfirmacion("eliminar", restriccion)}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => abrirConfirmacion("eliminar", restriccion)}>
                     <Trash2 className="w-4 h-4 text-destructive" />
                   </Button>
                 </div>
@@ -659,41 +500,6 @@ export function RestriccionesPage() {
                   {restriccion.mensaje}
                 </AlertDescription>
               </Alert>
-
-              {/* Mostrar parámetros específicos */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                {restriccion.parametros.asignaturaOrigen && (
-                  <div>
-                    <strong>Asignatura Origen:</strong> {getAsignaturaNombre(restriccion.parametros.asignaturaOrigen)}
-                  </div>
-                )}
-                {restriccion.parametros.asignaturaDestino && (
-                  <div>
-                    <strong>Asignatura Destino:</strong> {getAsignaturaNombre(restriccion.parametros.asignaturaDestino)}
-                  </div>
-                )}
-                {restriccion.parametros.salaProhibida && (
-                  <div>
-                    <strong>Sala Prohibida:</strong> {restriccion.parametros.salaProhibida}
-                  </div>
-                )}
-                {restriccion.parametros.especialidadRequerida && (
-                  <div>
-                    <strong>Especialidad Requerida:</strong> {restriccion.parametros.especialidadRequerida}
-                  </div>
-                )}
-                {restriccion.parametros.diaRestriccion && (
-                  <div>
-                    <strong>Día:</strong> {restriccion.parametros.diaRestriccion}
-                  </div>
-                )}
-                {restriccion.parametros.horaInicioRestriccion && restriccion.parametros.horaFinRestriccion && (
-                  <div>
-                    <strong>Horario:</strong> {restriccion.parametros.horaInicioRestriccion} - {restriccion.parametros.horaFinRestriccion}
-                  </div>
-                )}
-              </div>
-
               <div className="text-xs text-muted-foreground border-t pt-2">
                 Creado el {restriccion.fechaCreacion} por {restriccion.creadoPor}
               </div>
@@ -701,45 +507,6 @@ export function RestriccionesPage() {
           </Card>
         ))}
       </div>
-
-            {restriccionesFiltradas.length === 0 && (
-        <Card>
-          <CardContent className="text-center py-12">
-            ...
-          </CardContent>
-        </Card>
-      )}
-
-            {/* Dialog de confirmación */}
-      <Dialog open={dialogConfirmacionAbierto} onOpenChange={setDialogConfirmacionAbierto}>
-        <DialogContent className="sm:max-w-[400px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {accionAConfirmar === "eliminar" 
-                ? <XCircle className="w-5 h-5 text-red-500" /> 
-                : <CheckCircle className="w-5 h-5 text-green-500" />}
-              {accionAConfirmar === "eliminar" ? "Confirmar eliminación" : "Confirmar creación"}
-            </DialogTitle>
-          </DialogHeader>
-          <Alert className="mt-4">
-            <AlertDescription>
-              {accionAConfirmar === "eliminar"
-                ? `¿Estás seguro de eliminar la restricción "${restriccionObjetivo?.descripcion}"? Esta acción no se puede deshacer.`
-                : `¿Deseas agregar la restricción "${restriccionObjetivo?.descripcion}"?`}
-            </AlertDescription>
-          </Alert>
-          <div className="mt-6 flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setDialogConfirmacionAbierto(false)}>Cancelar</Button>
-            <Button
-              className="bg-blue-600 text-white hover:bg-blue-700"
-              onClick={confirmarAccion}
-            >
-              {accionAConfirmar === "eliminar" ? "Eliminar" : "Crear"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div> // <- cierre del return principal
-
+    </div>
   );
 }
