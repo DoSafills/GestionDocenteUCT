@@ -1,15 +1,15 @@
-// src/App.tsx
 import { useState } from 'react';
 import { Layout } from './components/Layout';
 import { DashboardPage } from './components/dashboard/DashboardPage';
-import { ProfesoresPage } from './components/profesores/ProfesoresPage';
+import { ProfesoresPage } from './pages/ProfesoresPage/ProfesoresPage';
 import { SalasPage } from './components/salas/SalasPage';
 import { AsignaturasPage } from '@pages/AsignaturasPage';
 import { HorariosPage } from './components/horarios/HorariosPage';
 import { RestriccionesPage } from './components/restricciones/RestriccionesPage';
 import { CursosPage } from './components/cursos/CursosPage';
-import LoginForm from '@pages/LoginPage/index';
+import LoginForm from './pages/LoginPage/index';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { Toaster } from 'sonner';
 
 type Pagina = 'dashboard' | 'profesores' | 'salas' | 'asignaturas' | 'horarios' | 'restricciones' | 'cursos';
 
@@ -26,13 +26,14 @@ const paginaMap: Record<Pagina, JSX.Element> = {
 export default function App() {
     return (
         <AuthProvider>
-            <AuthConsumer />
+            <MainApp />
+            <Toaster richColors position='top-right' expand />
         </AuthProvider>
     );
 }
 
-function AuthConsumer() {
-    const [paginaActual, setPaginaActual] = useState<Pagina>('dashboard');
+function MainApp() {
+    const [paginaActual, setPaginaActual] = useState<Pagina>('asignaturas');
     const { isAuthenticated } = useAuth();
 
     if (!isAuthenticated) {

@@ -1,78 +1,41 @@
-// Tipos principales para el sistema académico
+// NUEVOS TIPOS EN BASE AL MER
+export type DiaSemana = 'LUNES' | 'MARTES' | 'MIERCOLES' | 'JUEVES' | 'VIERNES' | 'SABADO';
 
-export interface Campus {
+export interface Clase {
     id: number;
-    nombre: string;
-    direccion: string;
+    seccion_id: number;
+    docente_id: number;
+    sala_id: number;
+    bloque_id: number;
+    estado: string;
 }
 
-export interface Edificio {
+export interface RestriccionHorario {
     id: number;
-    nombre: string;
-    tipo: string;
-    campus_id: number; // FK → Campus.id
-}
-
-export interface Sala {
-    id: number;
-    codigo: string;
-    capacidad: number;
-    tipo: string;
+    docente_id: number;
+    dia_semana: DiaSemana | number;
+    hora_inicio: string;
+    hora_fin: string;
     esta_disponible: boolean;
-    edificio_id: number; // FK → Edificio.id
-    equipamiento: string;
+    descripcion?: string;
+    esta_activa: boolean;
+}
+
+export interface RestriccionHorarioGuardar {
+    dia_semana: DiaSemana | number;
+    hora_inicio: string;
+    hora_fin: string;
+    esta_disponible: boolean;
+    esta_activa: boolean;
 }
 
 export interface Docente {
-    id: number; // PK
+    id: number;
     nombre: string;
     email: string;
     password_hash: string;
     esta_activo: boolean;
     especialidad: string;
-}
-
-export interface Clase {
-    id: number; // PK
-    seccion_id: number;
-    docente_id: number; // FK
-    sala_id: number; // FK
-    bloque_id: number; // FK
-    estado: string;
-}
-
-export interface Bloque {
-    id: number; // PK
-    dia_semana: number; // 1 = Lunes, ..., 7 = Domingo
-    hora_inicio: string; // formato "HH:MM:SS"
-    hora_fin: string; // formato "HH:MM:SS"
-}
-
-export interface Seccion {
-    id: number; // PK
-    codigo: string;
-    anio: number;
-    semestre: number;
-    asignatura_id: number; // FK -> Asignatura.id
-    cupos: number;
-}
-
-export interface Sala {
-    id: number; // PK
-    codigo: string;
-    capacidad: number;
-    tipo: string; // ejemplo: "Laboratorio", "Aula", etc.
-    esta_disponible: boolean;
-    edificio_id: number; // FK -> Edificio.id
-    equipamiento: string; // lista o descripción de equipos
-}
-
-export interface Asignatura {
-    id: number;
-    codigo: string; // ej: MAT1105-07
-    nombre: string;
-    creditos: number;
-    semestre: number;
 }
 
 export interface Estudiante {
@@ -91,6 +54,8 @@ export interface Admin {
     super_admin: boolean;
 }
 
+// Tipos principales para el sistema académico
+
 // Tipos básicos
 export interface Profesor {
     id: string;
@@ -107,6 +72,25 @@ export interface Profesor {
     experiencia: number; // años
     estado: 'activo' | 'inactivo';
     fechaContratacion: string;
+}
+
+export interface Edificio {
+    id: string;
+    nombre: string;
+    codigo: string;
+    direccion: string;
+    salas: Sala[];
+}
+
+export interface Sala {
+    id: string;
+    numero: string;
+    edificioId: string;
+    capacidad: number;
+    tipo: 'aula' | 'laboratorio' | 'auditorio' | 'sala_computacion';
+    equipamiento: string[];
+    disponible: boolean;
+    horarios: HorarioSala[];
 }
 
 export interface HorarioSala {
@@ -189,18 +173,18 @@ export interface RestriccionAcademica {
 }
 
 // Tipos heredados del sistema anterior (adaptados)
-export interface Estudiante {
-    id?: string;
-    nombre: string;
-    apellido: string;
-    email: string;
-    telefono: string;
-    edad: number;
-    carrera: string;
-    semestre: number;
-    asignaturasAprobadas: string[];
-    asignaturasInscritas: string[];
-}
+// export interface Estudiante {
+//   id?: string;
+//   nombre: string;
+//   apellido: string;
+//   email: string;
+//   telefono: string;
+//   edad: number;
+//   carrera: string;
+//   semestre: number;
+//   asignaturasAprobadas: string[];
+//   asignaturasInscritas: string[];
+// }
 
 export interface Curso {
     id: string;
