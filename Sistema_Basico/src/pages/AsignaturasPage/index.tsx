@@ -8,6 +8,7 @@ import type { Asignatura } from './types';
 import { AsignaturaCard } from './components/AsignaturaCard';
 import { AsignaturaFormDialog } from './components/AsignaturaFormDialog';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { SearchBar } from './components/SearchBar';
 
 import { asignaturasMock } from '@data/asignaturas';
 
@@ -18,6 +19,8 @@ export function AsignaturasPage() {
 
     const [alertOpen, setAlertOpen] = useState(false);
     const [selectedEliminarId, setSelectedEliminarId] = useState<number | undefined>(undefined);
+
+    const [searchQuery, setSearchQuery] = useState('');
 
     const handleAgregar = () => {
         setSelectedAsignaturaId(undefined);
@@ -55,6 +58,12 @@ export function AsignaturasPage() {
         setDialogOpen(false);
     };
 
+    const filteredAsignaturas = asignaturas.filter(
+        (a) =>
+            a.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            a.codigo.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+
     return (
         <div className='space-y-6'>
             <div className='flex justify-between items-center'>
@@ -68,9 +77,17 @@ export function AsignaturasPage() {
                 </Button>
             </div>
 
+            {/* Barra de búsqueda */}
+
+            <Card>
+                <CardContent className='p-4'>
+                    <SearchBar onSearch={setSearchQuery} />
+                </CardContent>
+            </Card>
+
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                {asignaturas.length > 0 ? (
-                    asignaturas.map((asig) => (
+                {filteredAsignaturas.length > 0 ? (
+                    filteredAsignaturas.map((asig) => (
                         <AsignaturaCard
                             key={asig.id}
                             asignatura={asig}
