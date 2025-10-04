@@ -5,10 +5,10 @@ import { Input } from "../../../components/ui/input";
 import { ChevronUp, ChevronDown, Clock } from "lucide-react";
 
 type Props = {
-  valor: string;                   // "HH:MM" 24h
-  onChange: (v: string) => void;   // "HH:MM" 24h
+  valor: string;
+  onChange: (v: string) => void;
   disabled?: boolean;
-  stepMinutos?: number;            // default 5
+  stepMinutos?: number;
 };
 
 function clamp(n: number, min: number, max: number) {
@@ -51,10 +51,9 @@ export default function SelectorHora({ valor, onChange, disabled, stepMinutos = 
   const pad = (x: number) => x.toString().padStart(2, "0");
   const display = to12(valor);
 
-  // clases reutilizadas para mantener simetría
   const btnIcon = "h-7 w-7 p-1";
   const icon = "h-3.5 w-3.5";
-  const inputW = "w-16"; // 64px; si lo cambias, cambia ambas columnas por igual
+  const inputW = "w-16"; 
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -77,9 +76,7 @@ export default function SelectorHora({ valor, onChange, disabled, stepMinutos = 
         side="bottom"
         className="w-auto min-w-[172px] p-3 bg-white text-gray-900 border rounded-md shadow-lg z-50"
       >
-        {/* 3 columnas simétricas: 86px | 20px | 86px */}
         <div className="grid grid-cols-[60px_4px_60px] gap-2 items-center">
-          {/* Columna Horas */}
           <div className="flex flex-col items-center">
             <Button variant="ghost" size="sm" className={btnIcon} onClick={incH} aria-label="Incrementar hora">
               <ChevronUp className={icon} />
@@ -97,13 +94,9 @@ export default function SelectorHora({ valor, onChange, disabled, stepMinutos = 
               <ChevronDown className={icon} />
             </Button>
           </div>
-
-          {/* Columna ":" centrado */}
           <div className="flex flex-col items-center justify-center">
             <span className="select-none text-lg leading-6">:</span>
           </div>
-
-          {/* Columna Minutos */}
           <div className="flex flex-col items-center">
             <Button variant="ghost" size="sm" className={btnIcon} onClick={incM} aria-label="Incrementar minutos">
               <ChevronUp className={icon} />
@@ -122,8 +115,6 @@ export default function SelectorHora({ valor, onChange, disabled, stepMinutos = 
             </Button>
           </div>
         </div>
-
-        {/* AM / PM */}
         <div className="mt-3 grid grid-cols-2 gap-2">
           <Button
             variant={mer === "AM" ? "default" : "outline"}
