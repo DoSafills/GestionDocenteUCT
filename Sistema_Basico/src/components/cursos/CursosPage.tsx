@@ -165,7 +165,7 @@ export function CursosPage() {
               <SelectTrigger>
                 <SelectValue placeholder="Filtrar por nivel" />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-zinc-900">
+              <SelectContent>
                 <SelectItem value="todos">Todos los niveles</SelectItem>
                 <SelectItem value="Principiante">Principiante</SelectItem>
                 <SelectItem value="Intermedio">Intermedio</SelectItem>
@@ -177,7 +177,7 @@ export function CursosPage() {
               <SelectTrigger>
                 <SelectValue placeholder="Disponibilidad" />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-zinc-900">
+              <SelectContent>
                 <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value="disponible">Con cupos</SelectItem>
                 <SelectItem value="completo">Completos</SelectItem>

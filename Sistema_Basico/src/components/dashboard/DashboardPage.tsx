@@ -1,6 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Progress } from "../ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Badge } from "../ui/badge";
+import { Progress } from "../ui/progress";
 import { 
   Users, 
   Building, 
@@ -13,7 +16,6 @@ import {
   Calendar,
   MapPin
 } from "lucide-react";
-import { profesoresMock, edificiosMock, asignaturasMock, restriccionesMock } from "../../data/mock-data";
 
 export function DashboardPage() {
   // Estadísticas generales
@@ -330,3 +332,4 @@ export function DashboardPage() {
     </div>
   );
 }
+
