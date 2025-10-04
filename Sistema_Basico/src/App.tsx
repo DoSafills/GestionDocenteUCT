@@ -1,3 +1,4 @@
+// src/App.tsx
 import { useState } from "react";
 import { Layout } from "./components/Layout";
 import { DashboardPage } from "./components/dashboard/DashboardPage";
@@ -7,37 +8,56 @@ import { AsignaturasPage } from "./components/asignaturas/AsignaturasPage";
 import { HorariosPage } from "./components/horarios/HorariosPage";
 import { RestriccionesPage } from "./components/restricciones/RestriccionesPage";
 import { CursosPage } from "./components/cursos/CursosPage";
+import LoginForm from "./pages/LoginPage/index";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+
+type Pagina =
+  | "dashboard"
+  | "profesores"
+  | "salas"
+  | "asignaturas"
+  | "horarios"
+  | "restricciones"
+  | "cursos";
+
+const paginaMap: Record<Pagina, JSX.Element> = {
+  dashboard: <DashboardPage />,
+  profesores: <ProfesoresPage />,
+  salas: <SalasPage />,
+  asignaturas: <AsignaturasPage />,
+  horarios: <HorariosPage />,
+  restricciones: <RestriccionesPage />,
+  cursos: <CursosPage />,
+};
 
 export default function App() {
-  const [paginaActual, setPaginaActual] = useState("dashboard");
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
+  );
+}
 
-  const renderPagina = () => {
-    switch (paginaActual) {
-      case "dashboard":
-        return <DashboardPage />;
-      case "profesores":
-        return <ProfesoresPage />;
-      case "salas":
-        return <SalasPage />;
-      case "asignaturas":
-        return <AsignaturasPage />;
-      case "horarios":
-        return <HorariosPage />;
-      case "restricciones":
-        return <RestriccionesPage />;
-      case "cursos":
-        return <CursosPage />;
-      default:
-        return <DashboardPage />;
-    }
-  };
+function MainApp() {
+  const [paginaActual, setPaginaActual] = useState<Pagina>("dashboard");
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-sm">
+          <LoginForm />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <Layout 
-      currentPage={paginaActual} 
-      onPageChange={setPaginaActual}
+    <Layout
+      currentPage={paginaActual}
+      onPageChange={(p) => setPaginaActual(p as Pagina)}
     >
-      {renderPagina()}
+      {paginaMap[paginaActual]}
     </Layout>
   );
 }

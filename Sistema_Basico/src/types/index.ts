@@ -1,3 +1,29 @@
+// NUEVOS TIPOS EN BASE AL MER
+export interface Docente {
+  id: number;
+  nombre: string;
+  email: string;
+  password_hash: string;
+  esta_activo: boolean;
+  especialidad: string;
+}
+
+export interface Estudiante {
+  id: number;
+  nombre: string;
+  email: string;
+  pass_hash: string;
+  carrera: string;
+}
+
+export interface Admin {
+  id: number;
+  nombre: string;
+  email: string;
+  pass_hash: string;
+  super_admin: boolean;
+}
+
 // Tipos principales para el sistema académico
 
 // Tipos básicos
@@ -111,18 +137,18 @@ export interface RestriccionAcademica {
 }
 
 // Tipos heredados del sistema anterior (adaptados)
-export interface Estudiante {
-  id?: string;
-  nombre: string;
-  apellido: string;
-  email: string;
-  telefono: string;
-  edad: number;
-  carrera: string;
-  semestre: number;
-  asignaturasAprobadas: string[];
-  asignaturasInscritas: string[];
-}
+// export interface Estudiante {
+//   id?: string;
+//   nombre: string;
+//   apellido: string;
+//   email: string;
+//   telefono: string;
+//   edad: number;
+//   carrera: string;
+//   semestre: number;
+//   asignaturasAprobadas: string[];
+//   asignaturasInscritas: string[];
+// }
 
 export interface Curso {
   id: string;

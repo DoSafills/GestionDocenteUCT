@@ -11,7 +11,7 @@ module.exports = {
         background: "#f9fafb",
         card: "#ffffff",
         primary: "#3b82f6",
-        "primary-foreground": "#ffffff",
+        "primary-foreground": "#0e0d0dff",
         muted: "#6b7280",
         "muted-foreground": "#374151",
       },
