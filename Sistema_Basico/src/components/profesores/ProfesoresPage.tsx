@@ -268,7 +268,7 @@ export function ProfesoresPage() {
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-zinc-900">
+                  <SelectContent>
                     <SelectItem value="activo">Activo</SelectItem>
                     <SelectItem value="inactivo">Inactivo</SelectItem>
                   </SelectContent>
@@ -305,7 +305,7 @@ export function ProfesoresPage() {
               <SelectTrigger className="w-48">
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-zinc-900">
+              <SelectContent>
                 <SelectItem value="todos">Todos los estados</SelectItem>
                 <SelectItem value="activo">Activos</SelectItem>
                 <SelectItem value="inactivo">Inactivos</SelectItem>

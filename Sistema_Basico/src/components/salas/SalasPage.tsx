@@ -202,7 +202,7 @@ export function SalasPage() {
           <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
             <DialogTrigger asChild>
               <div>
-                <Button variant="default" onClick={resetFormularioEdificio}>
+                <Button variant="outline" onClick={resetFormularioEdificio}>
                   <Plus className="w-4 h-4 mr-2" />
                   Agregar Edificio
                 </Button>
@@ -211,54 +211,46 @@ export function SalasPage() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
-                  <span style={{color: '#000', fontWeight: 'bold', fontSize: '1.25rem', letterSpacing: '0.5px', WebkitTextStroke: '0.1px #000', textShadow: '0 0 1px #000', background: 'transparent', zIndex: 10}}>
-                    {editandoEdificio ? "Editar Edificio" : "Agregar Nuevo Edificio"}
-                  </span>
+                  {editandoEdificio ? "Editar Edificio" : "Agregar Nuevo Edificio"}
                 </DialogTitle>
               </DialogHeader>
               
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="nombre" style={{color: '#000', fontWeight: 'bold', background: 'transparent', zIndex: 10}}>Nombre del Edificio *</Label>
+                  <Label htmlFor="nombre">Nombre del Edificio *</Label>
                   <Input
                     id="nombre"
                     value={formularioEdificio.nombre}
-                    onChange={(e) => {
-                      setFormularioEdificio(prev => {
-                        const nuevo = { ...prev, nombre: e.target.value };
-                        console.log('Nombre del Edificio:', nuevo.nombre);
-                        return nuevo;
-                      });
-                    }}
-                    placeholder="Edificio Biblioteca"
+                    onChange={(e) => setFormularioEdificio(prev => ({ ...prev, nombre: e.target.value }))}
+                    placeholder="Edificio de Ciencias"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="codigo" style={{color: '#000', fontWeight: 'bold', zIndex: 10}}>Código *</Label>
+                  <Label htmlFor="codigo">Código *</Label>
                   <Input
                     id="codigo"
                     value={formularioEdificio.codigo}
                     onChange={(e) => setFormularioEdificio(prev => ({ ...prev, codigo: e.target.value }))}
-                    placeholder="CSF - CJP"
+                    placeholder="CS"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="direccion" style={{color: '#000', fontWeight: 'bold', background: 'transparent', zIndex: 10}}>Dirección</Label>
+                  <Label htmlFor="direccion">Dirección</Label>
                   <Input
                     id="direccion"
                     value={formularioEdificio.direccion}
                     onChange={(e) => setFormularioEdificio(prev => ({ ...prev, direccion: e.target.value }))}
-                    placeholder="Av. Alemania - Av. Rudecindo Ortega"
+                    placeholder="Av. Universidad 123"
                   />
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4">
-                  <Button className="!bg-gray-200 !text-black !hover:bg-gray-300 dark:!bg-gray-700 dark:!text-white dark:!hover:bg-gray-600" onClick={() => setModalAbierto(false)}>
-                     Cancelar
+                  <Button variant="outline" onClick={() => setModalAbierto(false)}>
+                    Cancelar
                   </Button>
-                 <Button className="!bg-blue-500 !text-white !hover:bg-blue-600" onClick={handleSubmitEdificio}>
+                  <Button onClick={handleSubmitEdificio}>
                     {editandoEdificio ? "Actualizar" : "Agregar"} Edificio
                   </Button>
                 </div>
@@ -267,7 +259,7 @@ export function SalasPage() {
           </Dialog>
 
           <Dialog open={modalSalaAbierto} onOpenChange={setModalSalaAbierto}>
-            <DialogContent className="!bg-white !text-black">
+            <DialogContent>
               <DialogHeader>
                 <DialogTitle>
                   {editandoSala.sala ? "Editar Sala" : "Agregar Nueva Sala"}
@@ -285,7 +277,7 @@ export function SalasPage() {
                     <SelectTrigger>
                       <SelectValue placeholder="Selecciona un edificio" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white dark:bg-zinc-900">
+                    <SelectContent>
                       {edificios.map(edificio => (
                         <SelectItem key={edificio.id} value={edificio.id}>
                           {edificio.nombre} ({edificio.codigo})
@@ -326,7 +318,7 @@ export function SalasPage() {
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-white dark:bg-zinc-900">
+                    <SelectContent>
                       <SelectItem value="aula">Aula</SelectItem>
                       <SelectItem value="laboratorio">Laboratorio</SelectItem>
                       <SelectItem value="auditorio">Auditorio</SelectItem>
@@ -389,7 +381,7 @@ export function SalasPage() {
               <SelectTrigger>
                 <SelectValue placeholder="Filtrar por edificio" />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-zinc-900">
+              <SelectContent>
                 <SelectItem value="todos">Todos los edificios</SelectItem>
                 {edificios.map(edificio => (
                   <SelectItem key={edificio.id} value={edificio.id}>
@@ -403,7 +395,7 @@ export function SalasPage() {
               <SelectTrigger>
                 <SelectValue placeholder="Filtrar por tipo" />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-zinc-900">
+              <SelectContent>
                 <SelectItem value="todos">Todos los tipos</SelectItem>
                 <SelectItem value="aula">Aula</SelectItem>
                 <SelectItem value="laboratorio">Laboratorio</SelectItem>
@@ -505,7 +497,7 @@ export function SalasPage() {
                         <CardContent className="space-y-3">
                           <div className="flex items-center gap-2 text-sm">
                             <Users className="w-4 h-4 text-muted-foreground" />
-                            <span>Capacidad: {sala.capacidad} Personas</span>
+                            <span>Capacidad: {sala.capacidad} personas</span>
                           </div>
                           
                           {sala.equipamiento.length > 0 && (
@@ -525,11 +517,11 @@ export function SalasPage() {
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
                                 <Calendar className="w-4 h-4 text-muted-foreground" />
-                                <p className="text-sm">Asignaturas Programadas:</p>
+                                <p className="text-sm">Asignaturas programadas:</p>
                               </div>
                               <div className="space-y-1">
                                 {asignaturasEnSala.map(asignatura => (
-                                  <div key={asignatura.id} className="text-xs p-2 rounded" style={{ backgroundColor: "#e4e4e7" }}>
+                                  <div key={asignatura.id} className="text-xs p-2 bg-muted rounded">
                                     <div className="flex justify-between items-center">
                                       <span className="font-medium">{asignatura.codigo}</span>
                                       <Badge variant="outline" className="text-xs">

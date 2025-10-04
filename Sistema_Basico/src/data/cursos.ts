@@ -17,8 +17,7 @@ export const cursosDisponibles: Curso[] = [
       edadMinima: 16,
       documentosRequeridos: ['Cédula de identidad', 'Certificado de estudios']
     },
-    imagen: 'programming basics',
-    categoria: ''
+    imagen: 'programming basics'
   },
   {
     id: '2',
@@ -39,8 +38,7 @@ export const cursosDisponibles: Curso[] = [
       experienciaMinima: '6 meses de programación',
       documentosRequeridos: ['Cédula de identidad', 'Certificado de curso previo']
     },
-    imagen: 'web development',
-    categoria: ''
+    imagen: 'web development'
   },
   {
     id: '3',
@@ -62,8 +60,7 @@ export const cursosDisponibles: Curso[] = [
       experienciaMinima: '2 años de programación',
       documentosRequeridos: ['Cédula de identidad', 'Título universitario', 'Portfolio de proyectos']
     },
-    imagen: 'data science',
-    categoria: ''
+    imagen: 'data science'
   },
   {
     id: '4',
@@ -81,8 +78,7 @@ export const cursosDisponibles: Curso[] = [
       edadMinima: 17,
       documentosRequeridos: ['Cédula de identidad']
     },
-    imagen: 'ux ui design',
-    categoria: ''
+    imagen: 'ux ui design'
   },
   {
     id: '5',
@@ -101,8 +97,7 @@ export const cursosDisponibles: Curso[] = [
       experienciaMinima: '1 año en marketing o ventas',
       documentosRequeridos: ['Cédula de identidad', 'Experiencia laboral certificada']
     },
-    imagen: 'digital marketing',
-    categoria: ''
+    imagen: 'digital marketing'
   }
 ];
 

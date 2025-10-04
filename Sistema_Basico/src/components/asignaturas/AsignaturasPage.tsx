@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "../ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Textarea } from "../ui/textarea";
-import { Plus, Search, BookOpen, User, MapPin, Calendar, Edit, Trash2, Clock, Users } from "lucide-react";
+import { Plus, Search, BookOpen, User, MapPin, Edit, Trash2, Clock, Users } from "lucide-react";
 import { toast } from "sonner";
 import type { Asignatura } from "../../types";
 import { asignaturasMock, profesoresMock, edificiosMock } from "../../data/mock-data";
