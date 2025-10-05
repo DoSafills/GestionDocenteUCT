@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { Layout } from './components/Layout';
-import { DashboardPage } from './components/dashboard/DashboardPage';
-import { ProfesoresPage } from './pages/ProfesoresPage/ProfesoresPage';
-import { SalasPage } from './components/salas/SalasPage';
+import { Layout } from '../src/components/Layout';
+import { DashboardPage } from '../src/components/dashboard/DashboardPage';
+import { ProfesoresPage } from '../src/pages/ProfesoresPage/ProfesoresPage';
+import { SalasPage } from '../src/components/salas/SalasPage';
 import { AsignaturasPage } from '@pages/AsignaturasPage';
-import { HorariosPage } from './components/horarios/HorariosPage';
-import { RestriccionesPage } from './components/restricciones/RestriccionesPage';
-import { CursosPage } from './components/cursos/CursosPage';
-import LoginForm from './pages/LoginPage/index';
+import { HorariosPage } from '../src/components/horarios/HorariosPage';
+import { RestriccionesPage } from '../src/pages/RestriccionesPage/RestriccionesPage';
+import { CursosPage } from '../src/components/cursos/CursosPage';
+import LoginForm from '../src/pages/LoginPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Toaster } from 'sonner';
 
