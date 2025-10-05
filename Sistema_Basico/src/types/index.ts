@@ -3,22 +3,22 @@
 // Tipos básicos
 export interface Profesor {
   id: string;
-  docente_rut: string; // ej: 12345678-9
+  docente_rut: string;
   nombre: string;
-  apellido?: string;
+  apellido: string;
   email: string;
   telefono?: string;
   pass_hash: string;
-  max_horas_docencia: number;
+  max_horas_docencia?: number;
   especialidad: string[];
-  disponibilidad: {
+  disponibilidad?: {
     dias: string[];
     horasInicio: string;
     horasFin: string;
   };
-  experiencia: number; // años
-  estado: 'activo' | 'inactivo';
-  fechaContratacion: string;
+  experiencia?: number;
+  estado: string;
+  fechaContratacion?: string;
 }
 
 // Alias para compatibilidad
@@ -29,25 +29,26 @@ export interface Campus {
   id: string;
   codigo: string;
   nombre: string;
+  direccion: string;
 }
 
 export interface Edificio {
   id: string;
   nombre: string;
   codigo: string;
-  direccion: string;
-  campus_codigo: string;
-  salas: Sala[];
+  tipo: string;
+  campus_id: number;
+  salas?: Sala[];
 }
 
 export interface Seccion {
-  id: string;
-  seccion_id: string;
-  numero: string;
+  id: number;
+  seccion_id: string; // Identificador único de sección
   codigo: string;
-  ano: number;
+  anio: number;
   semestre: number;
-  asignatura_codigo: string;
+  asignatura_id: number; // referencia a Asignatura
+  asignatura_codigo?: string; // Código de la asignatura para compatibilidad
   cupos: number;
 }
 
@@ -72,16 +73,14 @@ export interface Clase {
 export interface Sala {
   id: string;
   codigo: string; // ej: CS01_125
-  numero: string;
-  edificioId: string;
-  edificio_codigo: string;
+  numero?: string;
+  edificioId?: string; // referencia a Edificio
+  edificio_codigo?: string;
   capacidad: number;
   tipo: 'TALLER' | 'LAB' | 'ATC';
-  piso: number;
-  estado: 'DISPONIBLE' | 'NO_DISPONIBLE';
-  equipamiento: string[];
-  disponible: boolean;
-  horarios: HorarioSala[];
+  equipamiento?: string[];
+  disponible?: boolean;
+  horarios?: HorarioSala[];
 }
 
 export interface HorarioSala {
@@ -120,19 +119,15 @@ export interface Asignatura {
   nombre: string;
   creditos: number;
   semestre: number;
-  carrera: string;
+  carrera?: string;
   profesorId?: string;
   salaId?: string;
-  horarios: {
-    dia: string;
-    horaInicio: string;
-    horaFin: string;
-  }[];
-  prerrequisitos: string[]; // códigos de asignaturas
-  cupos: number;
-  inscritos: number;
-  estado: 'planificada' | 'programada' | 'en_curso' | 'finalizada';
-  descripcion: string;
+  horarios?: Array<{ dia: string; horaInicio: string; horaFin: string }>;
+  prerrequisitos?: string[];
+  cupos?: number;
+  inscritos?: number;
+  estado?: string;
+  descripcion?: string;
 }
 
 export interface RestriccionAcademica {

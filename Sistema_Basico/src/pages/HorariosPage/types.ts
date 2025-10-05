@@ -1,16 +1,16 @@
 // Tipos específicos para el componente de horarios
-import type { HorarioManual, Profesor, Asignatura, Sala } from "../../../types";
+import type { HorarioManual, Profesor, Asignatura, Sala } from "../../types";
 
 // Estados del formulario de horarios
 export interface FormularioHorario {
   titulo: string;
   descripcion: string;
-  salaId: string;
-  dia: string;
+  salaId: string | undefined;
+  dia: string | undefined;
   horaInicio: string;
   horaFin: string;
-  profesorId: string;
-  asignaturaId: string;
+  profesorId: string | undefined;
+  asignaturaId: string | undefined;
   color: string;
   estado: "activo" | "cancelado" | "reprogramado";
   recurrente: boolean;
@@ -180,12 +180,12 @@ export interface EstadisticasHorarios {
 export const FORMULARIO_INICIAL: FormularioHorario = {
   titulo: "",
   descripcion: "",
-  salaId: "",
-  dia: "",
+  salaId: undefined,
+  dia: undefined,
   horaInicio: "",
   horaFin: "",
-  profesorId: "",
-  asignaturaId: "",
+  profesorId: undefined,
+  asignaturaId: undefined,
   color: "#3B82F6",
   estado: "activo",
   recurrente: false,

@@ -11,7 +11,6 @@ import type {
   Clase
 } from "../types";
 
-
 export const profesoresMock: Profesor[] = [
   {
     id: "prof_1",
@@ -91,24 +90,36 @@ export const profesoresMock: Profesor[] = [
   }
 ];
 
+export const campusMock: Campus[] = [
+  {
+    id: "campus_1",
+    codigo: "CP",
+    nombre: "Campus Principal",
+    direccion: "Av. Universidad 1234"
+  },
+  {
+    id: "campus_2", 
+    codigo: "CS",
+    nombre: "Campus Sur",
+    direccion: "Av. Sur 567"
+  }
+];
+
 export const edificiosMock: Edificio[] = [
   {
     id: "edif_1",
     nombre: "Edificio de Ciencias",
     codigo: "CS01",
-    campus_codigo: "CP",
-    direccion: "Av. Universidad 123",
+    tipo: "Académico",
+    campus_id: 1, // Referencia numérica según types/index.ts
     salas: [
       {
         id: "sala_cs_101",
         codigo: "CS01_125",
         numero: "125",
         edificioId: "edif_1",
-        edificio_codigo: "CS01",
         capacidad: 40,
         tipo: "ATC",
-        piso: 1,
-        estado: "DISPONIBLE",
         equipamiento: ["Proyector", "Pizarra", "Sistema de audio"],
         disponible: true,
         horarios: []
@@ -118,11 +129,8 @@ export const edificiosMock: Edificio[] = [
         codigo: "CS01_130",
         numero: "130",
         edificioId: "edif_1",
-        edificio_codigo: "CS01",
         capacidad: 30,
         tipo: "LAB",
-        piso: 1,
-        estado: "DISPONIBLE",
         equipamiento: ["Computadores", "Proyector", "Pizarra digital"],
         disponible: true,
         horarios: []
@@ -132,11 +140,8 @@ export const edificiosMock: Edificio[] = [
         codigo: "CS01_201",
         numero: "201",
         edificioId: "edif_1",
-        edificio_codigo: "CS01",
         capacidad: 60,
         tipo: "ATC",
-        piso: 2,
-        estado: "DISPONIBLE",
         equipamiento: ["Sistema de sonido", "Proyector HD", "Escenario"],
         disponible: true,
         horarios: []
@@ -147,33 +152,27 @@ export const edificiosMock: Edificio[] = [
     id: "edif_2",
     nombre: "Edificio de Arquitectura y Urbanismo",
     codigo: "FAUD",
-    campus_codigo: "CP",
-    direccion: "Av. Tecnología 456",
+    tipo: "Académico",
+    campus_id: 1,
     salas: [
       {
-        id: "sala_ing_101",
+        id: "sala_faud_204",
         codigo: "FAUD_204",
         numero: "204",
         edificioId: "edif_2",
-        edificio_codigo: "FAUD",
         capacidad: 45,
         tipo: "TALLER",
-        piso: 2,
-        estado: "DISPONIBLE",
         equipamiento: ["Proyector", "Pizarra", "Aire acondicionado"],
         disponible: true,
         horarios: []
       },
       {
-        id: "sala_ing_lab1",
+        id: "sala_faud_lab1",
         codigo: "FAUD_LAB1",
         numero: "LAB1",
         edificioId: "edif_2",
-        edificio_codigo: "FAUD",
         capacidad: 25,
         tipo: "LAB",
-        piso: 1,
-        estado: "DISPONIBLE",
         equipamiento: ["30 Computadores", "Proyector", "Software especializado"],
         disponible: true,
         horarios: []
@@ -181,23 +180,53 @@ export const edificiosMock: Edificio[] = [
     ]
   },
   {
-    id: "edif_3",
-    nombre: "Edificio Central",
-    codigo: "CC",
-    campus_codigo: "CS",
-    direccion: "Plaza Central s/n",
+    id: "edif_4",
+    nombre: "Centro de Desarrollo Tecnológico",
+    codigo: "CJP07",
+    tipo: "Tecnológico",
+    campus_id: 1,
     salas: [
       {
-        id: "sala_cc_aula1",
-        codigo: "CC_AULA1",
-        numero: "AULA1",
-        edificioId: "edif_3",
-        edificio_codigo: "CC",
-        capacidad: 80,
+        id: "sala_cjp_101",
+        codigo: "CJP07_101",
+        numero: "101",
+        edificioId: "edif_4",
+        capacidad: 35,
         tipo: "ATC",
-        piso: 1,
-        estado: "DISPONIBLE",
-        equipamiento: ["Proyector", "Sistema de audio", "Pizarra"],
+        equipamiento: ["Proyector", "Pizarra inteligente", "Sistema de audio"],
+        disponible: true,
+        horarios: []
+      },
+      {
+        id: "sala_cjp_102",
+        codigo: "CJP07_102",
+        numero: "102",
+        edificioId: "edif_4",
+        capacidad: 40,
+        tipo: "LAB",
+        equipamiento: ["20 Computadores", "Proyector", "Software de desarrollo"],
+        disponible: true,
+        horarios: []
+      },
+      {
+        id: "sala_cjp_201",
+        codigo: "CJP07_201",
+        numero: "201",
+        edificioId: "edif_4",
+        capacidad: 50,
+        tipo: "ATC",
+        equipamiento: ["Proyector HD", "Sistema de videoconferencia", "Pizarra"],
+        disponible: true,
+        horarios: []
+      },
+      {
+        id: "sala_cjp_lab2",
+        codigo: "CJP07_LAB2",
+        numero: "LAB2",
+        edificioId: "edif_4",
+        capacidad: 30,
+        tipo: "LAB",
+        equipamiento: ["25 Computadores", "Servidores", "Red avanzada"],
         disponible: true,
         horarios: []
       }
@@ -208,11 +237,11 @@ export const edificiosMock: Edificio[] = [
 export const asignaturasMock: Asignatura[] = [
   {
     id: "asig_1",
-    codigo: "MAT1105-07",
+    codigo: "MAT1105",
     nombre: "Cálculo I",
     creditos: 6,
     semestre: 1,
-    carrera: "Ingeniería Civil",
+    carrera: "Ingeniería Civil", // Agregado campo carrera
     profesorId: "prof_1",
     salaId: "sala_cs_101",
     horarios: [
@@ -228,13 +257,13 @@ export const asignaturasMock: Asignatura[] = [
   },
   {
     id: "asig_2",
-    codigo: "INF1101-02",
+    codigo: "INF1001",
     nombre: "Introducción a la Programación",
     creditos: 6,
     semestre: 1,
     carrera: "Ingeniería en Informática",
     profesorId: "prof_2",
-    salaId: "sala_ing_lab1",
+    salaId: "sala_faud_lab1",
     horarios: [
       { dia: "Martes", horaInicio: "10:15", horaFin: "12:30" },
       { dia: "Jueves", horaInicio: "10:15", horaFin: "12:30" }
@@ -247,7 +276,7 @@ export const asignaturasMock: Asignatura[] = [
   },
   {
     id: "asig_3",
-    codigo: "FIS1201-01",
+    codigo: "FIS1001",
     nombre: "Física General I",
     creditos: 6,
     semestre: 2,
@@ -258,7 +287,7 @@ export const asignaturasMock: Asignatura[] = [
       { dia: "Lunes", horaInicio: "14:00", horaFin: "15:30" },
       { dia: "Miércoles", horaInicio: "14:00", horaFin: "15:30" }
     ],
-    prerrequisitos: ["MAT1105-07"],
+    prerrequisitos: ["MAT1105"],
     cupos: 30,
     inscritos: 28,
     estado: "programada",
@@ -266,7 +295,7 @@ export const asignaturasMock: Asignatura[] = [
   },
   {
     id: "asig_4",
-    codigo: "QUI1201-03",
+    codigo: "QUI2001",
     nombre: "Química General",
     creditos: 4,
     semestre: 1,
@@ -285,7 +314,7 @@ export const asignaturasMock: Asignatura[] = [
   },
   {
     id: "asig_5",
-    codigo: "MAT2205-01",
+    codigo: "MAT2205",
     nombre: "Cálculo II",
     creditos: 6,
     semestre: 2,
@@ -295,7 +324,7 @@ export const asignaturasMock: Asignatura[] = [
       { dia: "Martes", horaInicio: "14:00", horaFin: "15:30" },
       { dia: "Jueves", horaInicio: "14:00", horaFin: "15:30" }
     ],
-    prerrequisitos: ["MAT1105-07"],
+    prerrequisitos: ["MAT1105"],
     cupos: 35,
     inscritos: 0,
     estado: "planificada",
@@ -303,182 +332,8 @@ export const asignaturasMock: Asignatura[] = [
   }
 ];
 
-export const restriccionesMock: RestriccionAcademica[] = [
-  {
-    id: "rest_1",
-    tipo: "prerrequisito",
-    descripcion: "Cálculo I es prerrequisito obligatorio para Física General I",
-    activa: true,
-    prioridad: "alta",
-    parametros: {
-      asignaturaOrigen: "MAT1105-07",
-      asignaturaDestino: "FIS1201-01"
-    },
-    mensaje: "El estudiante debe haber aprobado Cálculo I antes de inscribir Física General I",
-    fechaCreacion: "2024-01-15",
-    creadoPor: "admin"
-  },
-  {
-    id: "rest_2",
-    tipo: "sala_prohibida",
-    descripcion: "Química General no puede dictarse en salas de computación",
-    activa: true,
-    prioridad: "media",
-    parametros: {
-      asignaturaOrigen: "QUI1201-03",
-      salaProhibida: "sala_computacion"
-    },
-    mensaje: "Las clases de Química requieren laboratorio especializado, no salas de computación",
-    fechaCreacion: "2024-01-10",
-    creadoPor: "admin"
-  },
-  {
-    id: "rest_3",
-    tipo: "horario_conflicto",
-    descripcion: "No se pueden programar clases de laboratorio después de las 16:00",
-    activa: true,
-    prioridad: "media",
-    parametros: {
-      diaRestriccion: "todos",
-      horaInicioRestriccion: "16:00",
-      horaFinRestriccion: "23:59"
-    },
-    mensaje: "Los laboratorios deben programarse antes de las 16:00 por seguridad",
-    fechaCreacion: "2024-01-05",
-    creadoPor: "admin"
-  },
-  {
-    id: "rest_4",
-    tipo: "profesor_especialidad",
-    descripcion: "Solo profesores con especialidad en Matemáticas pueden dictar Cálculo",
-    activa: true,
-    prioridad: "alta",
-    parametros: {
-      asignaturaOrigen: "MAT1105-07",
-      especialidadRequerida: "Matemáticas"
-    },
-    mensaje: "El profesor debe tener especialidad en Matemáticas para dictar materias de cálculo",
-    fechaCreacion: "2024-01-12",
-    creadoPor: "admin"
-  },
-  {
-    id: "rest_5",
-    tipo: "secuencia_temporal",
-    descripcion: "Cálculo II solo puede ofrecerse después de Cálculo I",
-    activa: true,
-    prioridad: "alta",
-    parametros: {
-      asignaturaOrigen: "MAT1105-07",
-      asignaturaDestino: "MAT2205-01"
-    },
-    mensaje: "Cálculo II es una continuación directa de Cálculo I",
-    fechaCreacion: "2024-01-08",
-    creadoPor: "admin"
-  }
-];
-
-export const horariosManualMock: HorarioManual[] = [
-  {
-    id: "horario_1",
-    salaId: "sala_cs_101",
-    titulo: "Clase de Nivelación Matemáticas",
-    descripcion: "Clase de apoyo para estudiantes con dificultades en matemáticas",
-    dia: "Lunes",
-    horaInicio: "18:00",
-    horaFin: "19:30",
-    profesorId: "prof_1",
-    color: "#3B82F6",
-    estado: "activo",
-    fechaCreacion: "2024-01-20",
-    creadoPor: "admin",
-    recurrente: true,
-    fechaInicio: "2024-01-22",
-    fechaFin: "2024-05-20"
-  },
-  {
-    id: "horario_2",
-    salaId: "sala_ing_lab1",
-    titulo: "Taller de Programación Avanzada",
-    descripcion: "Taller extracurricular de programación para estudiantes avanzados",
-    dia: "Viernes",
-    horaInicio: "16:00",
-    horaFin: "18:00",
-    profesorId: "prof_2",
-    color: "#10B981",
-    estado: "activo",
-    fechaCreacion: "2024-01-18",
-    creadoPor: "admin",
-    recurrente: true,
-    fechaInicio: "2024-01-19",
-    fechaFin: "2024-04-26"
-  },
-  {
-    id: "horario_3",
-    salaId: "sala_cs_201",
-    titulo: "Conferencia Magistral",
-    descripcion: "Conferencia sobre nuevas tecnologías en educación",
-    dia: "Miércoles",
-    horaInicio: "19:00",
-    horaFin: "20:30",
-    profesorId: "prof_3",
-    color: "#8B5CF6",
-    estado: "activo",
-    fechaCreacion: "2024-01-15",
-    creadoPor: "admin",
-    recurrente: false,
-    fechaInicio: "2024-02-14",
-    fechaFin: "2024-02-14"
-  },
-  {
-    id: "horario_4",
-    salaId: "sala_cs_102",
-    titulo: "Laboratorio Libre",
-    descripcion: "Tiempo libre para que estudiantes practiquen experimentos",
-    dia: "Sábado",
-    horaInicio: "09:00",
-    horaFin: "12:00",
-    color: "#F59E0B",
-    estado: "activo",
-    fechaCreacion: "2024-01-12",
-    creadoPor: "admin",
-    recurrente: true,
-    fechaInicio: "2024-01-20",
-    fechaFin: "2024-06-15"
-  },
-  {
-    id: "horario_5",
-    salaId: "sala_cc_aula1",
-    titulo: "Reunión de Coordinación",
-    descripcion: "Reunión semanal del cuerpo docente",
-    dia: "Martes",
-    horaInicio: "12:00",
-    horaFin: "13:00",
-    color: "#EF4444",
-    estado: "activo",
-    fechaCreacion: "2024-01-10",
-    creadoPor: "admin",
-    recurrente: true,
-    fechaInicio: "2024-01-16",
-    fechaFin: "2024-12-17"
-  }
-];
-
-// Datos mock basados en el diagrama de base de datos
-
-export const campusMock: Campus[] = [
-  {
-    id: "campus_1",
-    codigo: "CP",
-    nombre: "Campus Principal"
-  },
-  {
-    id: "campus_2", 
-    codigo: "CS",
-    nombre: "Campus Sur"
-  }
-];
-
 export const bloquesMock: Bloque[] = [
+  // LUNES
   {
     id: "bloque_1",
     bloque_id: "1",
@@ -503,154 +358,447 @@ export const bloquesMock: Bloque[] = [
   {
     id: "bloque_4",
     bloque_id: "4",
+    dia_semana: 1, // Lunes
+    hora_inicio: "14:00",
+    hora_fin: "15:30"
+  },
+  {
+    id: "bloque_5",
+    bloque_id: "5",
+    dia_semana: 1, // Lunes
+    hora_inicio: "15:40",
+    hora_fin: "17:10"
+  },
+  
+  // MARTES
+  {
+    id: "bloque_6",
+    bloque_id: "6",
     dia_semana: 2, // Martes
     hora_inicio: "08:00", 
     hora_fin: "09:30"
   },
   {
-    id: "bloque_5",
-    bloque_id: "5",
+    id: "bloque_7",
+    bloque_id: "7",
     dia_semana: 2, // Martes
     hora_inicio: "09:40",
     hora_fin: "11:10"
   },
   {
-    id: "bloque_6",
-    bloque_id: "6",
+    id: "bloque_8",
+    bloque_id: "8",
+    dia_semana: 2, // Martes
+    hora_inicio: "11:20",
+    hora_fin: "12:50"
+  },
+  {
+    id: "bloque_9",
+    bloque_id: "9",
+    dia_semana: 2, // Martes
+    hora_inicio: "14:00",
+    hora_fin: "15:30"
+  },
+  {
+    id: "bloque_10",
+    bloque_id: "10",
+    dia_semana: 2, // Martes
+    hora_inicio: "16:00",
+    hora_fin: "17:30"
+  },
+  
+  // MIÉRCOLES
+  {
+    id: "bloque_11",
+    bloque_id: "11",
     dia_semana: 3, // Miércoles
     hora_inicio: "08:00",
     hora_fin: "09:30"
   },
   {
-    id: "bloque_7",
-    bloque_id: "7",
+    id: "bloque_12",
+    bloque_id: "12",
+    dia_semana: 3, // Miércoles
+    hora_inicio: "09:40",
+    hora_fin: "11:10"
+  },
+  {
+    id: "bloque_13",
+    bloque_id: "13",
+    dia_semana: 3, // Miércoles
+    hora_inicio: "11:20",
+    hora_fin: "12:50"
+  },
+  {
+    id: "bloque_14",
+    bloque_id: "14",
+    dia_semana: 3, // Miércoles
+    hora_inicio: "14:00",
+    hora_fin: "15:30"
+  },
+  
+  // JUEVES
+  {
+    id: "bloque_15",
+    bloque_id: "15",
+    dia_semana: 4, // Jueves
+    hora_inicio: "08:00",
+    hora_fin: "09:30"
+  },
+  {
+    id: "bloque_16",
+    bloque_id: "16",
+    dia_semana: 4, // Jueves
+    hora_inicio: "09:40",
+    hora_fin: "11:10"
+  },
+  {
+    id: "bloque_17",
+    bloque_id: "17",
     dia_semana: 4, // Jueves
     hora_inicio: "14:00",
     hora_fin: "15:30"
   },
   {
-    id: "bloque_8",
-    bloque_id: "8",
+    id: "bloque_18",
+    bloque_id: "18",
+    dia_semana: 4, // Jueves
+    hora_inicio: "15:40",
+    hora_fin: "17:10"
+  },
+  
+  // VIERNES
+  {
+    id: "bloque_19",
+    bloque_id: "19",
+    dia_semana: 5, // Viernes
+    hora_inicio: "08:00",
+    hora_fin: "09:30"
+  },
+  {
+    id: "bloque_20",
+    bloque_id: "20",
     dia_semana: 5, // Viernes
     hora_inicio: "10:00",
     hora_fin: "11:30"
+  },
+  {
+    id: "bloque_21",
+    bloque_id: "21",
+    dia_semana: 5, // Viernes
+    hora_inicio: "11:40",
+    hora_fin: "13:10"
+  },
+  {
+    id: "bloque_22",
+    bloque_id: "22",
+    dia_semana: 5, // Viernes
+    hora_inicio: "14:00",
+    hora_fin: "15:30"
+  },
+  
+  // SÁBADO (para laboratorios y clases especiales)
+  {
+    id: "bloque_23",
+    bloque_id: "23",
+    dia_semana: 6, // Sábado
+    hora_inicio: "09:00",
+    hora_fin: "12:00"
+  },
+  {
+    id: "bloque_24",
+    bloque_id: "24",
+    dia_semana: 6, // Sábado
+    hora_inicio: "14:00",
+    hora_fin: "17:00"
   }
 ];
 
 export const seccionesMock: Seccion[] = [
   {
-    id: "seccion_1",
+    id: 1,
     seccion_id: "seccion_1",
-    numero: "paralelo: 1-2-3",
     codigo: "MAT1105-2025-1",
-    ano: 2025,
+    anio: 2025,
     semestre: 1,
+    asignatura_id: 1, // Referencia numérica según types/index.ts
     asignatura_codigo: "MAT1105",
     cupos: 45
   },
   {
-    id: "seccion_2", 
+    id: 2,
     seccion_id: "seccion_2",
-    numero: "paralelo: 1-2",
     codigo: "FIS1001-2025-1",
-    ano: 2025,
+    anio: 2025,
     semestre: 1,
+    asignatura_id: 3,
     asignatura_codigo: "FIS1001",
     cupos: 40
   },
   {
-    id: "seccion_3",
+    id: 3,
     seccion_id: "seccion_3", 
-    numero: "paralelo: 1",
     codigo: "QUI2001-2025-1",
-    ano: 2025,
+    anio: 2025,
     semestre: 1,
+    asignatura_id: 4,
     asignatura_codigo: "QUI2001",
     cupos: 30
   },
   {
-    id: "seccion_4",
+    id: 4,
     seccion_id: "seccion_4",
-    numero: "paralelo: 1-2-3-4",
     codigo: "INF1001-2025-1", 
-    ano: 2025,
+    anio: 2025,
     semestre: 1,
+    asignatura_id: 2,
     asignatura_codigo: "INF1001",
     cupos: 35
   }
 ];
 
 export const clasesMock: Clase[] = [
+  // CLASES EDIFICIO CJP07 - LUNES
   {
     id: "clase_1",
     clase_id: "clase_1",
     seccion_id: "seccion_1",
     docente_rut: "12345678-9",
-    sala_codigo: "CS01_125",
-    bloque_id: "1",
-    estado: "Programado" as const
+    sala_codigo: "CJP07_101",
+    bloque_id: "1", // Lunes 08:00-09:30
+    estado: "Activo" as const
   },
   {
     id: "clase_2", 
     clase_id: "clase_2",
-    seccion_id: "seccion_1",
-    docente_rut: "12345678-9", 
-    sala_codigo: "CS01_125",
-    bloque_id: "2",
+    seccion_id: "seccion_2",
+    docente_rut: "23456789-0", 
+    sala_codigo: "CJP07_102",
+    bloque_id: "3", // Lunes 11:20-12:50
     estado: "Activo" as const
   },
   {
     id: "clase_3",
     clase_id: "clase_3",
-    seccion_id: "seccion_2",
-    docente_rut: "23456789-0",
-    sala_codigo: "FAUD_204",
-    bloque_id: "3",
+    seccion_id: "seccion_3",
+    docente_rut: "34567890-1",
+    sala_codigo: "CJP07_201",
+    bloque_id: "4", // Lunes 14:00-15:30
     estado: "Programado" as const
   },
+  
+  // CLASES EDIFICIO CJP07 - MARTES
   {
     id: "clase_4",
     clase_id: "clase_4", 
-    seccion_id: "seccion_3",
-    docente_rut: "34567890-1",
-    sala_codigo: "CS01_125",
-    bloque_id: "4",
-    estado: "ETC" as const
+    seccion_id: "seccion_1",
+    docente_rut: "12345678-9",
+    sala_codigo: "CJP07_101",
+    bloque_id: "7", // Martes 09:40-11:10
+    estado: "Activo" as const
   },
   {
     id: "clase_5",
     clase_id: "clase_5",
     seccion_id: "seccion_4",
-    docente_rut: "23456789-0",
-    sala_codigo: "FAUD_204", 
-    bloque_id: "5",
+    docente_rut: "45678901-2",
+    sala_codigo: "CJP07_LAB1",
+    bloque_id: "8", // Martes 11:20-12:50
     estado: "Activo" as const
   },
   {
     id: "clase_6",
     clase_id: "clase_6",
-    seccion_id: "seccion_1",
-    docente_rut: "12345678-9",
-    sala_codigo: "CS01_125",
-    bloque_id: "6",
+    seccion_id: "seccion_2",
+    docente_rut: "23456789-0",
+    sala_codigo: "CJP07_102",
+    bloque_id: "9", // Martes 14:00-15:30
     estado: "Programado" as const
   },
+  
+  // CLASES EDIFICIO CJP07 - MIÉRCOLES
   {
     id: "clase_7",
     clase_id: "clase_7",
-    seccion_id: "seccion_2", 
+    seccion_id: "seccion_3",
     docente_rut: "34567890-1",
-    sala_codigo: "FAUD_204",
-    bloque_id: "7",
+    sala_codigo: "CJP07_201",
+    bloque_id: "11", // Miércoles 08:00-09:30
     estado: "Activo" as const
   },
   {
     id: "clase_8",
     clase_id: "clase_8",
+    seccion_id: "seccion_1",
+    docente_rut: "12345678-9",
+    sala_codigo: "CJP07_101",
+    bloque_id: "12", // Miércoles 09:40-11:10
+    estado: "Activo" as const
+  },
+  {
+    id: "clase_9",
+    clase_id: "clase_9",
     seccion_id: "seccion_4",
+    docente_rut: "45678901-2",
+    sala_codigo: "CJP07_LAB2",
+    bloque_id: "14", // Miércoles 14:00-15:30
+    estado: "Activo" as const
+  },
+  
+  // CLASES EDIFICIO CJP07 - JUEVES
+  {
+    id: "clase_10",
+    clase_id: "clase_10",
+    seccion_id: "seccion_2",
     docente_rut: "23456789-0",
-    sala_codigo: "CS01_125",
-    bloque_id: "8",
+    sala_codigo: "CJP07_102",
+    bloque_id: "15", // Jueves 08:00-09:30
+    estado: "Activo" as const
+  },
+  {
+    id: "clase_11",
+    clase_id: "clase_11",
+    seccion_id: "seccion_3",
+    docente_rut: "34567890-1",
+    sala_codigo: "CJP07_201",
+    bloque_id: "17", // Jueves 14:00-15:30
     estado: "Programado" as const
+  },
+  {
+    id: "clase_12",
+    clase_id: "clase_12",
+    seccion_id: "seccion_1",
+    docente_rut: "12345678-9",
+    sala_codigo: "CJP07_101",
+    bloque_id: "18", // Jueves 15:40-17:10
+    estado: "Activo" as const
+  },
+  
+  // CLASES EDIFICIO CJP07 - VIERNES
+  {
+    id: "clase_13",
+    clase_id: "clase_13",
+    seccion_id: "seccion_4",
+    docente_rut: "45678901-2",
+    sala_codigo: "CJP07_LAB1",
+    bloque_id: "19", // Viernes 08:00-09:30
+    estado: "Activo" as const
+  },
+  {
+    id: "clase_14",
+    clase_id: "clase_14",
+    seccion_id: "seccion_2",
+    docente_rut: "23456789-0",
+    sala_codigo: "CJP07_102",
+    bloque_id: "20", // Viernes 10:00-11:30
+    estado: "Activo" as const
+  },
+  {
+    id: "clase_15",
+    clase_id: "clase_15",
+    seccion_id: "seccion_3",
+    docente_rut: "34567890-1",
+    sala_codigo: "CJP07_201",
+    bloque_id: "22", // Viernes 14:00-15:30
+    estado: "Programado" as const
+  },
+  
+  // CLASES EDIFICIO CJP07 - SÁBADO (Laboratorios especiales)
+  {
+    id: "clase_16",
+    clase_id: "clase_16",
+    seccion_id: "seccion_4",
+    docente_rut: "45678901-2",
+    sala_codigo: "CJP07_LAB2",
+    bloque_id: "23", // Sábado 09:00-12:00
+    estado: "Programado" as const
+  }
+];
+
+export const horariosManualMock: HorarioManual[] = [
+  {
+    id: "horario_1",
+    salaId: "CJP07_101",
+    titulo: "Nivelación Matemáticas",
+    descripcion: "Clase de apoyo para estudiantes con dificultades en matemáticas",
+    dia: "Lunes",
+    horaInicio: "18:00",
+    horaFin: "19:30",
+    profesorId: "prof_1",
+    color: "#3B82F6",
+    estado: "activo",
+    fechaCreacion: "2025-01-20",
+    creadoPor: "admin",
+    recurrente: true,
+    fechaInicio: "2025-01-22",
+    fechaFin: "2025-05-20"
+  },
+  {
+    id: "horario_2",
+    salaId: "CJP07_LAB1",
+    titulo: "Taller de Programación",
+    descripcion: "Taller práctico de programación para reforzar conceptos",
+    dia: "Miércoles",
+    horaInicio: "17:00",
+    horaFin: "18:30",
+    profesorId: "prof_2",
+    color: "#10B981",
+    estado: "activo",
+    fechaCreacion: "2025-02-01",
+    creadoPor: "admin",
+    recurrente: true,
+    fechaInicio: "2025-02-05",
+    fechaFin: "2025-06-25"
+  },
+  {
+    id: "horario_3",
+    salaId: "CJP07_102",
+    titulo: "Consulta Académica Física",
+    descripcion: "Horario de consulta para dudas de física",
+    dia: "Viernes",
+    horaInicio: "16:00",
+    horaFin: "17:00",
+    profesorId: "prof_3",
+    color: "#F59E0B",
+    estado: "activo",
+    fechaCreacion: "2025-02-10",
+    creadoPor: "prof_3",
+    recurrente: true,
+    fechaInicio: "2025-02-14",
+    fechaFin: "2025-05-30"
+  },
+  {
+    id: "horario_4",
+    salaId: "CJP07_LAB2",
+    titulo: "Laboratorio Extra Química",
+    descripcion: "Sesión de laboratorio adicional para experimentos avanzados",
+    dia: "Sábado",
+    horaInicio: "10:00",
+    horaFin: "12:00",
+    profesorId: "prof_4",
+    color: "#8B5CF6",
+    estado: "activo",
+    fechaCreacion: "2025-02-15",
+    creadoPor: "prof_4",
+    recurrente: false,
+    fechaInicio: "2025-03-01",
+    fechaFin: "2025-03-01"
+  }
+];
+
+export const restriccionesMock: RestriccionAcademica[] = [
+  {
+    id: "rest_1",
+    tipo: "prerrequisito",
+    descripcion: "Cálculo I es prerrequisito obligatorio para Física General I",
+    activa: true,
+    prioridad: "alta",
+    parametros: {
+      asignaturaOrigen: "MAT1105",
+      asignaturaDestino: "FIS1201"
+    },
+    mensaje: "El estudiante debe haber aprobado Cálculo I antes de inscribir Física General I",
+    fechaCreacion: "2024-01-15",
+    creadoPor: "admin"
   }
 ];
