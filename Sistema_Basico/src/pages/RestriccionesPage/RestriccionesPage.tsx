@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
@@ -655,7 +655,7 @@ export function RestriccionesPage() {
             <CardContent className="space-y-4">
               <Alert>
                 <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
+                <AlertDescription className="ml-5">
                   {restriccion.mensaje}
                 </AlertDescription>
               </Alert>
