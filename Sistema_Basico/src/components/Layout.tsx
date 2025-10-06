@@ -35,7 +35,7 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
     const { logout } = useAuth(); // usamos el logout de tu contexto
 
     return (
-        <div className='min-h-screen bg-background flex flex-col text-black'>
+        <div className='min-h-screen bg-background flex flex-col text-black pt-24'>
             {/* Header */}
             <Header />
 
