@@ -19,7 +19,7 @@ export interface ListaRestriccionesProps {
   setDialogConfirmacionAbierto: (open: boolean) => void;
   setAccionAConfirmar: (accion: "crear" | "eliminar" | null) => void;
   setRestriccionObjetivo: (r: RestriccionAcademica | null) => void;
-  handleEliminar: (r: RestriccionAcademica) => Promise<void>; // <-- agregado
+  handleEliminar: (r: RestriccionAcademica) => Promise<void>;
 }
 
 export function ListaRestricciones({
@@ -34,7 +34,7 @@ export function ListaRestricciones({
   setDialogConfirmacionAbierto,
   setAccionAConfirmar,
   setRestriccionObjetivo,
-  handleEliminar, // <-- agregado
+  handleEliminar,
 }: ListaRestriccionesProps) {
 
   const toggleActivarRestriccion = (id: string) => {
@@ -80,7 +80,7 @@ export function ListaRestricciones({
                   <div className="flex items-center gap-2 mb-2">
                     <CardTitle className="text-lg">{restriccion.descripcion}</CardTitle>
                     <Badge variant="outline" className="text-xs">{restriccion.tipo.replace('_', ' ')}</Badge>
-                    <Badge className={getPrioridadColor(restriccion.prioridad)}>{restriccion.prioridad}</Badge>
+                    <Badge className={getPrioridadColor(restriccion.prioridad ?? "media")}>{restriccion.prioridad ?? "media"}</Badge>
                     <div className="flex items-center gap-1">
                       {restriccion.activa ? (
                         <CheckCircle className="w-4 h-4 text-green-600" />
@@ -115,12 +115,12 @@ export function ListaRestricciones({
             </Alert>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              {restriccion.parametros.asignaturaOrigen && <div><strong>Asignatura Origen:</strong> {getAsignaturaNombre(restriccion.parametros.asignaturaOrigen)}</div>}
-              {restriccion.parametros.asignaturaDestino && <div><strong>Asignatura Destino:</strong> {getAsignaturaNombre(restriccion.parametros.asignaturaDestino)}</div>}
-              {restriccion.parametros.salaProhibida && <div><strong>Sala Prohibida:</strong> {restriccion.parametros.salaProhibida}</div>}
-              {restriccion.parametros.especialidadRequerida && <div><strong>Especialidad Requerida:</strong> {restriccion.parametros.especialidadRequerida}</div>}
-              {restriccion.parametros.diaRestriccion && <div><strong>Día:</strong> {restriccion.parametros.diaRestriccion}</div>}
-              {restriccion.parametros.horaInicioRestriccion && restriccion.parametros.horaFinRestriccion && (
+              {restriccion.parametros?.asignaturaOrigen && <div><strong>Asignatura Origen:</strong> {getAsignaturaNombre(restriccion.parametros.asignaturaOrigen)}</div>}
+              {restriccion.parametros?.asignaturaDestino && <div><strong>Asignatura Destino:</strong> {getAsignaturaNombre(restriccion.parametros.asignaturaDestino)}</div>}
+              {restriccion.parametros?.salaProhibida && <div><strong>Sala Prohibida:</strong> {restriccion.parametros.salaProhibida}</div>}
+              {restriccion.parametros?.especialidadRequerida && <div><strong>Especialidad Requerida:</strong> {restriccion.parametros.especialidadRequerida}</div>}
+              {restriccion.parametros?.diaRestriccion && <div><strong>Día:</strong> {restriccion.parametros.diaRestriccion}</div>}
+              {restriccion.parametros?.horaInicioRestriccion && restriccion.parametros?.horaFinRestriccion && (
                 <div><strong>Horario:</strong> {restriccion.parametros.horaInicioRestriccion} - {restriccion.parametros.horaFinRestriccion}</div>
               )}
             </div>

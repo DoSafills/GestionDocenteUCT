@@ -1,8 +1,6 @@
 // src/services/restriccionesApi.ts
 import { getAccessToken } from "../../../auth/tokenStore";
-
-const API_BASE = "https://sgh.inf.uct.cl/api/restricciones/";
-
+import { ENDPOINTS } from "@/endpoints";
 export interface RestriccionDTO {
   id?: number;
   tipo: string;
@@ -15,7 +13,7 @@ export interface RestriccionDTO {
 // Obtener todas las restricciones
 export async function obtenerTodas(): Promise<RestriccionDTO[]> {
   const token = getAccessToken();
-  const res = await fetch(API_BASE, {
+  const res = await fetch(ENDPOINTS.RESTRICCIONES, {
     headers: {
       accept: "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -28,7 +26,7 @@ export async function obtenerTodas(): Promise<RestriccionDTO[]> {
 // Obtener restricción por ID
 export async function obtenerPorId(id: number): Promise<RestriccionDTO> {
   const token = getAccessToken();
-  const res = await fetch(`${API_BASE}${id}`, {
+  const res = await fetch(`${ENDPOINTS.RESTRICCIONES}/${id}`, {
     headers: {
       accept: "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -43,7 +41,7 @@ export async function crearRestriccion(data: RestriccionDTO): Promise<Restriccio
   const token = getAccessToken();
   if (!token) throw new Error("No hay token de acceso, inicia sesión primero");
 
-  const res = await fetch(API_BASE, {
+  const res = await fetch(ENDPOINTS.RESTRICCIONES, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -61,7 +59,7 @@ export async function actualizarRestriccion(id: number, data: RestriccionDTO): P
   const token = getAccessToken();
   if (!token) throw new Error("No hay token de acceso, inicia sesión primero");
 
-  const res = await fetch(`${API_BASE}${id}`, {
+  const res = await fetch(`${ENDPOINTS.RESTRICCIONES}/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -79,7 +77,7 @@ export async function actualizarParcial(id: number, data: Partial<RestriccionDTO
   const token = getAccessToken();
   if (!token) throw new Error("No hay token de acceso, inicia sesión primero");
 
-  const res = await fetch(`${API_BASE}${id}`, {
+  const res = await fetch(`${ENDPOINTS.RESTRICCIONES}/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -97,7 +95,7 @@ export async function eliminarRestriccion(id: number): Promise<void> {
   const token = getAccessToken();
   if (!token) throw new Error("No hay token de acceso, inicia sesión primero");
 
-  const res = await fetch(`${API_BASE}${id}`, {
+  const res = await fetch(`${ENDPOINTS.RESTRICCIONES}/${id}`, {
     method: "DELETE",
     headers: {
       accept: "application/json",

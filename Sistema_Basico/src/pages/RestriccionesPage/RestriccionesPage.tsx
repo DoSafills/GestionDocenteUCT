@@ -2,20 +2,13 @@ import { useState, useEffect, useMemo } from "react";
 import { Filtros } from "./components/Filtros";
 import { ResumenRestricciones } from "./components/resumenrestricciones";
 import { FormularioRestriccion } from "./components/formulariorestricciones";
-import { ListaRestricciones} from "./components/listarestricciones";
-import type{ ListaRestriccionesProps } from "./components/listarestricciones";
+import { ListaRestricciones } from "./components/listarestricciones";
 import { ConfirmacionDialog } from "./components/configuraciondialog";
 
 import type { RestriccionAcademica } from "../../types";
-import type { RestriccionDTO } from "./services/api";
 import type { Formulario, TipoRestriccion } from "./components/formulariorestricciones";
 
-import {
-  obtenerTodas,
-  crearRestriccion,
-  actualizarRestriccion,
-  eliminarRestriccion,
-} from "./services/api";
+import { db } from "../../data/restricciones";
 
 // Formulario inicial
 const FORMULARIO_INICIAL: Formulario = {
@@ -35,6 +28,12 @@ const FORMULARIO_INICIAL: Formulario = {
   },
 };
 
+// Validar que prioridad sea del tipo correcto
+const validarPrioridad = (p: string): "alta" | "media" | "baja" => {
+  if (p === "alta" || p === "media" || p === "baja") return p;
+  return "media";
+};
+
 export function RestriccionesPage() {
   const [restricciones, setRestricciones] = useState<RestriccionAcademica[]>([]);
   const [busqueda, setBusqueda] = useState("");
@@ -50,38 +49,30 @@ export function RestriccionesPage() {
   const [accionAConfirmar, setAccionAConfirmar] = useState<"crear" | "eliminar" | null>(null);
   const [restriccionObjetivo, setRestriccionObjetivo] = useState<RestriccionAcademica | null>(null);
 
-  // Cargar restricciones desde la API
+  // Funciones mock
+  const obtenerTodasMock = async () => await db.getAll();
+  const crearRestriccionMock = async (r: RestriccionAcademica) => await db.create(r);
+  const actualizarRestriccionMock = async (id: string, datos: Partial<RestriccionAcademica>) =>
+    await db.update(id, datos);
+  const eliminarRestriccionMock = async (id: string) => await db.delete(id);
+  const toggleEstadoMock = async (id: string) => await db.toggleEstado(id);
+
+  // Cargar restricciones
   useEffect(() => {
-    obtenerTodas()
-      .then((data: RestriccionDTO[]) => {
-        const mapped: RestriccionAcademica[] = data.map(r => ({
-          id: r.id?.toString() || crypto.randomUUID(),
-          descripcion: r.valor,
-          tipo: r.tipo as TipoRestriccion,
-          mensaje: r.valor,
-          prioridad: r.prioridad === 1 ? "alta" : r.prioridad === 2 ? "media" : "baja",
-          activa: r.restriccion_dura ?? true,
-          fechaCreacion: new Date().toISOString(),
-          creadoPor: "API",
-          parametros: {
-            docente_rut: "",
-            operador: "",
-            valor: r.valor,
-            comentario: "",
-            asignaturaOrigen: "",
-            asignaturaDestino: "",
-            salaProhibida: "",
-            especialidadRequerida: "",
-            diaRestriccion: "",
-            horaInicioRestriccion: "",
-            horaFinRestriccion: "",
-          },
-        }));
-        setRestricciones(mapped);
-      })
-      .catch(console.error);
+    const fetchData = async () => {
+      try {
+        const data = await obtenerTodasMock();
+        setRestricciones(
+          data.map(r => ({ ...r, prioridad: validarPrioridad(r.prioridad) }))
+        );
+      } catch (error) {
+        console.error("Error cargando restricciones:", error);
+      }
+    };
+    fetchData();
   }, []);
 
+  // Abrir modal
   const abrirModalParaCrear = () => {
     setFormulario(FORMULARIO_INICIAL);
     setEditando(false);
@@ -91,51 +82,40 @@ export function RestriccionesPage() {
 
   const abrirModalParaEditar = (r: RestriccionAcademica) => {
     setFormulario({
-      tipo: r.tipo,
-      prioridad: r.prioridad,
-      descripcion: r.descripcion,
-      mensaje: r.mensaje,
-      activa: r.activa,
-      parametros: { ...r.parametros },
+      ...r,
+      prioridad: validarPrioridad(r.prioridad),
+      parametros: r.parametros || { ...FORMULARIO_INICIAL.parametros },
     });
     setEditando(true);
     setModalAbierto(true);
     setRestriccionObjetivo(r);
   };
 
+  // Guardar restricción
   const handleSubmit = async () => {
     try {
-      const dto: RestriccionDTO = {
-        tipo: formulario.tipo,
-        valor: formulario.mensaje,
-        prioridad: formulario.prioridad === "alta" ? 1 : formulario.prioridad === "media" ? 2 : 3,
-        restriccion_dura: formulario.activa,
-        restriccion_blanda: !formulario.activa,
-      };
-
+      const prioridadValidada = validarPrioridad(formulario.prioridad);
       if (editando && restriccionObjetivo) {
-        await actualizarRestriccion(Number(restriccionObjetivo.id), dto);
+        await actualizarRestriccionMock(restriccionObjetivo.id, formulario);
         setRestricciones(prev =>
           prev.map(r =>
             r.id === restriccionObjetivo.id
-              ? { ...r, ...formulario }
+              ? { ...r, ...formulario, prioridad: prioridadValidada, parametros: formulario.parametros || {} }
               : r
           )
         );
       } else {
-        const nuevaDTO = await crearRestriccion(dto);
-        const nueva: RestriccionAcademica = {
-          id: nuevaDTO.id?.toString() || crypto.randomUUID(),
-          tipo: formulario.tipo,
-          descripcion: formulario.descripcion,
-          mensaje: formulario.mensaje,
-          prioridad: formulario.prioridad,
-          activa: formulario.activa,
+        const nuevaRestriccion: RestriccionAcademica = {
+          ...formulario,
+          prioridad: prioridadValidada,
+          parametros: formulario.parametros || {},
+          id: crypto.randomUUID(),
           fechaCreacion: new Date().toISOString(),
-          creadoPor: "API",
-          parametros: { ...formulario.parametros },
+          creadoPor: "usuarioActual",
         };
-        setRestricciones(prev => [...prev, nueva]);
+
+        const creada = await crearRestriccionMock(nuevaRestriccion);
+        setRestricciones(prev => [...prev, creada]);
       }
     } catch (error) {
       console.error(error);
@@ -147,16 +127,28 @@ export function RestriccionesPage() {
     }
   };
 
+  // Eliminar
   const handleEliminar = async (r: RestriccionAcademica) => {
+    if (!r.id) return;
     try {
-      if (!r.id) return;
-      await eliminarRestriccion(Number(r.id));
+      await eliminarRestriccionMock(r.id);
       setRestricciones(prev => prev.filter(item => item.id !== r.id));
     } catch (error) {
       console.error(error);
     }
   };
 
+  // Activar/desactivar
+  const handleToggle = async (r: RestriccionAcademica) => {
+    if (!r.id) return;
+    const actualizado = await toggleEstadoMock(r.id);
+    if (!actualizado) return;
+    setRestricciones(prev =>
+      prev.map(item => (item.id === r.id ? actualizado : item))
+    );
+  };
+
+  // Filtrar
   const restriccionesFiltradas = useMemo(() => {
     return restricciones.filter(r => {
       const matchBusqueda = r.descripcion.toLowerCase().includes(busqueda.toLowerCase());
@@ -201,18 +193,18 @@ export function RestriccionesPage() {
       <ResumenRestricciones restricciones={restriccionesFiltradas} />
 
       <ListaRestricciones
-      restricciones={restriccionesFiltradas}
-      setRestricciones={setRestricciones}
-      busqueda={busqueda}
-      filtroTipo={filtroTipo}
-      filtroPrioridad={filtroPrioridad}
-      filtroActiva={filtroActiva}
-      setModalAbierto={setModalAbierto}
-      abrirModalParaEditar={abrirModalParaEditar}
-      setDialogConfirmacionAbierto={setDialogConfirmacionAbierto}
-      setAccionAConfirmar={setAccionAConfirmar}
-      setRestriccionObjetivo={setRestriccionObjetivo}
-      handleEliminar={handleEliminar}
+        restricciones={restriccionesFiltradas}
+        setRestricciones={setRestricciones}
+        busqueda={busqueda}
+        filtroTipo={filtroTipo}
+        filtroPrioridad={filtroPrioridad}
+        filtroActiva={filtroActiva}
+        setModalAbierto={setModalAbierto}
+        abrirModalParaEditar={abrirModalParaEditar}
+        setDialogConfirmacionAbierto={setDialogConfirmacionAbierto}
+        setAccionAConfirmar={setAccionAConfirmar}
+        setRestriccionObjetivo={setRestriccionObjetivo}
+        handleEliminar={handleEliminar}
       />
 
       <ConfirmacionDialog
