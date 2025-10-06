@@ -24,7 +24,7 @@ interface LayoutProps {
 const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'profesores', label: 'Profesores', icon: Users },
-    { id: 'salas', label: 'Salas y Edificios', icon: Building },
+    { id: 'edificios', label: 'Salas y Edificios', icon: Building },
     { id: 'asignaturas', label: 'Asignaturas', icon: BookOpen },
     { id: 'horarios', label: 'Horarios', icon: Calendar },
     { id: 'restricciones', label: 'Restricciones', icon: Settings },
