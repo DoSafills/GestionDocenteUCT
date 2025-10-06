@@ -19,9 +19,9 @@ export function DashboardPage() {
   // Estadísticas generales
   const totalProfesores = profesoresMock.length;
   const profesoresActivos = profesoresMock.filter(p => p.estado === 'activo').length;
-  const totalSalas = edificiosMock.reduce((acc, edificio) => acc + (Array.isArray((edificio as any).salas) ? (edificio as any).salas.length : 0), 0);
+  const totalSalas = edificiosMock.reduce((acc, edificio) => acc + edificio.salas.length, 0);
   const salasDisponibles = edificiosMock.reduce((acc, edificio) => 
-    acc + (Array.isArray((edificio as any).salas) ? (edificio as any).salas.filter((s: any) => s.disponible).length : 0), 0);
+    acc + edificio.salas.filter(s => s.disponible).length, 0);
   const totalAsignaturas = asignaturasMock.length;
   const asignaturasProgramadas = asignaturasMock.filter(a => a.estado === 'programada').length;
   const restriccionesActivas = restriccionesMock.filter(r => r.activa).length;
@@ -61,17 +61,16 @@ export function DashboardPage() {
 
   // Utilización de salas por edificio
   const utilizacionSalas = edificiosMock.map(edificio => {
-    const salas = (edificio as any).salas ?? [];
-    const salasConAsignatura = salas.filter((sala: any) => 
+    const salasConAsignatura = edificio.salas.filter(sala => 
       asignaturasMock.some(asig => asig.salaId === sala.id)
     ).length;
-    const porcentajeUso = salas.length > 0 ? 
-      (salasConAsignatura / salas.length) * 100 : 0;
+    const porcentajeUso = edificio.salas.length > 0 ? 
+      (salasConAsignatura / edificio.salas.length) * 100 : 0;
     
     return {
       edificio: edificio.nombre,
-      codigo: edificio.id,
-      totalSalas: salas.length,
+      codigo: edificio.codigo,
+      totalSalas: edificio.salas.length,
       salasEnUso: salasConAsignatura,
       porcentajeUso
     };
@@ -299,11 +298,11 @@ export function DashboardPage() {
                 </div>
                 <div className="flex justify-between">
                   <span>Laboratorios:</span>
-                  <span>{edificiosMock.reduce((acc, e) => acc + ((e as any).salas?.filter((s: any) => s.tipo === 'laboratorio').length || 0), 0)}</span>
+                  <span>{edificiosMock.reduce((acc, e) => acc + e.salas.filter(s => s.tipo === 'laboratorio').length, 0)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Salas con proyector:</span>
-                  <span>{edificiosMock.reduce((acc, e) => acc + ((e as any).salas?.filter((s: any) => s.equipamiento.includes('Proyector')).length || 0), 0)}</span>
+                  <span>{edificiosMock.reduce((acc, e) => acc + e.salas.filter(s => s.equipamiento.includes('Proyector')).length, 0)}</span>
                 </div>
               </div>
             </div>
