@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Layout } from './components/Layout';
 import { DashboardPage } from '@pages/DashboardPage';
 import { ProfesoresPage } from './pages/ProfesoresPage/ProfesoresPage';
-import { SalasPage } from './components/salas/SalasPage';
+import { EdificiosPage } from "./pages/EdificiosPage/index";
 import { AsignaturasPage } from '@pages/AsignaturasPage';
 import { HorariosPage } from './components/horarios/HorariosPage';
 import { RestriccionesPage } from './components/restricciones/RestriccionesPage';
@@ -11,12 +11,12 @@ import LoginForm from './pages/LoginPage/index';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Toaster } from 'sonner';
 
-type Pagina = 'dashboard' | 'profesores' | 'salas' | 'asignaturas' | 'horarios' | 'restricciones' | 'cursos';
+type Pagina = 'dashboard' | 'profesores' | 'edificio' | 'asignaturas' | 'horarios' | 'restricciones' | 'cursos';
 
 const paginaMap: Record<Pagina, JSX.Element> = {
     dashboard: <DashboardPage />,
     profesores: <ProfesoresPage />,
-    salas: <SalasPage />,
+    edificios: <EdificiosPage />,
     asignaturas: <AsignaturasPage />,
     horarios: <HorariosPage />,
     restricciones: <RestriccionesPage />,
