@@ -393,62 +393,87 @@ export function EdificiosPage() {
 
       {/* Vista por edificios */}
       <div className="space-y-6">
-        {edificios.map(edificio => {
-          const salasEdificio = salas.filter(s => s.edificio_id === edificio.id);
-          return (
-            <Card key={edificio.id}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Building className="w-6 h-6 text-primary" />
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        {edificio.nombre}
-                        <Badge variant="outline">{edificio.tipo}</Badge>
-                      </CardTitle>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <MapPin className="w-4 h-4" />
-                        Campus: {getCampusNombre(edificio.campus_id)}
+        {edificios
+          .filter(edificio => {
+            // Mostrar edificio si su nombre, tipo o campus coinciden con la búsqueda, o si alguna de sus salas coincide
+            const campusNombre = getCampusNombre(edificio.campus_id).toLowerCase();
+            const edificioCoincide =
+              edificio.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+              edificio.tipo.toLowerCase().includes(busqueda.toLowerCase()) ||
+              campusNombre.includes(busqueda.toLowerCase());
+            const salasCoinciden = salas.some(sala =>
+              sala.edificio_id === edificio.id &&
+              (
+                sala.codigo.toLowerCase().includes(busqueda.toLowerCase()) ||
+                sala.tipo.toLowerCase().includes(busqueda.toLowerCase()) ||
+                sala.equipamiento.toLowerCase().includes(busqueda.toLowerCase())
+              )
+            );
+            return busqueda.trim() === "" || edificioCoincide || salasCoinciden;
+          })
+          .map(edificio => {
+            const salasEdificio = salas.filter(s => s.edificio_id === edificio.id);
+            // Filtrar salas por búsqueda y tipo
+            const salasFiltradas = salasEdificio.filter(sala => {
+              const coincideBusqueda =
+                sala.codigo.toLowerCase().includes(busqueda.toLowerCase()) ||
+                sala.tipo.toLowerCase().includes(busqueda.toLowerCase()) ||
+                sala.equipamiento.toLowerCase().includes(busqueda.toLowerCase()) ||
+                edificio.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+                getCampusNombre(edificio.campus_id).toLowerCase().includes(busqueda.toLowerCase());
+              const coincideTipo = filtroTipo === "todos" || sala.tipo === filtroTipo;
+              return coincideBusqueda && coincideTipo;
+            });
+            // Si no hay salas que coincidan y tampoco el edificio, no mostrar nada
+            if (salasFiltradas.length === 0 && busqueda && !edificio.nombre.toLowerCase().includes(busqueda.toLowerCase())) {
+              return null;
+            }
+            return (
+              <Card key={edificio.id}>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Building className="w-6 h-6 text-primary" />
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          {edificio.nombre}
+                          <Badge variant="outline">{edificio.tipo}</Badge>
+                        </CardTitle>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="w-4 h-4" />
+                          Campus: {getCampusNombre(edificio.campus_id)}
+                        </div>
                       </div>
                     </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => agregarSala(edificio.id)}
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Agregar Sala
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => editarEdificio(edificio)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => eliminarEdificio(edificio.id)}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => agregarSala(edificio.id)}
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      Agregar Sala
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => editarEdificio(edificio)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => eliminarEdificio(edificio.id)}
-                    >
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {salasEdificio
-                    .filter(sala => {
-                      const coincideBusqueda = 
-                        sala.codigo.toLowerCase().includes(busqueda.toLowerCase()) ||
-                        edificio.nombre.toLowerCase().includes(busqueda.toLowerCase());
-                      const coincideTipo = filtroTipo === "todos" || sala.tipo === filtroTipo;
-                      return coincideBusqueda && coincideTipo;
-                    })
-                    .map(sala => {
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {salasFiltradas.map(sala => {
                       const asignaturasEnSala = getAsignaturasEnSala(sala.codigo);
                       return (
                         <Card key={sala.id} className="hover:shadow-md transition-shadow">
@@ -526,25 +551,25 @@ export function EdificiosPage() {
                         </Card>
                       );
                     })}
-                </div>
-                {salasEdificio.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Monitor className="w-8 h-8 mx-auto mb-2" />
-                    <p>No hay salas en este edificio</p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-2"
-                      onClick={() => agregarSala(edificio.id)}
-                    >
-                      Agregar primera sala
-                    </Button>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
+                  {salasFiltradas.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Monitor className="w-8 h-8 mx-auto mb-2" />
+                      <p>No hay salas en este edificio</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2"
+                        onClick={() => agregarSala(edificio.id)}
+                      >
+                        Agregar primera sala
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
       </div>
 
       {edificios.length === 0 && (
