@@ -1,13 +1,21 @@
-// src/pages/RestriccionesPage/RestriccionesPage.tsx
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Filtros } from "./components/Filtros";
 import { ResumenRestricciones } from "./components/resumenrestricciones";
 import { FormularioRestriccion } from "./components/formulariorestricciones";
-import { ListaRestricciones } from "./components/listarestricciones";
+import { ListaRestricciones} from "./components/listarestricciones";
+import type{ ListaRestriccionesProps } from "./components/listarestricciones";
 import { ConfirmacionDialog } from "./components/configuraciondialog";
 
-import type { TipoRestriccion, Formulario } from "./components/formulariorestricciones";
 import type { RestriccionAcademica } from "../../types";
+import type { RestriccionDTO } from "./services/api";
+import type { Formulario, TipoRestriccion } from "./components/formulariorestricciones";
+
+import {
+  obtenerTodas,
+  crearRestriccion,
+  actualizarRestriccion,
+  eliminarRestriccion,
+} from "./services/api";
 
 // Formulario inicial
 const FORMULARIO_INICIAL: Formulario = {
@@ -17,10 +25,6 @@ const FORMULARIO_INICIAL: Formulario = {
   mensaje: "",
   activa: true,
   parametros: {
-    docente_rut: "",
-    operador: "",
-    valor: "",
-    comentario: "",
     asignaturaOrigen: "",
     asignaturaDestino: "",
     salaProhibida: "",
@@ -31,28 +35,8 @@ const FORMULARIO_INICIAL: Formulario = {
   },
 };
 
-// Mock inicial
-const RESTRICCIONES_MOCK: RestriccionAcademica[] = [
-  {
-    id: crypto.randomUUID(),
-    descripcion: "Ejemplo de restricción académica",
-    tipo: "prerrequisito",
-    prioridad: "media",
-    mensaje: "Mensaje inicial",
-    activa: true,
-    fechaCreacion: new Date().toISOString(),
-    creadoPor: "Admin",
-    parametros: {
-      docente_rut: "12345678-9",
-      operador: "=",
-      valor: "Matemática I",
-      comentario: "Ejemplo inicial",
-    },
-  },
-];
-
 export function RestriccionesPage() {
-  const [restricciones, setRestricciones] = useState<RestriccionAcademica[]>(RESTRICCIONES_MOCK);
+  const [restricciones, setRestricciones] = useState<RestriccionAcademica[]>([]);
   const [busqueda, setBusqueda] = useState("");
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
   const [filtroPrioridad, setFiltroPrioridad] = useState<string>("todos");
@@ -66,6 +50,38 @@ export function RestriccionesPage() {
   const [accionAConfirmar, setAccionAConfirmar] = useState<"crear" | "eliminar" | null>(null);
   const [restriccionObjetivo, setRestriccionObjetivo] = useState<RestriccionAcademica | null>(null);
 
+  // Cargar restricciones desde la API
+  useEffect(() => {
+    obtenerTodas()
+      .then((data: RestriccionDTO[]) => {
+        const mapped: RestriccionAcademica[] = data.map(r => ({
+          id: r.id?.toString() || crypto.randomUUID(),
+          descripcion: r.valor,
+          tipo: r.tipo as TipoRestriccion,
+          mensaje: r.valor,
+          prioridad: r.prioridad === 1 ? "alta" : r.prioridad === 2 ? "media" : "baja",
+          activa: r.restriccion_dura ?? true,
+          fechaCreacion: new Date().toISOString(),
+          creadoPor: "API",
+          parametros: {
+            docente_rut: "",
+            operador: "",
+            valor: r.valor,
+            comentario: "",
+            asignaturaOrigen: "",
+            asignaturaDestino: "",
+            salaProhibida: "",
+            especialidadRequerida: "",
+            diaRestriccion: "",
+            horaInicioRestriccion: "",
+            horaFinRestriccion: "",
+          },
+        }));
+        setRestricciones(mapped);
+      })
+      .catch(console.error);
+  }, []);
+
   const abrirModalParaCrear = () => {
     setFormulario(FORMULARIO_INICIAL);
     setEditando(false);
@@ -75,10 +91,10 @@ export function RestriccionesPage() {
 
   const abrirModalParaEditar = (r: RestriccionAcademica) => {
     setFormulario({
-      tipo: r.tipo as TipoRestriccion,
-      descripcion: r.descripcion,
-      mensaje: r.mensaje || "",
+      tipo: r.tipo,
       prioridad: r.prioridad,
+      descripcion: r.descripcion,
+      mensaje: r.mensaje,
       activa: r.activa,
       parametros: { ...r.parametros },
     });
@@ -87,42 +103,58 @@ export function RestriccionesPage() {
     setRestriccionObjetivo(r);
   };
 
-  const handleSubmit = () => {
-    if (editando && restriccionObjetivo) {
-      setRestricciones(prev =>
-        prev.map(r =>
-          r.id === restriccionObjetivo.id
-            ? {
-                ...r,
-                tipo: formulario.tipo,
-                descripcion: formulario.descripcion,
-                mensaje: formulario.mensaje,
-                prioridad: formulario.prioridad,
-                activa: formulario.activa,
-                parametros: { ...formulario.parametros },
-              }
-            : r
-        )
-      );
-    } else {
-      const nueva: RestriccionAcademica = {
-        id: crypto.randomUUID(),
-        fechaCreacion: new Date().toISOString(),
-        creadoPor: "Admin",
+  const handleSubmit = async () => {
+    try {
+      const dto: RestriccionDTO = {
         tipo: formulario.tipo,
-        descripcion: formulario.descripcion,
-        mensaje: formulario.mensaje,
-        prioridad: formulario.prioridad,
-        activa: formulario.activa,
-        parametros: { ...formulario.parametros },
+        valor: formulario.mensaje,
+        prioridad: formulario.prioridad === "alta" ? 1 : formulario.prioridad === "media" ? 2 : 3,
+        restriccion_dura: formulario.activa,
+        restriccion_blanda: !formulario.activa,
       };
-      setRestricciones(prev => [...prev, nueva]);
-    }
 
-    setModalAbierto(false);
-    setEditando(false);
-    setRestriccionObjetivo(null);
-    setFormulario(FORMULARIO_INICIAL);
+      if (editando && restriccionObjetivo) {
+        await actualizarRestriccion(Number(restriccionObjetivo.id), dto);
+        setRestricciones(prev =>
+          prev.map(r =>
+            r.id === restriccionObjetivo.id
+              ? { ...r, ...formulario }
+              : r
+          )
+        );
+      } else {
+        const nuevaDTO = await crearRestriccion(dto);
+        const nueva: RestriccionAcademica = {
+          id: nuevaDTO.id?.toString() || crypto.randomUUID(),
+          tipo: formulario.tipo,
+          descripcion: formulario.descripcion,
+          mensaje: formulario.mensaje,
+          prioridad: formulario.prioridad,
+          activa: formulario.activa,
+          fechaCreacion: new Date().toISOString(),
+          creadoPor: "API",
+          parametros: { ...formulario.parametros },
+        };
+        setRestricciones(prev => [...prev, nueva]);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setModalAbierto(false);
+      setEditando(false);
+      setRestriccionObjetivo(null);
+      setFormulario(FORMULARIO_INICIAL);
+    }
+  };
+
+  const handleEliminar = async (r: RestriccionAcademica) => {
+    try {
+      if (!r.id) return;
+      await eliminarRestriccion(Number(r.id));
+      setRestricciones(prev => prev.filter(item => item.id !== r.id));
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const restriccionesFiltradas = useMemo(() => {
@@ -169,17 +201,18 @@ export function RestriccionesPage() {
       <ResumenRestricciones restricciones={restriccionesFiltradas} />
 
       <ListaRestricciones
-        restricciones={restriccionesFiltradas}
-        setRestricciones={setRestricciones}
-        abrirModalParaEditar={abrirModalParaEditar}
-        setDialogConfirmacionAbierto={setDialogConfirmacionAbierto}
-        setAccionAConfirmar={setAccionAConfirmar}
-        setRestriccionObjetivo={setRestriccionObjetivo}
-        filtroActiva={filtroActiva}
-        setModalAbierto={setModalAbierto}
-        busqueda={busqueda}
-        filtroTipo={filtroTipo}
-        filtroPrioridad={filtroPrioridad}
+      restricciones={restriccionesFiltradas}
+      setRestricciones={setRestricciones}
+      busqueda={busqueda}
+      filtroTipo={filtroTipo}
+      filtroPrioridad={filtroPrioridad}
+      filtroActiva={filtroActiva}
+      setModalAbierto={setModalAbierto}
+      abrirModalParaEditar={abrirModalParaEditar}
+      setDialogConfirmacionAbierto={setDialogConfirmacionAbierto}
+      setAccionAConfirmar={setAccionAConfirmar}
+      setRestriccionObjetivo={setRestriccionObjetivo}
+      handleEliminar={handleEliminar}
       />
 
       <ConfirmacionDialog

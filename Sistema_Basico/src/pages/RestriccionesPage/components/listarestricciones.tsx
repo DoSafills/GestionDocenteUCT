@@ -1,3 +1,4 @@
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
@@ -6,7 +7,7 @@ import { CheckCircle, XCircle, Edit, Trash2, AlertTriangle } from "lucide-react"
 import type { RestriccionAcademica } from "../../../types";
 import { getTipoIcon, getPrioridadColor, getAsignaturaNombre } from "../services/utils";
 
-interface ListaRestriccionesProps {
+export interface ListaRestriccionesProps {
   restricciones: RestriccionAcademica[];
   setRestricciones: React.Dispatch<React.SetStateAction<RestriccionAcademica[]>>;
   busqueda: string;
@@ -18,6 +19,7 @@ interface ListaRestriccionesProps {
   setDialogConfirmacionAbierto: (open: boolean) => void;
   setAccionAConfirmar: (accion: "crear" | "eliminar" | null) => void;
   setRestriccionObjetivo: (r: RestriccionAcademica | null) => void;
+  handleEliminar: (r: RestriccionAcademica) => Promise<void>; // <-- agregado
 }
 
 export function ListaRestricciones({
@@ -32,6 +34,7 @@ export function ListaRestricciones({
   setDialogConfirmacionAbierto,
   setAccionAConfirmar,
   setRestriccionObjetivo,
+  handleEliminar, // <-- agregado
 }: ListaRestriccionesProps) {
 
   const toggleActivarRestriccion = (id: string) => {
