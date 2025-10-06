@@ -5,7 +5,7 @@ import { ProfesoresPage } from './pages/ProfesoresPage/ProfesoresPage';
 import { EdificiosPage } from "./pages/EdificiosPage/index";
 import { AsignaturasPage } from '@pages/AsignaturasPage';
 import { HorariosPage } from './components/horarios/HorariosPage';
-import { RestriccionesPage } from './components/restricciones/RestriccionesPage';
+import { RestriccionesPage } from '../src/pages/RestriccionesPage/RestriccionesPage';
 import { CursosPage } from './components/cursos/CursosPage';
 import LoginForm from './pages/LoginPage/index';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -52,3 +52,4 @@ function MainApp() {
         </Layout>
     );
 }
+

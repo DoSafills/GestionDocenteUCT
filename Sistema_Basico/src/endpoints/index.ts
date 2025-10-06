@@ -5,4 +5,5 @@ export const ENDPOINTS = {
     AUTH_REGISTER: `${API_BASE_URL}/api/auth/register`,
     AUTH_REFRESH: `${API_BASE_URL}/api/auth/refresh`,
     ASIGNATURAS: `${API_BASE_URL}/api/asignaturas`,
+    RESTRICCIONES:`${API_BASE_URL}/api/restricciones`,
 };
