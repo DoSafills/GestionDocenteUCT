@@ -9,49 +9,48 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Textarea } from "../../components/ui/textarea";
 import { Plus, Search, Building, MapPin, Users, Monitor, Edit, Trash2, Calendar } from "lucide-react";
 import { toast } from "sonner";
-import type { Edificio, Sala } from "../../types";
-import { edificiosMock, asignaturasMock } from "../../data/mock-data";
+
+import type { Edificio, Sala, Campus } from "../../types";
+import { campusMock, edificiosMock, salasMock, asignaturasMock } from "../../data/mock-data";
+
 
 export function EdificiosPage() {
+  const [campus, setCampus] = useState<Campus[]>(campusMock);
   const [edificios, setEdificios] = useState<Edificio[]>(edificiosMock);
+  const [salas, setSalas] = useState<Sala[]>(salasMock);
   const [busqueda, setBusqueda] = useState("");
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
   const [edificioSeleccionado, setEdificioSeleccionado] = useState<string>("todos");
   const [modalAbierto, setModalAbierto] = useState(false);
   const [modalSalaAbierto, setModalSalaAbierto] = useState(false);
   const [editandoEdificio, setEditandoEdificio] = useState<Edificio | null>(null);
-  const [editandoSala, setEditandoSala] = useState<{ edificioId: string; sala: Sala | null }>({ edificioId: "", sala: null });
+  const [editandoSala, setEditandoSala] = useState<{ edificioId: number | string; sala: Sala | null }>({ edificioId: "", sala: null });
 
   const [formularioEdificio, setFormularioEdificio] = useState({
     nombre: "",
-    codigo: "",
-    direccion: ""
+    tipo: "",
+    campus_id: campus[0]?.id || 1
   });
 
   const [formularioSala, setFormularioSala] = useState({
-    numero: "",
+    codigo: "",
     capacidad: "",
     tipo: "aula" as "aula" | "laboratorio" | "auditorio" | "sala_computacion",
     equipamiento: "",
-    disponible: true
+    esta_disponible: true
   });
 
-  // Obtener todas las salas de todos los edificios
-  const todasLasSalas = edificios.flatMap(edificio => 
-    edificio.salas.map(sala => ({ ...sala, edificio }))
-  );
 
-  const salasFiltradas = todasLasSalas.filter(sala => {
-    const coincideBusqueda = 
-      sala.numero.toLowerCase().includes(busqueda.toLowerCase()) ||
-      sala.edificio.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      sala.edificio.codigo.toLowerCase().includes(busqueda.toLowerCase());
-    
-    const coincideTipo = filtroTipo === "todos" || sala.tipo === filtroTipo;
-    const coincideEdificio = edificioSeleccionado === "todos" || sala.edificioId === edificioSeleccionado;
-    
-    return coincideBusqueda && coincideTipo && coincideEdificio;
-  });
+  // Obtener campus por id
+  const getCampusNombre = (campus_id: number) => {
+    const campusObj = campus.find(c => c.id === campus_id);
+    return campusObj ? campusObj.nombre : "";
+  };
+
+  // Filtrar salas por edificio
+  const getSalasPorEdificio = (edificioId: number) => {
+    return salas.filter(sala => sala.edificio_id === edificioId);
+  };
 
   // Obtener asignaturas asignadas a cada sala
   const getAsignaturasEnSala = (salaId: string) => {
@@ -59,19 +58,17 @@ export function EdificiosPage() {
   };
 
   const handleSubmitEdificio = () => {
-    if (!formularioEdificio.nombre || !formularioEdificio.codigo) {
+    if (!formularioEdificio.nombre || !formularioEdificio.tipo) {
       toast.error("Por favor completa los campos obligatorios");
       return;
     }
-
+    const nuevoId = editandoEdificio?.id ?? (edificios.length > 0 ? Math.max(...edificios.map(e => e.id)) + 1 : 1);
     const nuevoEdificio: Edificio = {
-      id: editandoEdificio?.id || `edif_${Date.now()}`,
+      id: nuevoId,
       nombre: formularioEdificio.nombre,
-      codigo: formularioEdificio.codigo,
-      direccion: formularioEdificio.direccion,
-      salas: editandoEdificio?.salas || []
+      tipo: formularioEdificio.tipo,
+      campus_id: formularioEdificio.campus_id
     };
-
     if (editandoEdificio) {
       setEdificios(prev => prev.map(e => e.id === editandoEdificio.id ? nuevoEdificio : e));
       toast.success("Edificio actualizado exitosamente");
@@ -79,64 +76,48 @@ export function EdificiosPage() {
       setEdificios(prev => [...prev, nuevoEdificio]);
       toast.success("Edificio agregado exitosamente");
     }
-
     resetFormularioEdificio();
     setModalAbierto(false);
   };
 
   const handleSubmitSala = () => {
-    if (!formularioSala.numero || !formularioSala.capacidad) {
+    if (!formularioSala.codigo || !formularioSala.capacidad || !editandoSala.edificioId) {
       toast.error("Por favor completa los campos obligatorios");
       return;
     }
-
+    const nuevoId = editandoSala.sala?.id ?? (salas.length > 0 ? Math.max(...salas.map(s => s.id)) + 1 : 1);
     const nuevaSala: Sala = {
-      id: editandoSala.sala?.id || `sala_${Date.now()}`,
-      numero: formularioSala.numero,
-      edificioId: editandoSala.edificioId,
+      id: nuevoId,
+      codigo: formularioSala.codigo,
       capacidad: parseInt(formularioSala.capacidad),
       tipo: formularioSala.tipo,
-      equipamiento: formularioSala.equipamiento.split(",").map(e => e.trim()).filter(e => e),
-      disponible: formularioSala.disponible,
-      horarios: editandoSala.sala?.horarios || []
+      esta_disponible: formularioSala.esta_disponible,
+      edificio_id: Number(editandoSala.edificioId),
+      equipamiento: formularioSala.equipamiento
     };
-
-    setEdificios(prev => prev.map(edificio => {
-      if (edificio.id === editandoSala.edificioId) {
-        if (editandoSala.sala) {
-          // Editando sala existente
-          return {
-            ...edificio,
-            salas: edificio.salas.map(s => s.id === editandoSala.sala!.id ? nuevaSala : s)
-          };
-        } else {
-          // Agregando nueva sala
-          return {
-            ...edificio,
-            salas: [...edificio.salas, nuevaSala]
-          };
-        }
-      }
-      return edificio;
-    }));
-
-    toast.success(editandoSala.sala ? "Sala actualizada exitosamente" : "Sala agregada exitosamente");
+    if (editandoSala.sala) {
+      setSalas(prev => prev.map(s => s.id === editandoSala.sala!.id ? nuevaSala : s));
+      toast.success("Sala actualizada exitosamente");
+    } else {
+      setSalas(prev => [...prev, nuevaSala]);
+      toast.success("Sala agregada exitosamente");
+    }
     resetFormularioSala();
     setModalSalaAbierto(false);
   };
 
   const resetFormularioEdificio = () => {
-    setFormularioEdificio({ nombre: "", codigo: "", direccion: "" });
+    setFormularioEdificio({ nombre: "", tipo: "", campus_id: campus[0]?.id || 1 });
     setEditandoEdificio(null);
   };
 
   const resetFormularioSala = () => {
     setFormularioSala({
-      numero: "",
+      codigo: "",
       capacidad: "",
       tipo: "aula",
       equipamiento: "",
-      disponible: true
+      esta_disponible: true
     });
     setEditandoSala({ edificioId: "", sala: null });
   };
@@ -144,46 +125,39 @@ export function EdificiosPage() {
   const editarEdificio = (edificio: Edificio) => {
     setFormularioEdificio({
       nombre: edificio.nombre,
-      codigo: edificio.codigo,
-      direccion: edificio.direccion
+      tipo: edificio.tipo,
+      campus_id: edificio.campus_id
     });
     setEditandoEdificio(edificio);
     setModalAbierto(true);
   };
 
-  const editarSala = (edificioId: string, sala: Sala) => {
+  const editarSala = (edificioId: number, sala: Sala) => {
     setFormularioSala({
-      numero: sala.numero,
+      codigo: sala.codigo,
       capacidad: sala.capacidad.toString(),
-      tipo: sala.tipo,
-      equipamiento: sala.equipamiento.join(", "),
-      disponible: sala.disponible
+      tipo: sala.tipo as "aula" | "laboratorio" | "auditorio" | "sala_computacion",
+      equipamiento: sala.equipamiento,
+      esta_disponible: sala.esta_disponible
     });
     setEditandoSala({ edificioId, sala });
     setModalSalaAbierto(true);
   };
 
-  const agregarSala = (edificioId: string) => {
+  const agregarSala = (edificioId: number) => {
     resetFormularioSala();
     setEditandoSala({ edificioId, sala: null });
     setModalSalaAbierto(true);
   };
 
-  const eliminarEdificio = (id: string) => {
+  const eliminarEdificio = (id: number) => {
     setEdificios(prev => prev.filter(e => e.id !== id));
+    setSalas(prev => prev.filter(s => s.edificio_id !== id)); // Eliminar salas asociadas
     toast.success("Edificio eliminado exitosamente");
   };
 
-  const eliminarSala = (edificioId: string, salaId: string) => {
-    setEdificios(prev => prev.map(edificio => {
-      if (edificio.id === edificioId) {
-        return {
-          ...edificio,
-          salas: edificio.salas.filter(s => s.id !== salaId)
-        };
-      }
-      return edificio;
-    }));
+  const eliminarSala = (edificioId: number, salaId: number) => {
+    setSalas(prev => prev.filter(s => s.id !== salaId));
     toast.success("Sala eliminada exitosamente");
   };
 
@@ -223,35 +197,37 @@ export function EdificiosPage() {
                   <Input
                     id="nombre"
                     value={formularioEdificio.nombre}
-                    onChange={(e) => {
-                      setFormularioEdificio(prev => {
-                        const nuevo = { ...prev, nombre: e.target.value };
-                        console.log('Nombre del Edificio:', nuevo.nombre);
-                        return nuevo;
-                      });
-                    }}
+                    onChange={(e) => setFormularioEdificio(prev => ({ ...prev, nombre: e.target.value }))}
                     placeholder="Edificio Biblioteca"
                   />
                 </div>
-                
                 <div className="space-y-2">
-                  <Label htmlFor="codigo" style={{color: '#000', fontWeight: 'bold', zIndex: 10}}>Código *</Label>
+                  <Label htmlFor="tipo" style={{color: '#000', fontWeight: 'bold', zIndex: 10}}>Tipo de Edificio *</Label>
                   <Input
-                    id="codigo"
-                    value={formularioEdificio.codigo}
-                    onChange={(e) => setFormularioEdificio(prev => ({ ...prev, codigo: e.target.value }))}
-                    placeholder="CSF - CJP"
+                    id="tipo"
+                    value={formularioEdificio.tipo}
+                    onChange={(e) => setFormularioEdificio(prev => ({ ...prev, tipo: e.target.value }))}
+                    placeholder="cientifico, ingenieria, administrativo, etc."
                   />
                 </div>
-                
                 <div className="space-y-2">
-                  <Label htmlFor="direccion" style={{color: '#000', fontWeight: 'bold', background: 'transparent', zIndex: 10}}>Dirección</Label>
-                  <Input
-                    id="direccion"
-                    value={formularioEdificio.direccion}
-                    onChange={(e) => setFormularioEdificio(prev => ({ ...prev, direccion: e.target.value }))}
-                    placeholder="Av. Alemania - Av. Rudecindo Ortega"
-                  />
+                  <Label htmlFor="campus_id" style={{color: '#000', fontWeight: 'bold', zIndex: 10}}>Campus *</Label>
+                  <Select
+                    value={formularioEdificio.campus_id ? String(formularioEdificio.campus_id) : ""}
+                    onValueChange={value => setFormularioEdificio(prev => ({ ...prev, campus_id: Number(value) }))}
+                  >
+                    <SelectTrigger
+                      style={{ color: formularioEdificio.campus_id ? '#000' : undefined }}
+                      className="dark:text-white"
+                    >
+                      <SelectValue placeholder="Selecciona un campus" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white dark:bg-zinc-900">
+                      {campus.map(c => (
+                        <SelectItem key={c.id} value={String(c.id)}>{c.nombre}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4">
@@ -278,7 +254,7 @@ export function EdificiosPage() {
                 <div className="space-y-2">
                   <Label htmlFor="edificio">Edificio *</Label>
                   <Select 
-                    value={editandoSala.edificioId} 
+                    value={editandoSala.edificioId?.toString()} 
                     onValueChange={(value) => setEditandoSala(prev => ({ ...prev, edificioId: value }))}
                     disabled={!!editandoSala.sala}
                   >
@@ -287,8 +263,8 @@ export function EdificiosPage() {
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-zinc-900">
                       {edificios.map(edificio => (
-                        <SelectItem key={edificio.id} value={edificio.id}>
-                          {edificio.nombre} ({edificio.codigo})
+                        <SelectItem key={edificio.id} value={edificio.id.toString()}>
+                          {edificio.nombre}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -297,11 +273,11 @@ export function EdificiosPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="numero">Número de Sala *</Label>
+                    <Label htmlFor="codigo">Código de Sala *</Label>
                     <Input
-                      id="numero"
-                      value={formularioSala.numero}
-                      onChange={(e) => setFormularioSala(prev => ({ ...prev, numero: e.target.value }))}
+                      id="codigo"
+                      value={formularioSala.codigo}
+                      onChange={(e) => setFormularioSala(prev => ({ ...prev, codigo: e.target.value }))}
                       placeholder="CS-101"
                     />
                   </div>
@@ -350,8 +326,8 @@ export function EdificiosPage() {
                   <input
                     type="checkbox"
                     id="disponible"
-                    checked={formularioSala.disponible}
-                    onChange={(e) => setFormularioSala(prev => ({ ...prev, disponible: e.target.checked }))}
+                    checked={formularioSala.esta_disponible}
+                    onChange={(e) => setFormularioSala(prev => ({ ...prev, esta_disponible: e.target.checked }))}
                     className="rounded"
                   />
                   <Label htmlFor="disponible">Disponible para uso</Label>
@@ -392,7 +368,7 @@ export function EdificiosPage() {
               <SelectContent className="bg-white dark:bg-zinc-900">
                 <SelectItem value="todos">Todos los edificios</SelectItem>
                 {edificios.map(edificio => (
-                  <SelectItem key={edificio.id} value={edificio.id}>
+                  <SelectItem key={edificio.id} value={edificio.id.toString()}>
                     {edificio.nombre}
                   </SelectItem>
                 ))}
@@ -417,159 +393,158 @@ export function EdificiosPage() {
 
       {/* Vista por edificios */}
       <div className="space-y-6">
-        {edificios.map(edificio => (
-          <Card key={edificio.id}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Building className="w-6 h-6 text-primary" />
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      {edificio.nombre}
-                      <Badge variant="outline">{edificio.codigo}</Badge>
-                    </CardTitle>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="w-4 h-4" />
-                      {edificio.direccion || 'Dirección no especificada'}
+        {edificios.map(edificio => {
+          const salasEdificio = salas.filter(s => s.edificio_id === edificio.id);
+          return (
+            <Card key={edificio.id}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Building className="w-6 h-6 text-primary" />
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        {edificio.nombre}
+                        <Badge variant="outline">{edificio.tipo}</Badge>
+                      </CardTitle>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <MapPin className="w-4 h-4" />
+                        Campus: {getCampusNombre(edificio.campus_id)}
+                      </div>
                     </div>
                   </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => agregarSala(edificio.id)}
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Agregar Sala
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => editarEdificio(edificio)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => eliminarEdificio(edificio.id)}
+                    >
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => agregarSala(edificio.id)}
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Agregar Sala
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => editarEdificio(edificio)}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => eliminarEdificio(edificio.id)}
-                  >
-                    <Trash2 className="w-4 h-4 text-destructive" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {edificio.salas
-                  .filter(sala => {
-                    const coincideBusqueda = 
-                      sala.numero.toLowerCase().includes(busqueda.toLowerCase()) ||
-                      edificio.nombre.toLowerCase().includes(busqueda.toLowerCase());
-                    const coincideTipo = filtroTipo === "todos" || sala.tipo === filtroTipo;
-                    return coincideBusqueda && coincideTipo;
-                  })
-                  .map(sala => {
-                    const asignaturasEnSala = getAsignaturasEnSala(sala.id);
-                    
-                    return (
-                      <Card key={sala.id} className="hover:shadow-md transition-shadow">
-                        <CardHeader className="pb-3">
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-base">{sala.numero}</CardTitle>
-                            <div className="flex gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => editarSala(edificio.id, sala)}
-                              >
-                                <Edit className="w-3 h-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => eliminarSala(edificio.id, sala.id)}
-                              >
-                                <Trash2 className="w-3 h-3 text-destructive" />
-                              </Button>
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <Badge variant="secondary">{sala.tipo}</Badge>
-                            <Badge variant={sala.disponible ? "default" : "destructive"}>
-                              {sala.disponible ? "Disponible" : "No disponible"}
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Users className="w-4 h-4 text-muted-foreground" />
-                            <span>Capacidad: {sala.capacidad} Personas</span>
-                          </div>
-                          
-                          {sala.equipamiento.length > 0 && (
-                            <div className="space-y-1">
-                              <p className="text-sm">Equipamiento:</p>
-                              <div className="flex flex-wrap gap-1">
-                                {sala.equipamiento.map((equipo, index) => (
-                                  <Badge key={index} variant="outline" className="text-xs">
-                                    {equipo}
-                                  </Badge>
-                                ))}
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {salasEdificio
+                    .filter(sala => {
+                      const coincideBusqueda = 
+                        sala.codigo.toLowerCase().includes(busqueda.toLowerCase()) ||
+                        edificio.nombre.toLowerCase().includes(busqueda.toLowerCase());
+                      const coincideTipo = filtroTipo === "todos" || sala.tipo === filtroTipo;
+                      return coincideBusqueda && coincideTipo;
+                    })
+                    .map(sala => {
+                      const asignaturasEnSala = getAsignaturasEnSala(sala.codigo);
+                      return (
+                        <Card key={sala.id} className="hover:shadow-md transition-shadow">
+                          <CardHeader className="pb-3">
+                            <div className="flex items-center justify-between">
+                              <CardTitle className="text-base">{sala.codigo}</CardTitle>
+                              <div className="flex gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => editarSala(edificio.id, sala)}
+                                >
+                                  <Edit className="w-3 h-3" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => eliminarSala(edificio.id, sala.id)}
+                                >
+                                  <Trash2 className="w-3 h-3 text-destructive" />
+                                </Button>
                               </div>
                             </div>
-                          )}
-
-                          {asignaturasEnSala.length > 0 && (
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-muted-foreground" />
-                                <p className="text-sm">Asignaturas Programadas:</p>
-                              </div>
+                            <div className="flex gap-2">
+                              <Badge variant="secondary">{sala.tipo}</Badge>
+                              <Badge variant={sala.esta_disponible ? "default" : "destructive"}>
+                                {sala.esta_disponible ? "Disponible" : "No disponible"}
+                              </Badge>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            <div className="flex items-center gap-2 text-sm">
+                              <Users className="w-4 h-4 text-muted-foreground" />
+                              <span>Capacidad: {sala.capacidad} Personas</span>
+                            </div>
+                            {sala.equipamiento && (
                               <div className="space-y-1">
-                                {asignaturasEnSala.map(asignatura => (
-                                  <div key={asignatura.id} className="text-xs p-2 rounded" style={{ backgroundColor: "#e4e4e7" }}>
-                                    <div className="flex justify-between items-center">
-                                      <span className="font-medium">{asignatura.codigo}</span>
-                                      <Badge variant="outline" className="text-xs">
-                                        {asignatura.estado}
-                                      </Badge>
-                                    </div>
-                                    <p className="text-muted-foreground">{asignatura.nombre}</p>
-                                    <p className="text-muted-foreground">
-                                      {asignatura.horarios.map(h => 
-                                        `${h.dia} ${h.horaInicio}-${h.horaFin}`
-                                      ).join(', ')}
-                                    </p>
-                                  </div>
-                                ))}
+                                <p className="text-sm">Equipamiento:</p>
+                                <div className="flex flex-wrap gap-1">
+                                  {sala.equipamiento.split(',').map((equipo, index) => (
+                                    <Badge key={index} variant="outline" className="text-xs">
+                                      {equipo.trim()}
+                                    </Badge>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-              </div>
-              
-              {edificio.salas.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Monitor className="w-8 h-8 mx-auto mb-2" />
-                  <p>No hay salas en este edificio</p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="mt-2"
-                    onClick={() => agregarSala(edificio.id)}
-                  >
-                    Agregar primera sala
-                  </Button>
+                            )}
+                            {asignaturasEnSala.length > 0 && (
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                                  <p className="text-sm">Asignaturas Programadas:</p>
+                                </div>
+                                <div className="space-y-1">
+                                  {asignaturasEnSala.map(asignatura => (
+                                    <div key={asignatura.id} className="text-xs p-2 rounded" style={{ backgroundColor: "#e4e4e7" }}>
+                                      <div className="flex justify-between items-center">
+                                        <span className="font-medium">{asignatura.codigo}</span>
+                                        <Badge variant="outline" className="text-xs">
+                                          {asignatura.estado}
+                                        </Badge>
+                                      </div>
+                                      <p className="text-muted-foreground">{asignatura.nombre}</p>
+                                      <p className="text-muted-foreground">
+                                        {asignatura.horarios.map(h => 
+                                          `${h.dia} ${h.horaInicio}-${h.horaFin}`
+                                        ).join(', ')}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+                {salasEdificio.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Monitor className="w-8 h-8 mx-auto mb-2" />
+                    <p>No hay salas en este edificio</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => agregarSala(edificio.id)}
+                    >
+                      Agregar primera sala
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {edificios.length === 0 && (

@@ -1,5 +1,5 @@
 // Datos mock para el sistema académico
-import type { Profesor, Edificio, Sala, Asignatura, RestriccionAcademica, HorarioManual } from "../types";
+import type { Profesor, Sala, Asignatura, RestriccionAcademica, HorarioManual } from "../types";
 
 
 export const profesoresMock: Profesor[] = [
@@ -69,90 +69,98 @@ export const profesoresMock: Profesor[] = [
   }
 ];
 
-export const edificiosMock: Edificio[] = [
+
+// Mock de Campus
+export const campusMock = [
   {
-    id: "edif_1",
+    id: 1,
+    nombre: "Campus San Juan Pablo II",
+    direccion: "Av. Universidad 123"
+  },
+  {
+    id: 2,
+    nombre: "Campus Norte",
+    direccion: "Av. Tecnología 456"
+  }
+];
+
+// Mock de Edificios
+export const edificiosMock = [
+  {
+    id: 1,
     nombre: "Edificio de Ciencias",
-    codigo: "CS",
-    direccion: "Av. Universidad 123",
-    salas: [
-      {
-        id: "sala_cs_101",
-        numero: "CS-101",
-        edificioId: "edif_1",
-        capacidad: 40,
-        tipo: "aula",
-        equipamiento: ["Proyector", "Pizarra", "Sistema de audio"],
-        disponible: true,
-        horarios: []
-      },
-      {
-        id: "sala_cs_102",
-        numero: "CS-102",
-        edificioId: "edif_1",
-        capacidad: 30,
-        tipo: "laboratorio",
-        equipamiento: ["Computadores", "Proyector", "Pizarra digital"],
-        disponible: true,
-        horarios: []
-      },
-      {
-        id: "sala_cs_201",
-        numero: "CS-201",
-        edificioId: "edif_1",
-        capacidad: 60,
-        tipo: "auditorio",
-        equipamiento: ["Sistema de sonido", "Proyector HD", "Escenario"],
-        disponible: true,
-        horarios: []
-      }
-    ]
+    tipo: "cientifico",
+    campus_id: 1
   },
   {
-    id: "edif_2",
+    id: 2,
     nombre: "Edificio de Ingeniería",
-    codigo: "ING",
-    direccion: "Av. Tecnología 456",
-    salas: [
-      {
-        id: "sala_ing_101",
-        numero: "ING-101",
-        edificioId: "edif_2",
-        capacidad: 45,
-        tipo: "aula",
-        equipamiento: ["Proyector", "Pizarra", "Aire acondicionado"],
-        disponible: true,
-        horarios: []
-      },
-      {
-        id: "sala_ing_lab1",
-        numero: "ING-LAB1",
-        edificioId: "edif_2",
-        capacidad: 25,
-        tipo: "sala_computacion",
-        equipamiento: ["30 Computadores", "Proyector", "Software especializado"],
-        disponible: true,
-        horarios: []
-      }
-    ]
+    tipo: "ingenieria",
+    campus_id: 2
   },
   {
-    id: "edif_3",
+    id: 3,
     nombre: "Edificio Central",
-    codigo: "CC",
-    direccion: "Plaza Central s/n",
-    salas: [
-      {
-        id: "sala_cc_aula1",
-        numero: "CC-AULA1",
-        edificioId: "edif_3",
-        capacidad: 80,
-        tipo: "aula",
-        equipamiento: ["Proyector", "Sistema de audio", "Pizarra"],
-        disponible: true,
-        horarios: []
-      }
-    ]
+    tipo: "administrativo",
+    campus_id: 1
+  }
+];
+
+// Mock de Salas
+export const salasMock = [
+  {
+    id: 1,
+    codigo: "CS-101",
+    capacidad: 40,
+    tipo: "aula",
+    esta_disponible: true,
+    edificio_id: 1,
+    equipamiento: "Proyector, Pizarra, Sistema de audio"
+  },
+  {
+    id: 2,
+    codigo: "CS-102",
+    capacidad: 30,
+    tipo: "laboratorio",
+    esta_disponible: true,
+    edificio_id: 1,
+    equipamiento: "Computadores, Proyector, Pizarra digital"
+  },
+  {
+    id: 3,
+    codigo: "CS-201",
+    capacidad: 60,
+    tipo: "auditorio",
+    esta_disponible: true,
+    edificio_id: 1,
+    equipamiento: "Sistema de sonido, Proyector HD, Escenario"
+  },
+  {
+    id: 4,
+    codigo: "ING-101",
+    capacidad: 45,
+    tipo: "aula",
+    esta_disponible: true,
+    edificio_id: 2,
+    equipamiento: "Proyector, Pizarra, Aire acondicionado"
+  },
+  {
+    id: 5,
+    codigo: "ING-LAB1",
+    capacidad: 25,
+    tipo: "sala_computacion",
+    esta_disponible: true,
+    edificio_id: 2,
+    equipamiento: "30 Computadores, Proyector, Software especializado"
+  },
+  {
+    id: 6,
+    codigo: "CC-AULA1",
+    capacidad: 80,
+    tipo: "aula",
+    esta_disponible: true,
+    edificio_id: 3,
+    equipamiento: "Proyector, Sistema de audio, Pizarra"
   }
 ];
 
