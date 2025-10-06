@@ -207,7 +207,7 @@ export function FormularioInscripcion({ curso, abierto, onCerrar, onInscripcion 
                   <SelectTrigger>
                     <SelectValue placeholder="Selecciona tu nivel" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white dark:bg-zinc-900">
                     <SelectItem value="Principiante">Principiante</SelectItem>
                     <SelectItem value="Intermedio">Intermedio</SelectItem>
                     <SelectItem value="Avanzado">Avanzado</SelectItem>

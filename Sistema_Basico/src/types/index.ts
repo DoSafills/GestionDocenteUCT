@@ -1,5 +1,29 @@
+
 // NUEVOS TIPOS EN BASE AL MER
 export type DiaSemana = 'LUNES' | 'MARTES' | 'MIERCOLES' | 'JUEVES' | 'VIERNES' | 'SABADO';
+
+export interface Campus {
+  id: number;
+  nombre: string;
+  direccion: string;
+}
+
+export interface Edificio {
+  id: number;
+  nombre: string;
+  tipo: string;
+  campus_id: number; // FK → Campus.id
+}
+
+export interface Sala {
+  id: number;
+  codigo: string;
+  capacidad: number;
+  tipo: string;
+  esta_disponible: boolean;
+  edificio_id: number; // FK → Edificio.id
+  equipamiento: string;
+}
 
 export interface Clase {
     id: number;
@@ -72,25 +96,6 @@ export interface Profesor {
     experiencia: number; // años
     estado: 'activo' | 'inactivo';
     fechaContratacion: string;
-}
-
-export interface Edificio {
-    id: string;
-    nombre: string;
-    codigo: string;
-    direccion: string;
-    salas: Sala[];
-}
-
-export interface Sala {
-    id: string;
-    numero: string;
-    edificioId: string;
-    capacidad: number;
-    tipo: 'aula' | 'laboratorio' | 'auditorio' | 'sala_computacion';
-    equipamiento: string[];
-    disponible: boolean;
-    horarios: HorarioSala[];
 }
 
 export interface HorarioSala {
