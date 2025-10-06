@@ -42,23 +42,21 @@ HorariosPage/
 ## Arquitectura por Capas
 
 ### 1. Capa de Presentación (UI)
-- **HorariosPage.tsx**: Componente principal que maneja el estado de la UI
-- **components/**: Componentes reutilizables específicos del módulo
-- **hooks/**: Hooks personalizados para lógica de estado y efectos
+- HorariosPage.tsx: Componente principal que maneja el estado de la UI.
+- components/: Componentes reutilizables específicos del módulo.
+- hooks/: Hooks personalizados para lógica de estado y efectos.
 
 ### 2. Capa de Aplicación (Services)
-- **services/horarioService.ts**: Orquesta la lógica de negocio
-- Maneja validaciones, transformaciones y coordinación entre repositorios
-- Proporciona una API limpia para la capa de presentación
+- services/horarioService.ts: Orquesta la lógica de negocio.
+- Maneja validaciones, transformaciones y coordinación entre repositorios.
+- Proporciona una API limpia para la capa de presentación.
 
 ### 3. Capa de Infraestructura (Repository)
-- **repository/horarioRepository.ts**: Acceso y manipulación de datos
-- Abstrae el origen de datos (mock, API, base de datos)
-- Transforma datos entre formatos del dominio y externos
+- repository/horarioRepository.ts: Acceso y manipulación de datos (mock/API/DB).
+- Transforma datos entre formatos del dominio y externos.
 
 ### 4. Capa de Dominio (Types)
-- **types/**: Definiciones de tipos y interfaces del dominio
-- Representa las entidades de negocio según el diagrama MER
+- types/: Definiciones de tipos e interfaces del dominio basadas en el MER.
 
 ## Funcionalidades Implementadas
 
@@ -89,25 +87,20 @@ const stats = await service.obtenerEstadisticas();
 // Retorna: { totalClases, clasesPorEstado, clasesPorDia }
 ```
 
-## Mapeo de Endpoints
+## Validaciones de Negocio (Service)
+- Disponibilidad del docente vs. bloque solicitado.
+- Disponibilidad de la sala y ausencia de solapamientos.
+- Capacidad de sala vs. cupos de la sección.
+- Reglas por estado (activo, reprogramado, cancelado).
+- Reglas temporales: bloques válidos según calendario académico.
 
-Los métodos del servicio se mapean directamente a endpoints REST:
+## Mapeo de Endpoints (Referencia)
+- GET /api/seccion/{seccion_id}/horarios → obtenerHorariosPorSeccion()
+- GET /api/clase/{clase_id} → obtenerHorarioPorClase()
+- GET /api/bloque/{bloque_id} → obtenerHorariosPorBloque()
+- GET /api/docente/{rut}/horarios → obtenerHorariosPorDocente()
 
-- `GET /api/seccion/{seccion_id}/horarios` → `obtenerHorariosPorSeccion()`
-- `GET /api/clase/{clase_id}` → `obtenerHorarioPorClase()`
-- `GET /api/bloque/{bloque_id}` → `obtenerHorariosPorBloque()`
-- `GET /api/docente/{rut}/horarios` → `obtenerHorariosPorDocente()`
-
-## Beneficios de esta Arquitectura
-
-1. **Separación de Responsabilidades**: Cada capa tiene una responsabilidad específica
-2. **Testabilidad**: Cada componente puede probarse independientemente
-3. **Reutilización**: Servicios y repositorios pueden usarse en otros módulos
-4. **Escalabilidad**: Fácil agregar nuevas funcionalidades sin afectar código existente
-5. **Mantenibilidad**: Código organizado y fácil de localizar
-6. **Tipado Fuerte**: TypeScript proporciona seguridad de tipos en tiempo de compilación
-
-## Uso del Hook Principal
+## Uso de Hooks
 
 ```typescript
 import { useHorarios } from './hooks';
@@ -125,14 +118,22 @@ function MiComponente() {
 }
 ```
 
+## Convenciones
+- Tipos en types/: entidades puras (Horario, Bloque, Seccion, etc.).
+- Repositorio sin lógica de negocio; solo I/O y mapping.
+- Service con orquestación y validaciones.
+- Hooks sin efectos secundarios fuera de React.
+
+## Testing (Sugerido)
+- Unit: services y utils.
+- Integration: hooks con repositorio mockeado.
+- UI: componentes con estados (cargando, vacío, error, éxito).
+
 ## Extensibilidad
-
-Para agregar nuevas funcionalidades:
-
-1. **Nuevos tipos**: Agregar en `types/`
-2. **Nueva lógica de negocio**: Extender `horarioService.ts`
-3. **Nuevas consultas de datos**: Extender `horarioRepository.ts`
-4. **Nuevos componentes**: Agregar en `components/`
-5. **Nuevas utilidades**: Agregar en `utils/`
+1. Nuevos tipos: agregar en types/.
+2. Nueva lógica de negocio: extender horarioService.ts.
+3. Nuevas consultas de datos: extender horarioRepository.ts.
+4. Nuevos componentes: agregar en components/.
+5. Nuevas utilidades: agregar en utils/.
 
 Esta estructura proporciona una base sólida y escalable para el desarrollo futuro del sistema de gestión de horarios.
