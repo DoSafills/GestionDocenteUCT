@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Layout } from './components/Layout';
-import { DashboardPage } from "./pages/DashboardPage";
+import { DashboardPage } from '@pages/DashboardPage';
 import { ProfesoresPage } from './pages/ProfesoresPage/ProfesoresPage';
 import { SalasPage } from './components/salas/SalasPage';
 import { AsignaturasPage } from '@pages/AsignaturasPage';
