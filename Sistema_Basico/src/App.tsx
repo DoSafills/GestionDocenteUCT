@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Layout } from './components/Layout';
-import { DashboardPage } from './components/dashboard/DashboardPage';
-import { ProfesoresPage } from './pages/ProfesoresPage/ProfesoresPage';
-import { EdificiosPage } from "./pages/EdificiosPage/index";
+import { DashboardPage } from '@pages/DashboardPage';
+import { ProfesoresPage } from '@pages/ProfesoresPage';
+import { EdificiosPage } from '@pages/EdificiosPage';
 import { AsignaturasPage } from '@pages/AsignaturasPage';
 import { HorariosPage } from './components/horarios/HorariosPage';
-import { RestriccionesPage } from '../src/pages/RestriccionesPage/RestriccionesPage';
+import { RestriccionesPage } from '@pages/RestriccionesPage';
 import { CursosPage } from './components/cursos/CursosPage';
 import LoginForm from './pages/LoginPage/index';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -33,7 +33,7 @@ export default function App() {
 }
 
 function MainApp() {
-    const [paginaActual, setPaginaActual] = useState<Pagina>('asignaturas');
+    const [paginaActual, setPaginaActual] = useState<Pagina>('dashboard');
     const { isAuthenticated } = useAuth();
 
     if (!isAuthenticated) {
@@ -52,4 +52,3 @@ function MainApp() {
         </Layout>
     );
 }
-
