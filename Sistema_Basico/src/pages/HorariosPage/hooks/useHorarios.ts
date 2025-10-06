@@ -13,9 +13,12 @@ export const useHorarios = () => {
     setCargando(true);
     setError(null);
     try {
+      console.log("[useHorarios] obtenerHorariosPorSeccion", seccionId);
       const datos = await service.obtenerHorariosPorSeccion(seccionId);
+      console.log("[useHorarios] recibidos", datos.length);
       setHorarios(datos);
     } catch (err) {
+      console.error("[useHorarios] error obtenerHorariosPorSeccion", err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setCargando(false);
@@ -26,9 +29,11 @@ export const useHorarios = () => {
     setCargando(true);
     setError(null);
     try {
+      console.log("[useHorarios] obtenerHorarioPorClase", claseId);
       const horario = await service.obtenerHorarioPorClase(claseId);
       return horario;
     } catch (err) {
+      console.error("[useHorarios] error obtenerHorarioPorClase", err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
       return null;
     } finally {
@@ -40,21 +45,15 @@ export const useHorarios = () => {
     setCargando(true);
     setError(null);
     try {
+      console.log("[useHorarios] filtrarHorarios", filtros);
       const datos = await service.filtrarHorarios(filtros);
+      console.log("[useHorarios] recibidos", datos.length);
       setHorarios(datos);
     } catch (err) {
+      console.error("[useHorarios] error filtrarHorarios", err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setCargando(false);
-    }
-  };
-
-  const obtenerEstadisticas = async () => {
-    try {
-      return await service.obtenerEstadisticas();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
-      return null;
     }
   };
 
@@ -64,8 +63,7 @@ export const useHorarios = () => {
     error,
     obtenerHorariosPorSeccion,
     obtenerHorarioPorClase,
-    filtrarHorarios,
-    obtenerEstadisticas,
+    filtrarHorarios, 
     setHorarios
   };
-};
+}

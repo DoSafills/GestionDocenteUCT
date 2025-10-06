@@ -3,7 +3,7 @@ import { Button } from "../../../components/ui/button";
 import { Badge } from "../../../components/ui/badge";
 import { Calendar, Clock, MapPin, User, Eye, Edit } from "lucide-react";
 import { getColorPorEstado } from "../constants";
-import { formatearRangoHorario } from "../utils";
+import { formatearRangoHorario } from "../utils/formatters";
 import type { ListaHorariosProps } from "../types/componentes";
 
 export function ListaHorarios({
@@ -120,13 +120,7 @@ export function ListaHorarios({
             </div>
 
             <div className="flex gap-2 pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onVerDetalle(horario.clase_id)}
-              >
-                Ver Detalle
-              </Button>
+
             </div>
           </CardContent>
         </Card>

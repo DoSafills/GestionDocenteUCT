@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --font-size: 16px;
   --background: #ffffff;
@@ -29,6 +33,12 @@
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
   --radius: 0.625rem;
+
+  /* Tamaños de texto usados más abajo */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-base: 1rem;     /* 16px */
 }
 
 .dark {
@@ -60,23 +70,60 @@
   --chart-5: oklch(0.645 0.246 16.439);
 }
 
-
-
 @layer base {
-  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) {
-    h1 { font-size: var(--text-2xl); font-weight: var(--font-weight-medium); line-height: 1.5; color: hsl(var(--foreground)); }
-    h2 { font-size: var(--text-xl); font-weight: var(--font-weight-medium); line-height: 1.5; color: hsl(var(--foreground)); }
-    h3 { font-size: var(--text-lg); font-weight: var(--font-weight-medium); line-height: 1.5; color: hsl(var(--foreground)); }
-    h4 { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; color: hsl(var(--foreground)); }
-    p  { font-size: var(--text-base); font-weight: var(--font-weight-normal); line-height: 1.5; color: hsl(var(--foreground)); }
-    label { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; color: hsl(var(--foreground)); }
-    button { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; }
-    /* input: solo tamaño y peso, sin color ni opacidad */
-    input  { font-size: var(--text-base); font-weight: var(--font-weight-normal); line-height: 1.5; }
+
+  h1:not([class^="text-"]):not([class*=" text-"]) {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+    color: var(--foreground);
+  }
+  h2:not([class^="text-"]):not([class*=" text-"]) {
+    font-size: var(--text-xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+    color: var(--foreground);
+  }
+  h3:not([class^="text-"]):not([class*=" text-"]) {
+    font-size: var(--text-lg);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+    color: var(--foreground);
+  }
+  h4:not([class^="text-"]):not([class*=" text-"]) {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+    color: var(--foreground);
+  }
+  p:not([class^="text-"]):not([class*=" text-"]) {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-normal);
+    line-height: 1.5;
+    color: var(--foreground);
+  }
+  label:not([class^="text-"]):not([class*=" text-"]) {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+    color: var(--foreground);
+  }
+  button:not([class^="text-"]):not([class*=" text-"]) {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+  input:not([class^="text-"]):not([class*=" text-"]) {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-normal);
+    line-height: 1.5;
   }
 }
 
-html { 
-  font-size: var(--font-size); 
-  color-scheme: dark;
+html {
+  font-size: var(--font-size);
+  /* Si vas a manejar modo oscuro con la clase .dark, puedes dejar que el UA se ajuste:
+     color-scheme: light dark;  o quitar esta línea. 
+     Si fuerzas dark aquí, los componentes nativos (scrollbar, etc.) se verán en dark siempre. */
+  color-scheme: light dark;
 }

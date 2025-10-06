@@ -7,7 +7,7 @@ import type {
   RestriccionAcademica, 
   HorarioManual,
   Campus,
-  Seccion,
+ Seccion,
   Bloque,
   Clase
 } from "../types";

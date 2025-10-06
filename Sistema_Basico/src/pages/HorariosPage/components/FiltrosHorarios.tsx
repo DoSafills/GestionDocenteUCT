@@ -4,72 +4,52 @@ import { Input } from "../../../components/ui/input";
 import { Button } from "../../../components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../../components/ui/dialog";
 import { Badge } from "../../../components/ui/badge";
-import { Search, X, HelpCircle, Calendar, MapPin, Users, BookOpen, Clock, Filter } from "lucide-react";
-
-// Definir la interfaz directamente aquí para evitar problemas de importación
-interface FiltrosHorariosProps {
-  filtros: any;
-  onFiltroChange: (filtros: any) => void;
-  salas: any[];
-  profesores: any[];
-  asignaturas: any[];
-}
+import { Search, X, HelpCircle, Calendar, MapPin, BookOpen, Filter } from "lucide-react";
+import type { FiltrosHorariosProps } from "../types/componentes";
 
 export function FiltrosHorarios({
   filtros,
   onFiltroChange,
   salas,
   profesores,
-  asignaturas
 }: FiltrosHorariosProps) {
   const [busquedaGlobal, setBusquedaGlobal] = useState('');
-  const [filtrosAvanzadosAbiertos, setFiltrosAvanzadosAbiertos] = useState(false);
+  const [menuAbierto, setMenuAbierto] = useState(false); // desplegable
 
   const handleBusquedaChange = (valor: string) => {
     setBusquedaGlobal(valor);
-    
     if (valor.trim()) {
       const filtrosBusqueda: any = {};
-      
-      // Detectar tipo de búsqueda basado en patrones
-      if (/^\d{1,2}\.?\d{3}\.?\d{3}-?[\dkK]$/i.test(valor)) {
-        filtrosBusqueda.docenteRut = valor;
+
+      // Nota: Sin filtro de bloques. No interpretamos valores numéricos como bloqueId.
+
+      // Buscar por docente (por nombre)
+      const docente = profesores.find(p =>
+        String(p.nombre || "").toLowerCase().includes(valor.toLowerCase())
+      );
+      if (docente) filtrosBusqueda.docenteRut = String((docente as any).id);
+
+      // Buscar por sala/edificio
+      const sala = salas.find(s =>
+        s.codigo?.toLowerCase().includes(valor.toLowerCase()) ||
+        s.numero?.toLowerCase().includes(valor.toLowerCase()) ||
+        s.edificio?.codigo?.toLowerCase().includes(valor.toLowerCase()) ||
+        s.edificio?.nombre?.toLowerCase().includes(valor.toLowerCase())
+      );
+      if (sala) {
+        filtrosBusqueda.salaId = sala.codigo.includes('_')
+          ? sala.codigo.split('_')[0]
+          : sala.codigo;
       }
-      else if (/^[A-Z]{3}\d{4}-\d{4}-\d$/i.test(valor)) {
-        filtrosBusqueda.seccionId = valor;
-      }
-      else if (/^\d+$/.test(valor)) {
-        filtrosBusqueda.bloqueId = valor;
-      }
-      else {
-        // Buscar en nombres de docentes
-        const docenteEncontrado = profesores.find(p => 
-          `${p.nombre} ${p.apellido}`.toLowerCase().includes(valor.toLowerCase())
-        );
-        if (docenteEncontrado) {
-          filtrosBusqueda.docenteRut = docenteEncontrado.docente_rut;
-        }
-        
-        // Buscar en códigos de sala
-        const salaEncontrada = salas.find(s => 
-          s.codigo?.toLowerCase().includes(valor.toLowerCase()) ||
-          s.numero?.toLowerCase().includes(valor.toLowerCase()) ||
-          s.edificio?.nombre?.toLowerCase().includes(valor.toLowerCase())
-        );
-        if (salaEncontrada) {
-          filtrosBusqueda.salaId = salaEncontrada.codigo;
-        }
-      }
-      
-      onFiltroChange(filtrosBusqueda);
+
+      onFiltroChange({ ...filtros, ...filtrosBusqueda });
     } else {
       limpiarFiltros();
     }
   };
 
-  const handleFiltroRapido = (campo: string, valor: any) => {
-    const nuevosFiltros = { ...filtros, [campo]: valor };
-    onFiltroChange(nuevosFiltros);
+  const handleFiltroRapido = (campo: keyof typeof filtros, valor: any) => {
+    onFiltroChange({ ...filtros, [campo]: filtros[campo] === valor ? undefined : valor });
   };
 
   const limpiarFiltros = () => {
@@ -78,15 +58,14 @@ export function FiltrosHorarios({
       seccionId: undefined,
       docenteRut: undefined,
       salaId: undefined,
-      bloqueId: undefined,
       dia: undefined,
-      estado: undefined
+      estado: undefined,
+      // bloqueId intencionalmente omitido (no se usa)
     });
   };
 
-  const hayFiltrosActivos = Object.values(filtros).some(valor => 
-    valor !== undefined && valor !== ''
-  ) || busquedaGlobal.length > 0;
+  const hayFiltrosActivos =
+    Object.values(filtros).some((v: any) => v !== undefined && v !== '') || busquedaGlobal.length > 0;
 
   const diasSemana = [
     { id: 1, nombre: 'Lunes', corto: 'L' },
@@ -97,23 +76,11 @@ export function FiltrosHorarios({
     { id: 6, nombre: 'Sábado', corto: 'S' },
   ];
 
-  const bloques = [
-    { id: 1, nombre: 'Bloque 1', horario: '08:00-09:30' },
-    { id: 2, nombre: 'Bloque 2', horario: '09:45-11:15' },
-    { id: 3, nombre: 'Bloque 3', horario: '11:30-13:00' },
-    { id: 4, nombre: 'Bloque 4', horario: '14:00-15:30' },
-    { id: 5, nombre: 'Bloque 5', horario: '15:45-17:15' },
-    { id: 6, nombre: 'Bloque 6', horario: '17:30-19:00' },
-  ];
+  const estados = ['activo', 'cancelado', 'reprogramado'] as const;
 
-  const estados = [
-    { id: 'activo', nombre: 'Activo', color: 'bg-green-100 text-green-800' },
-    { id: 'cancelado', nombre: 'Cancelado', color: 'bg-red-100 text-red-800' },
-    { id: 'reprogramado', nombre: 'Reprogramado', color: 'bg-yellow-100 text-yellow-800' },
-  ];
-
-  // Obtener edificios únicos
-  const edificios = [...new Set(salas.map(s => s.edificio?.nombre).filter(Boolean))];
+  const edificios = Array.from(
+    new Set(salas.map((s: any) => s.edificio?.codigo || s.edificio?.nombre).filter(Boolean))
+  ) as string[];
 
   return (
     <Card>
@@ -123,7 +90,7 @@ export function FiltrosHorarios({
           <div className="flex gap-2">
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" title="Ayuda">
                   <HelpCircle className="w-4 h-4" />
                 </Button>
               </DialogTrigger>
@@ -131,36 +98,22 @@ export function FiltrosHorarios({
                 <DialogHeader>
                   <DialogTitle>Ayuda de Búsqueda</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold mb-2">Parámetros de búsqueda:</h4>
-                    <ul className="space-y-2 text-sm">
-                      <li>• <strong>Código de sección:</strong> MAT1105-2025-1</li>
-                      <li>• <strong>RUT docente:</strong> 12.345.678-9</li>
-                      <li>• <strong>ID de bloque:</strong> 1, 2, 3...</li>
-                      <li>• <strong>Nombre docente:</strong> Juan Pérez</li>
-                      <li>• <strong>Sala:</strong> CS01_125, Aula 201</li>
-                    </ul>
-                  </div>
+                <div className="space-y-2 text-sm">
+                  <p>• Docente (por nombre): Ana, Luis, etc.</p>
+                  <p>• Sala o edificio: CJP07_101, CJP07</p>
+                  <p>• Día: usa los botones de días</p>
+                  <p>• Estado: usa los botones de estado</p>
                 </div>
               </DialogContent>
             </Dialog>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setFiltrosAvanzadosAbiertos(!filtrosAvanzadosAbiertos)}
-            >
+
+            <Button variant="outline" size="sm" onClick={() => setMenuAbierto(!menuAbierto)}>
               <Filter className="w-4 h-4 mr-2" />
               Filtros
             </Button>
 
             {hayFiltrosActivos && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={limpiarFiltros}
-              >
+              <Button variant="outline" size="sm" onClick={limpiarFiltros}>
                 <X className="w-4 h-4 mr-2" />
                 Limpiar
               </Button>
@@ -168,22 +121,21 @@ export function FiltrosHorarios({
           </div>
         </div>
       </CardHeader>
-      
-      <CardContent className="space-y-4">
-        {/* Búsqueda global */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input
-            placeholder="Buscar por código de sección, docente, sala, bloque..."
-            value={busquedaGlobal}
-            onChange={(e) => handleBusquedaChange(e.target.value)}
-            className="pl-10"
-          />
-        </div>
 
-        {/* Filtros rápidos por botones */}
-        <div className="space-y-4">
-          {/* Días de la semana */}
+      {menuAbierto && (
+        <CardContent className="space-y-4">
+          {/* Search blanca con letras negras */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              placeholder="Buscar sección, docente, sala..."
+              value={busquedaGlobal}
+              onChange={(e) => handleBusquedaChange(e.target.value)}
+              className="pl-10 bg-white text-black placeholder:text-gray-500 border border-gray-300"
+            />
+          </div>
+
+          {/* Días */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Calendar className="w-4 h-4" />
@@ -193,38 +145,12 @@ export function FiltrosHorarios({
               {diasSemana.map((dia) => (
                 <Button
                   key={dia.id}
-                  variant={filtros.dia === dia.nombre ? 'default' : 'outline'}
+                  variant={filtros.dia === dia.id ? 'default' : 'outline'}
                   size="sm"
                   className="h-8 px-3"
-                  onClick={() => handleFiltroRapido('dia', 
-                    filtros.dia === dia.nombre ? undefined : dia.nombre
-                  )}
+                  onClick={() => handleFiltroRapido('dia', filtros.dia === dia.id ? undefined : dia.id)}
                 >
                   {dia.corto}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Bloques */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Clock className="w-4 h-4" />
-              <span className="text-sm font-medium">Bloques:</span>
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {bloques.map((bloque) => (
-                <Button
-                  key={bloque.id}
-                  variant={filtros.bloqueId === bloque.id.toString() ? 'default' : 'outline'}
-                  size="sm"
-                  className="h-8 px-3"
-                  onClick={() => handleFiltroRapido('bloqueId', 
-                    filtros.bloqueId === bloque.id.toString() ? undefined : bloque.id.toString()
-                  )}
-                  title={bloque.horario}
-                >
-                  {bloque.id}
                 </Button>
               ))}
             </div>
@@ -239,83 +165,52 @@ export function FiltrosHorarios({
             <div className="flex flex-wrap gap-1">
               {estados.map((estado) => (
                 <Button
-                  key={estado.id}
-                  variant={filtros.estado === estado.id ? 'default' : 'outline'}
+                  key={estado}
+                  variant={filtros.estado === estado ? 'default' : 'outline'}
                   size="sm"
                   className="h-8 px-3"
-                  onClick={() => handleFiltroRapido('estado', 
-                    filtros.estado === estado.id ? undefined : estado.id
-                  )}
+                  onClick={() => handleFiltroRapido('estado', filtros.estado === estado ? undefined : estado)}
                 >
-                  {estado.nombre}
+                  {estado}
                 </Button>
               ))}
             </div>
           </div>
 
-          {/* Edificios (Filtros avanzados) */}
-          {filtrosAvanzadosAbiertos && (
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <MapPin className="w-4 h-4" />
-                <span className="text-sm font-medium">Edificios:</span>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {edificios.map((edificio) => (
-                  <Button
-                    key={edificio}
-                    variant={filtros.edificio === edificio ? 'default' : 'outline'}
-                    size="sm"
-                    className="h-8 px-3"
-                    onClick={() => handleFiltroRapido('edificio', 
-                      filtros.edificio === edificio ? undefined : edificio
-                    )}
-                  >
-                    {edificio}
-                  </Button>
-                ))}
-              </div>
+          {/* Edificios */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <MapPin className="w-4 h-4" />
+              <span className="text-sm font-medium">Edificios:</span>
             </div>
-          )}
-        </div>
+            <div className="flex flex-wrap gap-2">
+              {edificios.map((edif) => (
+                <Button
+                  key={edif}
+                  variant={filtros.salaId === edif ? 'default' : 'outline'}
+                  size="sm"
+                  className="h-8 px-3"
+                  onClick={() => handleFiltroRapido('salaId', filtros.salaId === edif ? undefined : edif)}
+                >
+                  {edif}
+                </Button>
+              ))}
+            </div>
+          </div>
 
-        {/* Indicadores de filtros activos */}
-        {hayFiltrosActivos && (
+          {/* Chips de filtros activos */}
           <div className="flex flex-wrap gap-2 pt-2 border-t">
-            {filtros.seccionId && (
-              <Badge className="bg-blue-100 text-blue-800">
-                Sección: {filtros.seccionId}
-              </Badge>
-            )}
             {filtros.docenteRut && (
               <Badge className="bg-green-100 text-green-800">
-                Docente: {profesores.find(p => p.docente_rut === filtros.docenteRut)?.nombre || filtros.docenteRut}
+                Docente: {profesores.find(p => String((p as any).id) === String(filtros.docenteRut))?.nombre ?? filtros.docenteRut}
               </Badge>
             )}
-            {filtros.salaId && (
-              <Badge className="bg-purple-100 text-purple-800">
-                Sala: {filtros.salaId}
-              </Badge>
-            )}
-
-            {filtros.dia && (
-              <Badge className="bg-cyan-100 text-cyan-800">
-                Día: {filtros.dia}
-              </Badge>
-            )}
-            {filtros.estado && (
-              <Badge className="bg-gray-100 text-gray-800">
-                Estado: {estados.find(e => e.id === filtros.estado)?.nombre || filtros.estado}
-              </Badge>
-            )}
-            {filtros.edificio && (
-              <Badge className="bg-indigo-100 text-indigo-800">
-                Edificio: {filtros.edificio}
-              </Badge>
-            )}
+            {filtros.salaId && <Badge className="bg-purple-100 text-purple-800">Edif/Sala: {filtros.salaId}</Badge>}
+            {typeof filtros.dia === "number" && <Badge className="bg-cyan-100 text-cyan-800">Día: {filtros.dia}</Badge>}
+            {filtros.estado && <Badge className="bg-gray-100 text-gray-800">Estado: {filtros.estado}</Badge>}
           </div>
-        )}
-      </CardContent>
+        </CardContent>
+      )}
     </Card>
   );
 }

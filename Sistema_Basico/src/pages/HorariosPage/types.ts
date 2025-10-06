@@ -1,23 +1,6 @@
 // Tipos específicos para el componente de horarios
 import type { HorarioManual, Profesor, Asignatura, Sala } from "../../types";
 
-// Estados del formulario de horarios
-export interface FormularioHorario {
-  titulo: string;
-  descripcion: string;
-  salaId: string | undefined;
-  dia: string | undefined;
-  horaInicio: string;
-  horaFin: string;
-  profesorId: string | undefined;
-  asignaturaId: string | undefined;
-  color: string;
-  estado: "activo" | "cancelado" | "reprogramado";
-  recurrente: boolean;
-  fechaInicio: string;
-  fechaFin: string;
-}
-
 // Estados de filtros
 export interface FiltrosHorarios {
   busqueda: string;
@@ -28,15 +11,6 @@ export interface FiltrosHorarios {
   filtroFecha?: string;
 }
 
-// Props para el modal de confirmación de eliminación
-export interface ModalConfirmacionProps {
-  abierto: boolean;
-  onConfirmar: () => void;
-  onCancelar: () => void;
-  titulo?: string;
-  mensaje?: string;
-  tipo?: "eliminar" | "cancelar" | "reprogramar";
-}
 
 // Estado del modal de confirmación
 export interface EstadoConfirmacion {
@@ -53,18 +27,6 @@ export interface HorarioCardProps {
   onEditar: (horario: HorarioManual) => void;
   onEliminar: (horario: HorarioManual) => void;
   onCambiarEstado: (horarioId: string, nuevoEstado: HorarioManual["estado"]) => void;
-  profesores: Profesor[];
-  asignaturas: Asignatura[];
-  salas: (Sala & { edificio: any })[];
-}
-
-// Props para el formulario de horario
-export interface FormularioHorarioProps {
-  formulario: FormularioHorario;
-  setFormulario: React.Dispatch<React.SetStateAction<FormularioHorario>>;
-  editandoHorario: HorarioManual | null;
-  onSubmit: () => void;
-  onCancelar: () => void;
   profesores: Profesor[];
   asignaturas: Asignatura[];
   salas: (Sala & { edificio: any })[];
@@ -147,12 +109,6 @@ export interface EstadoHorarios {
 
 // Acciones disponibles para los horarios
 export type AccionHorario = 
-  | "editar"
-  | "eliminar" 
-  | "cancelar"
-  | "reprogramar"
-  | "activar"
-  | "duplicar"
   | "ver_detalles";
 
 // Configuración de acciones con sus propiedades
@@ -164,34 +120,6 @@ export interface ConfiguracionAccion {
   confirmacion?: boolean;
   visible: (horario: HorarioManual) => boolean;
 }
-
-// Estadísticas de horarios
-export interface EstadisticasHorarios {
-  total: number;
-  activos: number;
-  cancelados: number;
-  reprogramados: number;
-  porSala: { [salaId: string]: number };
-  porProfesor: { [profesorId: string]: number };
-  porDia: { [dia: string]: number };
-}
-
-// Exportar valores por defecto
-export const FORMULARIO_INICIAL: FormularioHorario = {
-  titulo: "",
-  descripcion: "",
-  salaId: undefined,
-  dia: undefined,
-  horaInicio: "",
-  horaFin: "",
-  profesorId: undefined,
-  asignaturaId: undefined,
-  color: "#3B82F6",
-  estado: "activo",
-  recurrente: false,
-  fechaInicio: "",
-  fechaFin: "",
-};
 
 export const FILTROS_INICIALES: FiltrosHorarios = {
   busqueda: "",
