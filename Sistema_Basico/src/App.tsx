@@ -4,7 +4,7 @@ import { DashboardPage } from '@pages/DashboardPage';
 import { ProfesoresPage } from '@pages/ProfesoresPage';
 import { EdificiosPage } from '@pages/EdificiosPage';
 import { AsignaturasPage } from '@pages/AsignaturasPage';
-import { HorariosPage } from './components/horarios/HorariosPage';
+import { HorariosPage } from '@pages/HorariosPage';
 import { RestriccionesPage } from '@pages/RestriccionesPage';
 import { CursosPage } from './components/cursos/CursosPage';
 import LoginForm from './pages/LoginPage/index';
