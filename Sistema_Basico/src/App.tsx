@@ -1,22 +1,22 @@
 import { useState } from 'react';
-import { Layout } from '../src/components/Layout';
-import { DashboardPage } from '../src/components/dashboard/DashboardPage';
-import { ProfesoresPage } from '../src/pages/ProfesoresPage/ProfesoresPage';
-import { SalasPage } from '../src/components/salas/SalasPage';
+import { Layout } from './components/Layout';
+import { DashboardPage } from './components/dashboard/DashboardPage';
+import { ProfesoresPage } from './pages/ProfesoresPage/ProfesoresPage';
+import { EdificiosPage } from "./pages/EdificiosPage/index";
 import { AsignaturasPage } from '@pages/AsignaturasPage';
-import { HorariosPage } from '../src/components/horarios/HorariosPage';
+import { HorariosPage } from './components/horarios/HorariosPage';
 import { RestriccionesPage } from '../src/pages/RestriccionesPage/RestriccionesPage';
-import { CursosPage } from '../src/components/cursos/CursosPage';
-import LoginForm from '../src/pages/LoginPage';
+import { CursosPage } from './components/cursos/CursosPage';
+import LoginForm from './pages/LoginPage/index';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Toaster } from 'sonner';
 
-type Pagina = 'dashboard' | 'profesores' | 'salas' | 'asignaturas' | 'horarios' | 'restricciones' | 'cursos';
+type Pagina = 'dashboard' | 'profesores' | 'edificio' | 'asignaturas' | 'horarios' | 'restricciones' | 'cursos';
 
 const paginaMap: Record<Pagina, JSX.Element> = {
     dashboard: <DashboardPage />,
     profesores: <ProfesoresPage />,
-    salas: <SalasPage />,
+    edificios: <EdificiosPage />,
     asignaturas: <AsignaturasPage />,
     horarios: <HorariosPage />,
     restricciones: <RestriccionesPage />,
@@ -52,3 +52,4 @@ function MainApp() {
         </Layout>
     );
 }
+
