@@ -5,9 +5,9 @@ Maneja todas las operaciones de persistencia relacionadas con docentes.
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from app.domain.models.docente import Docente
-from app.domain.schemas.docente import DocenteCreate, DocenteUpdate
-from app.config.database import get_db_session
+from Backend.domain.models.docente import Docente
+from Backend.domain.schemas.docente import DocenteCreate, DocenteUpdate
+from Backend.config.database import get_db_session
 
 
 class DocenteRepository:
@@ -202,7 +202,7 @@ class DocenteRepository:
         Returns:
             True si la asignación fue exitosa, False si no se pudo realizar
         """
-        from app.domain.models.clase import Clase
+        from Backend.domain.models.clase import Clase
         
         # Verificar que el docente existe
         docente = self.obtener_docente_por_rut(docente_rut)
@@ -234,7 +234,7 @@ class DocenteRepository:
         Returns:
             True si la desasignación fue exitosa, False si no se pudo realizar
         """
-        from app.domain.models.clase import Clase
+        from Backend.domain.models.clase import Clase
         
         # Obtener la clase
         clase = self.db.query(Clase).filter(Clase.clase_id == clase_id).first()
@@ -260,7 +260,7 @@ class DocenteRepository:
         Returns:
             Lista de clases asignadas al docente
         """
-        from app.domain.models.clase import Clase
+        from Backend.domain.models.clase import Clase
         
         return self.db.query(Clase).filter(Clase.docente_rut == docente_rut).all()
     
@@ -274,7 +274,7 @@ class DocenteRepository:
         Returns:
             Número de clases asignadas
         """
-        from app.domain.models.clase import Clase
+        from Backend.domain.models.clase import Clase
         
         return self.db.query(Clase).filter(Clase.docente_rut == docente_rut).count()
     

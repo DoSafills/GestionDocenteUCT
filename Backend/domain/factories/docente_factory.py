@@ -1,8 +1,8 @@
 """
 Factory Method para la creación de docentes con validaciones PostgreSQL.
 """
-from app.domain.models.docente import Docente
-from app.domain.schemas.docente import DocenteCreate
+from Backend.domain.models.docente import Docente
+from Backend.domain.schemas.docente import DocenteCreate
 
 
 class DocenteFactory:

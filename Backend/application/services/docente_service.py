@@ -4,11 +4,11 @@ Orquesta las operaciones de alto nivel y aplica reglas de negocio.
 """
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
-from app.domain.models.docente import Docente
-from app.domain.schemas.docente import DocenteCreate, DocenteUpdate, DocenteResponse
-from app.infrastructure.repositories.docente_repo import DocenteRepository
-from app.domain.factories.docente_factory import DocenteFactory
-from app.config.database import get_db_session
+from Backend.domain.models.docente import Docente
+from Backend.domain.schemas.docente import DocenteCreate, DocenteUpdate, DocenteResponse
+from Backend.infrastructure.repositories.docente_repo import DocenteRepository
+from Backend.domain.factories.docente_factory import DocenteFactory
+from Backend.config.database import get_db_session
 
 
 class DocenteService:

@@ -3,7 +3,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
-from app.config.database import Base
+from Backend.config.database import Base
 
 class Clase(Base):
     __tablename__ = "clase"

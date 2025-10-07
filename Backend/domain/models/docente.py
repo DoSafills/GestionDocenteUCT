@@ -1,7 +1,7 @@
 """Modelo ORM de Docente"""
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from app.config.database import Base
+from Backend.config.database import Base
 
 class Docente(Base):
     __tablename__ = "docente"
