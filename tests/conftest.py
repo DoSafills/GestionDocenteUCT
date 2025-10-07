@@ -5,9 +5,9 @@ import pytest
 import os
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-from app.config.database import Base
-from app.domain.models.docente import Docente
-from app.domain.models.clase import Clase
+from Backend.config.database import Base
+from Backend.domain.models.docente import Docente
+from Backend.domain.models.clase import Clase
 from urllib.parse import quote_plus
 from dotenv import load_dotenv
 
@@ -67,7 +67,7 @@ def clean_db(test_db_session):
 @pytest.fixture
 def sample_docente_data():
     """Datos de ejemplo para docente."""
-    from app.domain.schemas.docente import DocenteCreate
+    from Backend.domain.schemas.docente import DocenteCreate
     
     return DocenteCreate(
         docente_rut="12345678-9",
@@ -80,7 +80,7 @@ def sample_docente_data():
 @pytest.fixture
 def sample_docente_data_list():
     """Lista de datos de ejemplo para múltiples docentes."""
-    from app.domain.schemas.docente import DocenteCreate
+    from Backend.domain.schemas.docente import DocenteCreate
     
     return [
         DocenteCreate(

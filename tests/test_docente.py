@@ -3,10 +3,10 @@ Tests de integración para el módulo de docentes.
 Cubre el flujo completo desde service hasta repository.
 """
 import pytest
-from app.domain.schemas.docente import DocenteCreate, DocenteUpdate
-from app.domain.factories.docente_factory import DocenteFactory
-from app.infrastructure.repositories.docente_repo import DocenteRepository
-from app.application.services.docente_service import DocenteService
+from Backend.domain.schemas.docente import DocenteCreate, DocenteUpdate
+from Backend.domain.factories.docente_factory import DocenteFactory
+from Backend.infrastructure.repositories.docente_repo import DocenteRepository
+from Backend.application.services.docente_service import DocenteService
 
 
 @pytest.fixture
