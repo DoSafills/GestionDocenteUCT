@@ -7,11 +7,11 @@ import type { RestriccionAcademica } from "../../../types";
 interface ConfirmacionDialogProps {
   dialogConfirmacionAbierto: boolean;
   setDialogConfirmacionAbierto: (open: boolean) => void;
-  accionAConfirmar: "crear" | "eliminar" | null;
+  accionAConfirmar: "crear" | "editar" | "eliminar" | null;
   restriccionObjetivo: RestriccionAcademica | null;
-  setRestricciones: React.Dispatch<React.SetStateAction<RestriccionAcademica[]>>;
-  setAccionAConfirmar: (accion: "crear" | "eliminar" | null) => void;
+  setAccionAConfirmar: (accion: "crear" | "editar" | "eliminar" | null) => void;
   setRestriccionObjetivo: (r: RestriccionAcademica | null) => void;
+  ejecutarAccion: () => void; // Prop agregada
 }
 
 export function ConfirmacionDialog({
@@ -19,50 +19,70 @@ export function ConfirmacionDialog({
   setDialogConfirmacionAbierto,
   accionAConfirmar,
   restriccionObjetivo,
-  setRestricciones,
   setAccionAConfirmar,
   setRestriccionObjetivo,
+  ejecutarAccion, // Recibimos la función
 }: ConfirmacionDialogProps) {
 
   const confirmarAccion = () => {
-    if (accionAConfirmar === "eliminar" && restriccionObjetivo) {
-      setRestricciones(prev => prev.filter(r => r.id !== restriccionObjetivo.id));
-    }
-    if (accionAConfirmar === "crear" && restriccionObjetivo) {
-      setRestricciones(prev => [...prev, restriccionObjetivo]);
-    }
+    ejecutarAccion(); // Ejecuta la acción real desde RestriccionesPage
     setDialogConfirmacionAbierto(false);
     setAccionAConfirmar(null);
     setRestriccionObjetivo(null);
   };
+
+  const titulo =
+    accionAConfirmar === "eliminar"
+      ? "Confirmar eliminación"
+      : accionAConfirmar === "editar"
+      ? "Confirmar edición"
+      : "Confirmar creación";
+
+  const icono =
+    accionAConfirmar === "eliminar"
+      ? <XCircle className="w-5 h-5 text-red-500" />
+      : <CheckCircle className="w-5 h-5 text-green-500" />;
+
+  const descripcion =
+    accionAConfirmar === "eliminar"
+      ? `¿Estás seguro de eliminar la restricción "${restriccionObjetivo?.descripcion}"? Esta acción no se puede deshacer.`
+      : accionAConfirmar === "editar"
+      ? `¿Deseas guardar los cambios en la restricción "${restriccionObjetivo?.descripcion}"?`
+      : `¿Deseas agregar la restricción "${restriccionObjetivo?.descripcion}"?`;
+
+  const textoBoton =
+    accionAConfirmar === "eliminar"
+      ? "Eliminar"
+      : accionAConfirmar === "editar"
+      ? "Guardar"
+      : "Crear";
 
   return (
     <Dialog open={dialogConfirmacionAbierto} onOpenChange={setDialogConfirmacionAbierto}>
       <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {accionAConfirmar === "eliminar"
-              ? <XCircle className="w-5 h-5 text-red-500" />
-              : <CheckCircle className="w-5 h-5 text-green-500" />}
-            {accionAConfirmar === "eliminar" ? "Confirmar eliminación" : "Confirmar creación"}
+            {icono}
+            {titulo}
           </DialogTitle>
         </DialogHeader>
 
         <Alert className="mt-4">
-          <AlertDescription>
-            {accionAConfirmar === "eliminar"
-              ? `¿Estás seguro de eliminar la restricción "${restriccionObjetivo?.descripcion}"? Esta acción no se puede deshacer.`
-              : `¿Deseas agregar la restricción "${restriccionObjetivo?.descripcion}"?`}
-          </AlertDescription>
+          <AlertDescription>{descripcion}</AlertDescription>
         </Alert>
 
         <div className="mt-6 flex justify-end gap-2">
-          <Button variant="outline" onClick={() => setDialogConfirmacionAbierto(false)}>Cancelar</Button>
+          <Button
+            variant="outline"
+            onClick={() => setDialogConfirmacionAbierto(false)}
+          >
+            Cancelar
+          </Button>
           <Button
             className="bg-blue-600 text-white hover:bg-blue-700"
             onClick={confirmarAccion}
           >
-            {accionAConfirmar === "eliminar" ? "Eliminar" : "Crear"}
+            {textoBoton}
           </Button>
         </div>
       </DialogContent>

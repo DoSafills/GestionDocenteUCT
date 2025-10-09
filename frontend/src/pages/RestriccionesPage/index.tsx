@@ -46,7 +46,7 @@ export function RestriccionesPage() {
   const [formulario, setFormulario] = useState<Formulario>(FORMULARIO_INICIAL);
 
   const [dialogConfirmacionAbierto, setDialogConfirmacionAbierto] = useState(false);
-  const [accionAConfirmar, setAccionAConfirmar] = useState<"crear" | "eliminar" | null>(null);
+  const [accionAConfirmar, setAccionAConfirmar] = useState<"crear" | "editar" | "eliminar" | null>(null);
   const [restriccionObjetivo, setRestriccionObjetivo] = useState<RestriccionAcademica | null>(null);
 
   // Funciones mock
@@ -72,7 +72,7 @@ export function RestriccionesPage() {
     fetchData();
   }, []);
 
-  // Abrir modal
+  // Abrir modal para CREAR
   const abrirModalParaCrear = () => {
     setFormulario(FORMULARIO_INICIAL);
     setEditando(false);
@@ -80,6 +80,7 @@ export function RestriccionesPage() {
     setModalAbierto(true);
   };
 
+  // Abrir modal para EDITAR
   const abrirModalParaEditar = (r: RestriccionAcademica) => {
     setFormulario({
       ...r,
@@ -89,6 +90,12 @@ export function RestriccionesPage() {
     setEditando(true);
     setModalAbierto(true);
     setRestriccionObjetivo(r);
+  };
+
+  // Confirmar CREAR o EDITAR
+  const handleConfirmarGuardado = () => {
+    setAccionAConfirmar(editando ? "editar" : "crear");
+    setDialogConfirmacionAbierto(true);
   };
 
   // Guardar restricción
@@ -129,12 +136,22 @@ export function RestriccionesPage() {
 
   // Eliminar
   const handleEliminar = async (r: RestriccionAcademica) => {
-    if (!r.id) return;
+    setAccionAConfirmar("eliminar");
+    setRestriccionObjetivo(r);
+    setDialogConfirmacionAbierto(true);
+  };
+
+
+  // Acción final para ELIMINAR
+  const ejecutarEliminar = async () => {
+    if (!restriccionObjetivo?.id) return;
     try {
-      await eliminarRestriccionMock(r.id);
-      setRestricciones(prev => prev.filter(item => item.id !== r.id));
+      await eliminarRestriccionMock(restriccionObjetivo.id);
+      setRestricciones(prev => prev.filter(item => item.id !== restriccionObjetivo.id));
     } catch (error) {
       console.error(error);
+    } finally {
+      setRestriccionObjetivo(null);
     }
   };
 
@@ -173,7 +190,7 @@ export function RestriccionesPage() {
         <FormularioRestriccion
           formulario={formulario}
           setFormulario={setFormulario}
-          handleSubmit={handleSubmit}
+          handleSubmit={handleConfirmarGuardado}  // ⚠️ ahora abre el diálogo
           modalCerrar={() => setModalAbierto(false)}
           editando={editando}
         />
@@ -204,7 +221,7 @@ export function RestriccionesPage() {
         setDialogConfirmacionAbierto={setDialogConfirmacionAbierto}
         setAccionAConfirmar={setAccionAConfirmar}
         setRestriccionObjetivo={setRestriccionObjetivo}
-        handleEliminar={handleEliminar}
+        handleEliminar={handleEliminar} // ⚠️ ahora abre el diálogo
       />
 
       <ConfirmacionDialog
@@ -212,7 +229,13 @@ export function RestriccionesPage() {
         setDialogConfirmacionAbierto={setDialogConfirmacionAbierto}
         accionAConfirmar={accionAConfirmar}
         restriccionObjetivo={restriccionObjetivo}
-        setRestricciones={setRestricciones}
+        ejecutarAccion={() => {
+          if (accionAConfirmar === "crear" || accionAConfirmar === "editar") {
+            handleSubmit();
+          } else if (accionAConfirmar === "eliminar") {
+            ejecutarEliminar();
+          }
+        }}
         setAccionAConfirmar={setAccionAConfirmar}
         setRestriccionObjetivo={setRestriccionObjetivo}
       />
