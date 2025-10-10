@@ -13,7 +13,7 @@ import {
     LogOut, // <-- importamos ícono de lucide-react
 } from 'lucide-react';
 import Header from './Header';
-import { useAuth } from '../context/AuthContext'; // <-- importamos logout
+import { useAuthContext as useAuth } from "@/pages/LoginPage/hooks/AuthProvider"; // <-- importamos logout
 
 interface LayoutProps {
     children: ReactNode;
