@@ -5,6 +5,9 @@ import { FormularioRestriccion } from "./components/formulariorestricciones";
 import { ListaRestricciones } from "./components/listarestricciones";
 import { ConfirmacionDialog } from "./components/configuraciondialog";
 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../components/ui/dialog";
+import { Button } from "../../components/ui/button";
+
 import type { RestriccionAcademica } from "../../types";
 import type { Formulario, TipoRestriccion } from "./components/formulariorestricciones";
 
@@ -28,7 +31,7 @@ const FORMULARIO_INICIAL: Formulario = {
   },
 };
 
-// Validar que prioridad sea del tipo correcto
+// Validar prioridad
 const validarPrioridad = (p: string): "alta" | "media" | "baja" => {
   if (p === "alta" || p === "media" || p === "baja") return p;
   return "media";
@@ -46,7 +49,6 @@ export function RestriccionesPage() {
   const [formulario, setFormulario] = useState<Formulario>(FORMULARIO_INICIAL);
 
   const [dialogConfirmacionAbierto, setDialogConfirmacionAbierto] = useState(false);
-  const [accionAConfirmar, setAccionAConfirmar] = useState<"crear" | "editar" | "eliminar" | null>(null);
   const [restriccionObjetivo, setRestriccionObjetivo] = useState<RestriccionAcademica | null>(null);
 
   // Funciones mock
@@ -62,9 +64,7 @@ export function RestriccionesPage() {
     const fetchData = async () => {
       try {
         const data = await obtenerTodasMock();
-        setRestricciones(
-          data.map(r => ({ ...r, prioridad: validarPrioridad(r.prioridad) }))
-        );
+        setRestricciones(data.map(r => ({ ...r, prioridad: validarPrioridad(r.prioridad) })));
       } catch (error) {
         console.error("Error cargando restricciones:", error);
       }
@@ -72,7 +72,7 @@ export function RestriccionesPage() {
     fetchData();
   }, []);
 
-  // Abrir modal para CREAR
+  // Abrir modal CREAR
   const abrirModalParaCrear = () => {
     setFormulario(FORMULARIO_INICIAL);
     setEditando(false);
@@ -80,7 +80,7 @@ export function RestriccionesPage() {
     setModalAbierto(true);
   };
 
-  // Abrir modal para EDITAR
+  // Abrir modal EDITAR
   const abrirModalParaEditar = (r: RestriccionAcademica) => {
     setFormulario({
       ...r,
@@ -92,13 +92,7 @@ export function RestriccionesPage() {
     setRestriccionObjetivo(r);
   };
 
-  // Confirmar CREAR o EDITAR
-  const handleConfirmarGuardado = () => {
-    setAccionAConfirmar(editando ? "editar" : "crear");
-    setDialogConfirmacionAbierto(true);
-  };
-
-  // Guardar restricción
+  // Guardar restricción directamente
   const handleSubmit = async () => {
     try {
       const prioridadValidada = validarPrioridad(formulario.prioridad);
@@ -120,7 +114,6 @@ export function RestriccionesPage() {
           fechaCreacion: new Date().toISOString(),
           creadoPor: "usuarioActual",
         };
-
         const creada = await crearRestriccionMock(nuevaRestriccion);
         setRestricciones(prev => [...prev, creada]);
       }
@@ -134,15 +127,12 @@ export function RestriccionesPage() {
     }
   };
 
-  // Eliminar
+  // Eliminar restricción
   const handleEliminar = async (r: RestriccionAcademica) => {
-    setAccionAConfirmar("eliminar");
     setRestriccionObjetivo(r);
     setDialogConfirmacionAbierto(true);
   };
 
-
-  // Acción final para ELIMINAR
   const ejecutarEliminar = async () => {
     if (!restriccionObjetivo?.id) return;
     try {
@@ -155,17 +145,13 @@ export function RestriccionesPage() {
     }
   };
 
-  // Activar/desactivar
   const handleToggle = async (r: RestriccionAcademica) => {
     if (!r.id) return;
     const actualizado = await toggleEstadoMock(r.id);
     if (!actualizado) return;
-    setRestricciones(prev =>
-      prev.map(item => (item.id === r.id ? actualizado : item))
-    );
+    setRestricciones(prev => prev.map(item => (item.id === r.id ? actualizado : item)));
   };
 
-  // Filtrar
   const restriccionesFiltradas = useMemo(() => {
     return restricciones.filter(r => {
       const matchBusqueda = r.descripcion.toLowerCase().includes(busqueda.toLowerCase());
@@ -179,22 +165,31 @@ export function RestriccionesPage() {
 
   return (
     <div className="space-y-6">
-      <button
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        onClick={abrirModalParaCrear}
-      >
-        Crear nueva restricción
-      </button>
+      <Button onClick={abrirModalParaCrear}>Crear nueva restricción</Button>
 
-      {modalAbierto && (
-        <FormularioRestriccion
-          formulario={formulario}
-          setFormulario={setFormulario}
-          handleSubmit={handleConfirmarGuardado}  // ⚠️ ahora abre el diálogo
-          modalCerrar={() => setModalAbierto(false)}
-          editando={editando}
-        />
-      )}
+      {/* DIALOG MODAL PARA CREAR/EDITAR */}
+      <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editando ? "Editar Restricción" : "Crear Restricción"}</DialogTitle>
+          </DialogHeader>
+
+          <FormularioRestriccion
+            formulario={formulario}
+            setFormulario={setFormulario}
+            handleSubmit={handleSubmit} // guardado directo
+            editando={editando}
+            modalCerrar={() => setModalAbierto(false)}
+          />
+
+          <DialogFooter className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setModalAbierto(false)}>Cancelar</Button>
+            <Button onClick={handleSubmit}>
+              {editando ? "Guardar cambios" : "Crear"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Filtros
         busqueda={busqueda}
@@ -219,24 +214,19 @@ export function RestriccionesPage() {
         setModalAbierto={setModalAbierto}
         abrirModalParaEditar={abrirModalParaEditar}
         setDialogConfirmacionAbierto={setDialogConfirmacionAbierto}
-        setAccionAConfirmar={setAccionAConfirmar}
+        setAccionAConfirmar={() => {}} // solo para TypeScript
         setRestriccionObjetivo={setRestriccionObjetivo}
-        handleEliminar={handleEliminar} // ⚠️ ahora abre el diálogo
+        handleEliminar={handleEliminar}
       />
 
+      {/* Confirmación solo para eliminar */}
       <ConfirmacionDialog
         dialogConfirmacionAbierto={dialogConfirmacionAbierto}
         setDialogConfirmacionAbierto={setDialogConfirmacionAbierto}
-        accionAConfirmar={accionAConfirmar}
+        accionAConfirmar="eliminar"
         restriccionObjetivo={restriccionObjetivo}
-        ejecutarAccion={() => {
-          if (accionAConfirmar === "crear" || accionAConfirmar === "editar") {
-            handleSubmit();
-          } else if (accionAConfirmar === "eliminar") {
-            ejecutarEliminar();
-          }
-        }}
-        setAccionAConfirmar={setAccionAConfirmar}
+        ejecutarAccion={ejecutarEliminar}
+        setAccionAConfirmar={() => {}}
         setRestriccionObjetivo={setRestriccionObjetivo}
       />
     </div>

@@ -1,7 +1,6 @@
+// ./components/configuraciondialog.tsx
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../components/ui/dialog";
-import { Alert, AlertDescription } from "../../../components/ui/alert";
 import { Button } from "../../../components/ui/button";
-import { CheckCircle, XCircle } from "lucide-react";
 import type { RestriccionAcademica } from "../../../types";
 
 interface ConfirmacionDialogProps {
@@ -9,9 +8,9 @@ interface ConfirmacionDialogProps {
   setDialogConfirmacionAbierto: (open: boolean) => void;
   accionAConfirmar: "crear" | "editar" | "eliminar" | null;
   restriccionObjetivo: RestriccionAcademica | null;
+  ejecutarAccion: () => void;
   setAccionAConfirmar: (accion: "crear" | "editar" | "eliminar" | null) => void;
   setRestriccionObjetivo: (r: RestriccionAcademica | null) => void;
-  ejecutarAccion: () => void; // Prop agregada
 }
 
 export function ConfirmacionDialog({
@@ -19,70 +18,49 @@ export function ConfirmacionDialog({
   setDialogConfirmacionAbierto,
   accionAConfirmar,
   restriccionObjetivo,
+  ejecutarAccion,
   setAccionAConfirmar,
   setRestriccionObjetivo,
-  ejecutarAccion, // Recibimos la función
 }: ConfirmacionDialogProps) {
+  if (!accionAConfirmar) return null;
 
-  const confirmarAccion = () => {
-    ejecutarAccion(); // Ejecuta la acción real desde RestriccionesPage
+  const mensaje = (() => {
+    switch (accionAConfirmar) {
+      case "crear":
+        return "¿Deseas crear esta restricción?";
+      case "editar":
+        return "¿Deseas guardar los cambios en esta restricción?";
+      case "eliminar":
+        return `¿Deseas eliminar la restricción "${restriccionObjetivo?.descripcion}"?`;
+      default:
+        return "";
+    }
+  })();
+
+  const cerrarDialog = () => {
     setDialogConfirmacionAbierto(false);
     setAccionAConfirmar(null);
     setRestriccionObjetivo(null);
   };
 
-  const titulo =
-    accionAConfirmar === "eliminar"
-      ? "Confirmar eliminación"
-      : accionAConfirmar === "editar"
-      ? "Confirmar edición"
-      : "Confirmar creación";
-
-  const icono =
-    accionAConfirmar === "eliminar"
-      ? <XCircle className="w-5 h-5 text-red-500" />
-      : <CheckCircle className="w-5 h-5 text-green-500" />;
-
-  const descripcion =
-    accionAConfirmar === "eliminar"
-      ? `¿Estás seguro de eliminar la restricción "${restriccionObjetivo?.descripcion}"? Esta acción no se puede deshacer.`
-      : accionAConfirmar === "editar"
-      ? `¿Deseas guardar los cambios en la restricción "${restriccionObjetivo?.descripcion}"?`
-      : `¿Deseas agregar la restricción "${restriccionObjetivo?.descripcion}"?`;
-
-  const textoBoton =
-    accionAConfirmar === "eliminar"
-      ? "Eliminar"
-      : accionAConfirmar === "editar"
-      ? "Guardar"
-      : "Crear";
+  const confirmar = () => {
+    ejecutarAccion();
+    cerrarDialog();
+  };
 
   return (
     <Dialog open={dialogConfirmacionAbierto} onOpenChange={setDialogConfirmacionAbierto}>
-      <DialogContent className="sm:max-w-[400px]">
+      <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            {icono}
-            {titulo}
-          </DialogTitle>
+          <DialogTitle>Confirmación</DialogTitle>
         </DialogHeader>
-
-        <Alert className="mt-4">
-          <AlertDescription>{descripcion}</AlertDescription>
-        </Alert>
-
-        <div className="mt-6 flex justify-end gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setDialogConfirmacionAbierto(false)}
-          >
+        <p className="my-4">{mensaje}</p>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={cerrarDialog}>
             Cancelar
           </Button>
-          <Button
-            className="bg-blue-600 text-white hover:bg-blue-700"
-            onClick={confirmarAccion}
-          >
-            {textoBoton}
+          <Button onClick={confirmar}>
+            Confirmar
           </Button>
         </div>
       </DialogContent>

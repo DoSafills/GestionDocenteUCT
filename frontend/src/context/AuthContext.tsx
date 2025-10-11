@@ -15,7 +15,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const refreshIntervalRef = useRef<number | null>(null);
 
   const loginApi = async (payload: LoginRequest): Promise<LoginResponse> => {

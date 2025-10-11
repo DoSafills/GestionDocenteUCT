@@ -77,7 +77,9 @@ export function FormularioRestriccion({
                       ...prev,
                       parametros: {
                         ...prev.parametros,
-                        [t === "origen" ? "asignaturaOrigen" : "asignaturaDestino"]: value,
+                        [t === "origen"
+                          ? "asignaturaOrigen"
+                          : "asignaturaDestino"]: value,
                       },
                     }))
                   }

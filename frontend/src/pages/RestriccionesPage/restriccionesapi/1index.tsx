@@ -2,8 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Filtros } from "./components/Filtros";
 import { ResumenRestricciones } from "./components/resumenrestricciones";
 import { FormularioRestriccion } from "./components/formulariorestricciones";
-import { ListaRestricciones} from "./components/listarestricciones";
-import type{ ListaRestriccionesProps } from "./components/listarestricciones";
+import { ListaRestricciones } from "./components/listarestricciones";
 import { ConfirmacionDialog } from "./components/configuraciondialog";
 
 import type { RestriccionAcademica } from "../../types";
@@ -47,7 +46,7 @@ export function RestriccionesPage() {
   const [formulario, setFormulario] = useState<Formulario>(FORMULARIO_INICIAL);
 
   const [dialogConfirmacionAbierto, setDialogConfirmacionAbierto] = useState(false);
-  const [accionAConfirmar, setAccionAConfirmar] = useState<"crear" | "eliminar" | null>(null);
+  const [accionAConfirmar, setAccionAConfirmar] = useState<"crear" | "editar" | "eliminar" | null>(null);
   const [restriccionObjetivo, setRestriccionObjetivo] = useState<RestriccionAcademica | null>(null);
 
   // Cargar restricciones desde la API
@@ -55,10 +54,10 @@ export function RestriccionesPage() {
     obtenerTodas()
       .then((data: RestriccionDTO[]) => {
         const mapped: RestriccionAcademica[] = data.map(r => ({
-          id: r.id?.toString() || crypto.randomUUID(),
-          descripcion: r.valor,
+          id: r.id?.toString() ?? crypto.randomUUID(),
+          descripcion: r.valor ?? "",
           tipo: r.tipo as TipoRestriccion,
-          mensaje: r.valor,
+          mensaje: r.valor ?? "",
           prioridad: r.prioridad === 1 ? "alta" : r.prioridad === 2 ? "media" : "baja",
           activa: r.restriccion_dura ?? true,
           fechaCreacion: new Date().toISOString(),
@@ -66,7 +65,7 @@ export function RestriccionesPage() {
           parametros: {
             docente_rut: "",
             operador: "",
-            valor: r.valor,
+            valor: r.valor ?? "",
             comentario: "",
             asignaturaOrigen: "",
             asignaturaDestino: "",
@@ -87,6 +86,7 @@ export function RestriccionesPage() {
     setEditando(false);
     setRestriccionObjetivo(null);
     setModalAbierto(true);
+    setAccionAConfirmar("crear");
   };
 
   const abrirModalParaEditar = (r: RestriccionAcademica) => {
@@ -96,11 +96,12 @@ export function RestriccionesPage() {
       descripcion: r.descripcion,
       mensaje: r.mensaje,
       activa: r.activa,
-      parametros: { ...r.parametros },
+      parametros: { ...r.parametros } as Formulario["parametros"],
     });
     setEditando(true);
     setModalAbierto(true);
     setRestriccionObjetivo(r);
+    setAccionAConfirmar("editar");
   };
 
   const handleSubmit = async () => {
@@ -115,17 +116,22 @@ export function RestriccionesPage() {
 
       if (editando && restriccionObjetivo) {
         await actualizarRestriccion(Number(restriccionObjetivo.id), dto);
+        const actualizado: RestriccionAcademica = {
+          ...restriccionObjetivo,
+          descripcion: formulario.descripcion,
+          mensaje: formulario.mensaje,
+          tipo: formulario.tipo,
+          prioridad: formulario.prioridad,
+          activa: formulario.activa,
+          parametros: { ...formulario.parametros },
+        };
         setRestricciones(prev =>
-          prev.map(r =>
-            r.id === restriccionObjetivo.id
-              ? { ...r, ...formulario }
-              : r
-          )
+          prev.map(r => (r.id === restriccionObjetivo.id ? actualizado : r))
         );
       } else {
         const nuevaDTO = await crearRestriccion(dto);
         const nueva: RestriccionAcademica = {
-          id: nuevaDTO.id?.toString() || crypto.randomUUID(),
+          id: nuevaDTO.id?.toString() ?? crypto.randomUUID(),
           tipo: formulario.tipo,
           descripcion: formulario.descripcion,
           mensaje: formulario.mensaje,
@@ -144,16 +150,21 @@ export function RestriccionesPage() {
       setEditando(false);
       setRestriccionObjetivo(null);
       setFormulario(FORMULARIO_INICIAL);
+      setAccionAConfirmar(null);
     }
   };
 
-  const handleEliminar = async (r: RestriccionAcademica) => {
+  const handleEliminar = async () => {
+    if (!restriccionObjetivo || !restriccionObjetivo.id) return;
     try {
-      if (!r.id) return;
-      await eliminarRestriccion(Number(r.id));
-      setRestricciones(prev => prev.filter(item => item.id !== r.id));
+      await eliminarRestriccion(Number(restriccionObjetivo.id));
+      setRestricciones(prev => prev.filter(r => r.id !== restriccionObjetivo.id));
     } catch (error) {
       console.error(error);
+    } finally {
+      setDialogConfirmacionAbierto(false);
+      setAccionAConfirmar(null);
+      setRestriccionObjetivo(null);
     }
   };
 
@@ -201,18 +212,18 @@ export function RestriccionesPage() {
       <ResumenRestricciones restricciones={restriccionesFiltradas} />
 
       <ListaRestricciones
-      restricciones={restriccionesFiltradas}
-      setRestricciones={setRestricciones}
-      busqueda={busqueda}
-      filtroTipo={filtroTipo}
-      filtroPrioridad={filtroPrioridad}
-      filtroActiva={filtroActiva}
-      setModalAbierto={setModalAbierto}
-      abrirModalParaEditar={abrirModalParaEditar}
-      setDialogConfirmacionAbierto={setDialogConfirmacionAbierto}
-      setAccionAConfirmar={setAccionAConfirmar}
-      setRestriccionObjetivo={setRestriccionObjetivo}
-      handleEliminar={handleEliminar}
+        restricciones={restriccionesFiltradas}
+        setRestricciones={setRestricciones}
+        busqueda={busqueda}
+        filtroTipo={filtroTipo}
+        filtroPrioridad={filtroPrioridad}
+        filtroActiva={filtroActiva}
+        setModalAbierto={setModalAbierto}
+        abrirModalParaEditar={abrirModalParaEditar}
+        setDialogConfirmacionAbierto={setDialogConfirmacionAbierto}
+        setAccionAConfirmar={setAccionAConfirmar}
+        setRestriccionObjetivo={setRestriccionObjetivo}
+        handleEliminar={handleEliminar}
       />
 
       <ConfirmacionDialog
@@ -220,9 +231,13 @@ export function RestriccionesPage() {
         setDialogConfirmacionAbierto={setDialogConfirmacionAbierto}
         accionAConfirmar={accionAConfirmar}
         restriccionObjetivo={restriccionObjetivo}
-        setRestricciones={setRestricciones}
         setAccionAConfirmar={setAccionAConfirmar}
         setRestriccionObjetivo={setRestriccionObjetivo}
+        ejecutarAccion={
+          accionAConfirmar === "eliminar"
+            ? handleEliminar
+            : handleSubmit
+        }
       />
     </div>
   );
