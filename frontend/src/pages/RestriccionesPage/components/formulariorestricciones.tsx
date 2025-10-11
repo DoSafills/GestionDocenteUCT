@@ -1,10 +1,16 @@
 import React from "react";
 import { Label } from "../../../components/ui/label";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../../components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "../../../components/ui/select";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import { Switch } from "../../../components/ui/switch";
-import { asignaturasMock } from "../../../data/mock-data";
+import { asignaturasMock } from "../../../data/asignaturas";
 import { diasSemana } from "../services/utils";
 
 export type TipoRestriccion =
@@ -44,7 +50,13 @@ interface FormularioProps {
   editando: boolean;
 }
 
-export function FormularioRestriccion({ formulario, setFormulario, handleSubmit, modalCerrar, editando }: FormularioProps) {
+export function FormularioRestriccion({
+  formulario,
+  setFormulario,
+  handleSubmit,
+  modalCerrar,
+  editando,
+}: FormularioProps) {
   const renderParametrosEspecificos = () => {
     switch (formulario.tipo) {
       case "prerrequisito":
@@ -55,7 +67,11 @@ export function FormularioRestriccion({ formulario, setFormulario, handleSubmit,
               <div key={t} className="space-y-2">
                 <Label>Asignatura {t === "origen" ? "Origen" : "Destino"}</Label>
                 <Select
-                  value={t === "origen" ? formulario.parametros.asignaturaOrigen : formulario.parametros.asignaturaDestino}
+                  value={
+                    t === "origen"
+                      ? formulario.parametros.asignaturaOrigen
+                      : formulario.parametros.asignaturaDestino
+                  }
                   onValueChange={(value) =>
                     setFormulario((prev) => ({
                       ...prev,
@@ -69,7 +85,7 @@ export function FormularioRestriccion({ formulario, setFormulario, handleSubmit,
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar asignatura" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-60 overflow-y-auto bg-white text-black">
                     {asignaturasMock.map((asig) => (
                       <SelectItem key={asig.id} value={asig.codigo}>
                         {asig.codigo} - {asig.nombre}
@@ -99,7 +115,7 @@ export function FormularioRestriccion({ formulario, setFormulario, handleSubmit,
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar asignatura" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-60 overflow-y-auto bg-white text-black">
                   {asignaturasMock.map((asig) => (
                     <SelectItem key={asig.id} value={asig.codigo}>
                       {asig.codigo} - {asig.nombre}
@@ -122,7 +138,7 @@ export function FormularioRestriccion({ formulario, setFormulario, handleSubmit,
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar tipo" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white text-black">
                   <SelectItem value="aula">Aula</SelectItem>
                   <SelectItem value="laboratorio">Laboratorio</SelectItem>
                   <SelectItem value="auditorio">Auditorio</SelectItem>
@@ -150,7 +166,7 @@ export function FormularioRestriccion({ formulario, setFormulario, handleSubmit,
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar asignatura" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-60 overflow-y-auto bg-white text-black">
                   {asignaturasMock.map((asig) => (
                     <SelectItem key={asig.id} value={asig.codigo}>
                       {asig.codigo} - {asig.nombre}
@@ -166,7 +182,10 @@ export function FormularioRestriccion({ formulario, setFormulario, handleSubmit,
                 onChange={(e) =>
                   setFormulario((prev) => ({
                     ...prev,
-                    parametros: { ...prev.parametros, especialidadRequerida: e.target.value },
+                    parametros: {
+                      ...prev.parametros,
+                      especialidadRequerida: e.target.value,
+                    },
                   }))
                 }
                 placeholder="Matemáticas, Física, etc."
@@ -192,7 +211,7 @@ export function FormularioRestriccion({ formulario, setFormulario, handleSubmit,
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar día" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white text-black">
                   <SelectItem value="todos">Todos los días</SelectItem>
                   {diasSemana.map(({ valor, nombre }) => (
                     <SelectItem key={valor} value={valor.toString()}>
@@ -210,7 +229,10 @@ export function FormularioRestriccion({ formulario, setFormulario, handleSubmit,
                 onChange={(e) =>
                   setFormulario((prev) => ({
                     ...prev,
-                    parametros: { ...prev.parametros, horaInicioRestriccion: e.target.value },
+                    parametros: {
+                      ...prev.parametros,
+                      horaInicioRestriccion: e.target.value,
+                    },
                   }))
                 }
               />
@@ -223,7 +245,10 @@ export function FormularioRestriccion({ formulario, setFormulario, handleSubmit,
                 onChange={(e) =>
                   setFormulario((prev) => ({
                     ...prev,
-                    parametros: { ...prev.parametros, horaFinRestriccion: e.target.value },
+                    parametros: {
+                      ...prev.parametros,
+                      horaFinRestriccion: e.target.value,
+                    },
                   }))
                 }
               />
@@ -250,7 +275,7 @@ export function FormularioRestriccion({ formulario, setFormulario, handleSubmit,
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white text-black">
               <SelectItem value="prerrequisito">Prerrequisito</SelectItem>
               <SelectItem value="sala_prohibida">Sala Prohibida</SelectItem>
               <SelectItem value="horario_conflicto">Conflicto de Horario</SelectItem>
@@ -275,7 +300,9 @@ export function FormularioRestriccion({ formulario, setFormulario, handleSubmit,
           <Label>Mensaje de Error *</Label>
           <Textarea
             value={formulario.mensaje}
-            onChange={(e) => setFormulario((prev) => ({ ...prev, mensaje: e.target.value }))}
+            onChange={(e) =>
+              setFormulario((prev) => ({ ...prev, mensaje: e.target.value }))
+            }
             placeholder="Mensaje que se mostrará cuando no se cumpla la restricción"
             rows={3}
           />
@@ -293,7 +320,7 @@ export function FormularioRestriccion({ formulario, setFormulario, handleSubmit,
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white text-black">
                 <SelectItem value="alta">Alta</SelectItem>
                 <SelectItem value="media">Media</SelectItem>
                 <SelectItem value="baja">Baja</SelectItem>
@@ -310,7 +337,9 @@ export function FormularioRestriccion({ formulario, setFormulario, handleSubmit,
                   setFormulario((prev) => ({ ...prev, activa: checked }))
                 }
               />
-              <span className="text-sm">{formulario.activa ? "Activa" : "Inactiva"}</span>
+              <span className="text-sm">
+                {formulario.activa ? "Activa" : "Inactiva"}
+              </span>
             </div>
           </div>
         </div>
