@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent } from "../../components/ui/card";
 import { User } from "lucide-react";
 import { toast } from "sonner";
-
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { profesoresMock, restriccionesMock } from "./data/mock-profesores";
 import type { DiaSemana, RestriccionHorarioGuardar } from "../../types";
 import type { Docente } from "./types";
@@ -11,7 +11,7 @@ import AccionesHeader from "./components/AccionesHeader";
 import FiltrosListado from "./components/FiltrosListado";
 import DialogoDocente from "./components/DialogoDocente";
 import TarjetaDocente from "./components/TarjetaDocente";
-import DialogoConfirmEliminar from "./components/DialogoConfirmEliminar";
+
 
 const DIA_LABEL: Record<DiaSemana, string> = {
   LUNES: "Lunes", MARTES: "Martes", MIERCOLES: "Miércoles", JUEVES: "Jueves", VIERNES: "Viernes", SABADO: "Sábado",
@@ -252,12 +252,15 @@ export function ProfesoresPage() {
         </Card>
       )}
 
-      <DialogoConfirmEliminar
+      <ConfirmDialog
         open={confirmOpen}
-        setOpen={setConfirmOpen}
-        aEliminar={aEliminar}
-        onCancelar={() => { setConfirmOpen(false); setAEliminar(null); }}
-        onConfirmar={confirmarEliminar}
+        onOpenChange={setConfirmOpen}
+        onConfirm={confirmarEliminar}
+        title="Eliminar docente"
+        description={`¿Seguro que quieres eliminar a ${aEliminar?.nombre}?`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        variant="destructive"
       />
     </div>
   );
