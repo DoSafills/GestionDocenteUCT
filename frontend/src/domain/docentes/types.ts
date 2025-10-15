@@ -1,11 +1,12 @@
-import type { UserDTO } from "../users/types"
+import type { UserDTO } from "@/domain/users/types"
 
 export interface DocenteDTO {
+  id: number           // = user_id
   user_id: number
   departamento: string
 }
 
-export type DocenteConUsuario = UserDTO & { docente: DocenteDTO }
+export type DocenteConUsuario = UserDTO & { docente: { user_id: number; departamento: string } }
 
 export type DocenteCreateDTO = {
   nombre: string

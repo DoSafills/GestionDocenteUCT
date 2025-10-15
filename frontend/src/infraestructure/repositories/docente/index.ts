@@ -1,4 +1,6 @@
-import type { DocenteDataSource } from "../../services/docente/DocenteService"
+// frontend/src/infraestructure/repositories/docente/index.ts
+import type { IRepository } from "@/domain/repositories/IRepository"
+import type { DocenteConUsuario } from "@/domain/docentes/types"
 import { DocenteApiRepository } from "./DocenteApiRepository"
 import { DocenteMockRepository } from "./DocenteMockRepository"
 
@@ -19,15 +21,17 @@ const mock = new DocenteMockRepository([
 ])
 
 let mode: Mode = "mock"
-let current: DocenteDataSource = mock as unknown as DocenteDataSource
+// 👇 cambia el tipo acá
+let current: IRepository<DocenteConUsuario> = mock
+
 const listeners = new Set<() => void>()
 
-export function getDocentesRepo(): DocenteDataSource { return current }
+export function getDocentesRepo(): IRepository<DocenteConUsuario> { return current }
 export function getDocentesMode(): Mode { return mode }
 export function setDocentesMode(next: Mode) {
   if (mode === next) return
   mode = next
-  current = (mode === "api" ? api : mock) as unknown as DocenteDataSource
+  current = mode === "api" ? api : mock
   listeners.forEach((l) => l())
 }
 export function subscribeDocentesRepo(cb: () => void) {

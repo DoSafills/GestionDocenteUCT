@@ -1,27 +1,50 @@
-// frontend/src/infraestructure/services/DocenteService.ts
-import type { DocenteConUsuario, DocenteCreateDTO, DocenteUpdateDTO } from "../../../domain/docentes/types"
+// frontend/src/infraestructure/services/docente/DocenteService.ts
+import type { IRepository } from "@/domain/repositories/IRepository"
+import type { IService } from "@/domain/interfaces/IService"
+import { DocenteUsuario } from "@/domain/docentes"
+import type { DocenteConUsuario } from "@/domain/docentes/types"
+import { normalize } from "@/utils/string"
 
-export type DocenteDataSource = {
-  getAll(forceRefresh?: boolean): Promise<DocenteConUsuario[]>
-  getById(id: number): Promise<DocenteConUsuario>
-  createFromDTO(input: DocenteCreateDTO): Promise<DocenteConUsuario>
-  updateFromDTO(id: number, input: DocenteUpdateDTO): Promise<DocenteConUsuario>
-  delete(id: number): Promise<void>
-  search?(term: string): Promise<DocenteConUsuario[]>
-}
+export class DocenteService implements IService<DocenteUsuario, DocenteConUsuario> {
+  private repo: IRepository<DocenteConUsuario>
 
-export class DocenteService {
-  private repo: DocenteDataSource
-  constructor(repo: DocenteDataSource) { this.repo = repo }
-  setRepo(repo: DocenteDataSource) { this.repo = repo }
+  constructor(repo: IRepository<DocenteConUsuario>) {
+    this.repo = repo
+  }
+  setRepo(repo: IRepository<DocenteConUsuario>) { this.repo = repo }
 
-  list(force?: boolean) { return this.repo.getAll(force) }
-  get(id: number) { return this.repo.getById(id) }
-  create(input: DocenteCreateDTO) { return this.repo.createFromDTO(input) }
-  update(id: number, input: DocenteUpdateDTO) { return this.repo.updateFromDTO(id, input) }
-  remove(id: number) { return this.repo.delete(id) }
-  search(term: string) {
-    if (!this.repo.search) return this.repo.getAll(true).then(all => all)
-    return this.repo.search(term)
+  async obtenerTodas(): Promise<DocenteUsuario[]> {
+    const dtos = await this.repo.getAll(true)
+    return dtos.map(d => new DocenteUsuario(d))
+  }
+  async obtenerPorId(id: number): Promise<DocenteUsuario | undefined> {
+    const dto = await this.repo.getById(id).catch(() => undefined)
+    return dto ? new DocenteUsuario(dto) : undefined
+  }
+  async crearNueva(data: Omit<DocenteConUsuario, "id">): Promise<DocenteUsuario> {
+    const created = await this.repo.create(data as any)
+    return new DocenteUsuario(created)
+  }
+  async actualizar(id: number, data: Partial<Omit<DocenteConUsuario, "id">>): Promise<DocenteUsuario> {
+    const updated = await this.repo.update(id, data as any)
+    return new DocenteUsuario(updated)
+  }
+  async eliminar(id: number): Promise<void> { await this.repo.delete(id) }
+
+  async buscar(term: string): Promise<DocenteUsuario[]> {
+    const anyRepo = this.repo as unknown as { search?: (t: string) => Promise<DocenteConUsuario[]> }
+    if (typeof anyRepo.search === "function") {
+      const found = await anyRepo.search(normalize(term))
+      return found.map(d => new DocenteUsuario(d))
+    }
+    const all = await this.repo.getAll(true)
+    const q = normalize(term)
+    return all
+      .filter(d =>
+        normalize(d.nombre).includes(q) ||
+        normalize(d.email).includes(q) ||
+        normalize(d.docente?.departamento ?? "").includes(q)
+      )
+      .map(d => new DocenteUsuario(d))
   }
 }
