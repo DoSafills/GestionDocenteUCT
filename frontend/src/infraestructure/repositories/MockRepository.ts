@@ -1,4 +1,6 @@
-export class MockRepository<T extends { id: number }> {
+import type { IRepository } from './IRepository';
+
+export class MockRepository<T extends { id: number }> implements IRepository<T> {
     protected data: T[];
 
     constructor(initialData: T[]) {

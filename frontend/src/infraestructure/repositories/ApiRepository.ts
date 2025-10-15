@@ -1,34 +1,7 @@
 import { getAccessToken } from '@/auth/tokenStore';
+import type { IRepository } from '@/domain/repositories/IRepository';
 
-/*
-Clase que mantiene un array interno de objetos inmutables
-los datos no pueden modificarse directamente desde fuera
-sino unicamente a traves de los metodos del servicio.
-*/
-
-/*
-Uso
-
-export interface EdificioDTO {
-    id: number,
-    nombre: string,
-    ...
-}
-
-export class EdificioApiRepository extends ApiRepository<EdificioDTO> {
-    constructor(){
-        super(ENDPOINTS.EDIFICIOS)
-    }
-}
-
-
-Exportar singletons
-
-export const edificioApiRepository = new EdificioApiRepository()
-
-*/
-
-export class ApiRepository<T extends { id: number }> {
+export class ApiRepository<T extends { id: number }> implements IRepository<T> {
     protected endpoint: string;
     private cache: T[];
 
@@ -91,7 +64,7 @@ export class ApiRepository<T extends { id: number }> {
         return structuredClone(data);
     }
 
-    async update(id: string | number, item: Partial<Omit<T, 'id'>>): Promise<T> {
+    async update(id: number, item: Partial<Omit<T, 'id'>>): Promise<T> {
         const res = await fetch(`${this.endpoint}/${id}`, {
             method: 'PUT',
             headers: this.getHeaders(),
@@ -108,13 +81,13 @@ export class ApiRepository<T extends { id: number }> {
         return structuredClone(updated);
     }
 
-    async delete(id: string | number): Promise<void> {
+    async delete(id: number): Promise<void> {
         const res = await fetch(`${this.endpoint}/${id}`, {
             method: 'DELETE',
             headers: this.getHeaders(),
         });
 
-        this.handleResponse(res);
+        await this.handleResponse(res);
 
         const index = this.cache.findIndex((x) => x.id === id);
 
