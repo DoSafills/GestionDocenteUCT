@@ -3,31 +3,22 @@ import { Card, CardContent } from "../../components/ui/card";
 import { User } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { profesoresMock, restriccionesMock } from "./data/mock-profesores";
 import type { DiaSemana, RestriccionHorarioGuardar } from "../../types";
-import type { Docente } from "./types";
+import { docenteService } from "./deps";
+import type { DocenteConUsuario, DocenteCreateDTO, DocenteUpdateDTO } from "@/domain/docentes/types";
+import { normalize } from "@/utils/string";
 
 import AccionesHeader from "./components/AccionesHeader";
 import FiltrosListado from "./components/FiltrosListado";
 import DialogoDocente from "./components/DialogoDocente";
 import TarjetaDocente from "./components/TarjetaDocente";
 
-
-const DIA_LABEL: Record<DiaSemana, string> = {
-  LUNES: "Lunes", MARTES: "Martes", MIERCOLES: "Miércoles", JUEVES: "Jueves", VIERNES: "Viernes", SABADO: "Sábado",
-};
+const DIA_LABEL: Record<DiaSemana, string> = { LUNES: "Lunes", MARTES: "Martes", MIERCOLES: "Miércoles", JUEVES: "Jueves", VIERNES: "Viernes", SABADO: "Sábado" };
 const ORD_DIAS: DiaSemana[] = ["LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO"];
 const diaToNum: Record<DiaSemana, number> = { LUNES: 1, MARTES: 2, MIERCOLES: 3, JUEVES: 4, VIERNES: 5, SABADO: 6 };
 const numToDia: Record<number, DiaSemana> = { 1: "LUNES", 2: "MARTES", 3: "MIERCOLES", 4: "JUEVES", 5: "VIERNES", 6: "SABADO" };
-const normalizarTexto = (s: string) => (s || "").toLowerCase().normalize("NFKD").replace(/\p{Diacritic}/gu, "");
 const nowBase = () => Math.floor(Math.random() * 1e9);
 const hhmmToMin = (hhmm: string) => { const [h, m] = hhmm.split(":").map(Number); return h * 60 + m; };
-
-function useDocentesListado() {
-  const [items, setItems] = useState<Docente[]>([]);
-  const listar = async () => setItems(profesoresMock as unknown as Docente[]);
-  return { items, setItems, listar };
-}
 
 function useDebouncedValue<T>(value: T, delay = 250) {
   const [debounced, setDebounced] = useState(value);
@@ -49,15 +40,6 @@ function defaultSemana(): SemanaDisponibilidad {
     VIERNES: { enabled: true, slots: [{ id: base + 4, desde: "08:00", hasta: "12:30" }], editing: false },
     SABADO: { enabled: false, slots: [], editing: false },
   };
-}
-
-function useFormulario() {
-  const [open, setOpen] = useState(false);
-  const [editando, setEditando] = useState<Docente | null>(null);
-  const [form, setForm] = useState<Omit<Docente, "id">>({ nombre: "", email: "", password_hash: "", esta_activo: true, especialidad: "" });
-  const [semana, setSemana] = useState<SemanaDisponibilidad>(defaultSemana());
-  const limpiar = () => { setEditando(null); setForm({ nombre: "", email: "", password_hash: "", esta_activo: true, especialidad: "" }); setSemana(defaultSemana()); };
-  return { open, setOpen, editando, setEditando, form, setForm, semana, setSemana, limpiar };
 }
 
 function validarSemana(semana: SemanaDisponibilidad): string | null {
@@ -119,75 +101,96 @@ function restriccionesASemana(restricciones: RestriccionHorarioGuardar[]): Seman
   return base;
 }
 
+type FormState = DocenteCreateDTO
+
 export function ProfesoresPage() {
-  const { items, setItems, listar } = useDocentesListado();
-  const { open, setOpen, editando, setEditando, form, setForm, semana, setSemana, limpiar } = useFormulario();
+  const [items, setItems] = useState<DocenteConUsuario[]>([]);
+  const [open, setOpen] = useState(false);
+  const [editando, setEditando] = useState<DocenteConUsuario | null>(null);
+  const [form, setForm] = useState<FormState>({ nombre: "", email: "", departamento: "", activo: true });
+  const [semana, setSemana] = useState<SemanaDisponibilidad>(defaultSemana());
 
   const [restriccionesLocal, setRestriccionesLocal] = useState<Record<number, RestriccionHorarioGuardar[]>>({});
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [aEliminar, setAEliminar] = useState<Docente | null>(null);
+  const [aEliminar, setAEliminar] = useState<DocenteConUsuario | null>(null);
   const [busqueda, setBusqueda] = useState("");
   const debouncedSearch = useDebouncedValue(busqueda, 250);
   const [filtroEstado, setFiltroEstado] = useState<"todos" | "activo" | "inactivo">("todos");
 
-  useEffect(() => { listar(); }, []);
+  const limpiar = () => {
+    setEditando(null);
+    setForm({ nombre: "", email: "", departamento: "", activo: true });
+    setSemana(defaultSemana());
+  };
+
+  const listar = async () => {
+    const data = debouncedSearch ? await docenteService.search(debouncedSearch) : await docenteService.list(true);
+    setItems(data);
+  };
+
+  useEffect(() => { listar(); }, [debouncedSearch]);
 
   const filtrados = useMemo(() => {
-    const q = normalizarTexto(debouncedSearch);
+    const q = normalize(debouncedSearch);
     return items.filter((d) => {
-      if (filtroEstado === "activo" && !d.esta_activo) return false;
-      if (filtroEstado === "inactivo" && d.esta_activo) return false;
+      if (filtroEstado === "activo" && !d.activo) return false;
+      if (filtroEstado === "inactivo" && d.activo) return false;
       if (!q) return true;
-      return normalizarTexto(`${d.nombre} ${d.email} ${d.especialidad}`).includes(q);
+      return normalize(`${d.nombre} ${d.email} ${d.docente.departamento}`).includes(q);
     });
   }, [items, debouncedSearch, filtroEstado]);
 
-  const obtenerRestriccionesDocente = (docenteId: number): RestriccionHorarioGuardar[] => {
-    if (restriccionesLocal[docenteId]?.length) return restriccionesLocal[docenteId];
-    return restriccionesMock.filter((r) => r.docente_id === docenteId);
-  };
-
   const abrirCrear = () => { limpiar(); setOpen(true); };
-  const abrirEditar = (d: Docente) => {
+  const abrirEditar = (d: DocenteConUsuario) => {
     limpiar();
     setEditando(d);
-    setForm({ nombre: d.nombre, email: d.email, password_hash: d.password_hash, esta_activo: d.esta_activo, especialidad: d.especialidad });
-    const actuales = obtenerRestriccionesDocente(d.id);
+    setForm({ nombre: d.nombre, email: d.email, departamento: d.docente.departamento, activo: d.activo });
+    const actuales = restriccionesLocal[d.id] || [];
     setSemana(restriccionesASemana(actuales));
     setOpen(true);
   };
 
-  const guardar = () => {
+  const guardar = async () => {
     if (!form.nombre.trim()) return toast.error("El nombre es obligatorio");
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((form.email || "").trim())) return toast.error("Correo inválido");
     const err = validarSemana(semana);
     if (err) return toast.error(err);
 
-    let docenteId = editando?.id;
-    if (editando) {
-      setItems((prev) => prev.map((x) => (x.id === editando.id ? { ...x, ...form } : x)));
-      docenteId = editando.id;
-    } else {
-      docenteId = (items.length ? Math.max(...items.map((i) => i.id)) : 0) + 1;
-      setItems((prev) => [{ id: docenteId!, ...form }, ...prev]);
+    try {
+      if (editando) {
+        const patch: DocenteUpdateDTO = { nombre: form.nombre, email: form.email, departamento: form.departamento, activo: form.activo };
+        await docenteService.update(editando.id, patch);
+        const payload = semanaATransfer(semana, editando.id);
+        setRestriccionesLocal((prev) => ({ ...prev, [editando.id]: payload }));
+        toast.success("Docente actualizado");
+      } else {
+        const created = await docenteService.create(form);
+        const payload = semanaATransfer(semana, created.id);
+        setRestriccionesLocal((prev) => ({ ...prev, [created.id]: payload }));
+        toast.success("Docente creado");
+      }
+      await listar();
+      setOpen(false);
+      limpiar();
+    } catch (e: any) {
+      toast.error(e.message || "Error al guardar");
     }
-
-    const payload = semanaATransfer(semana, docenteId!);
-    setRestriccionesLocal((prev) => ({ ...prev, [docenteId!]: payload }));
-
-    toast.success(editando ? "Docente actualizado" : "Docente creado");
-    setOpen(false);
-    limpiar();
   };
 
-  const eliminarDocente = (d: Docente) => { setAEliminar(d); setConfirmOpen(true); };
-  const confirmarEliminar = () => {
+  const eliminarDocente = (d: DocenteConUsuario) => { setAEliminar(d); setConfirmOpen(true); };
+  const confirmarEliminar = async () => {
     if (!aEliminar) return;
-    setItems((prev) => prev.filter((x) => x.id !== aEliminar.id));
-    setRestriccionesLocal((prev) => { const cp = { ...prev }; delete cp[aEliminar.id]; return cp; });
-    toast.success("Docente eliminado");
-    setConfirmOpen(false);
-    setAEliminar(null);
+    try {
+      await docenteService.remove(aEliminar.id);
+      setRestriccionesLocal((prev) => { const cp = { ...prev }; delete cp[aEliminar.id]; return cp; });
+      await listar();
+      toast.success("Docente eliminado");
+    } catch (e: any) {
+      toast.error(e.message || "Error al eliminar");
+    } finally {
+      setConfirmOpen(false);
+      setAEliminar(null);
+    }
   };
 
   const toggleDia = (dia: DiaSemana, enabled: boolean) => setSemana((prev) => ({ ...prev, [dia]: { ...prev[dia], enabled } }));
@@ -228,7 +231,7 @@ export function ProfesoresPage() {
       {filtrados.length ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
           {filtrados.map((d) => {
-            const filas = restriccionesATabla(obtenerRestriccionesDocente(d.id));
+            const filas = restriccionesATabla(restriccionesLocal[d.id] || []);
             return (
               <TarjetaDocente
                 key={d.id}

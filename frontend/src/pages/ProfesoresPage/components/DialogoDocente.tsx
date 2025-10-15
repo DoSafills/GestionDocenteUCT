@@ -9,7 +9,7 @@ import { Switch } from "../../../components/ui/switch";
 import { CalendarDays, Mail, Pencil, PlusCircle, Trash2 } from "lucide-react";
 import SelectorHora from "../components/SelectorHora";
 import type { DiaSemana } from "../../../types";
-import type { Docente } from "../types";
+import type { DocenteConUsuario, DocenteCreateDTO } from "@/domain/docentes/types";
 
 type Slot = { id: number; desde: string; hasta: string };
 type DiaConfig = { enabled: boolean; slots: Slot[]; editing: boolean };
@@ -18,9 +18,9 @@ type SemanaDisponibilidad = Record<DiaSemana, DiaConfig>;
 type Props = {
   open: boolean;
   setOpen: (v: boolean) => void;
-  editando: Docente | null;
-  form: Omit<Docente, "id">;
-  setForm: (f: Omit<Docente, "id">) => void;
+  editando: DocenteConUsuario | null;
+  form: DocenteCreateDTO;
+  setForm: (f: DocenteCreateDTO) => void;
   semana: SemanaDisponibilidad;
   DIA_LABEL: Record<DiaSemana, string>;
   ORD_DIAS: DiaSemana[];
@@ -52,7 +52,11 @@ export default function DialogoDocente({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2 md:col-span-2">
             <Label>Nombre</Label>
-            <Input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
+            <Input
+              value={form.nombre}
+              onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+              placeholder="Ej. Ana Pérez"
+            />
           </div>
 
           <div className="space-y-2">
@@ -63,15 +67,17 @@ export default function DialogoDocente({
                 className="pl-9"
                 value={(form.email || "").trim()}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
+                placeholder="ana.perez@universidad.edu"
               />
             </div>
           </div>
 
           <div className="space-y-2">
             <Label>Estado</Label>
+            {/* puedes dejar Select o cambiar a Switch; acá dejo Select como tu versión original */}
             <Select
-              value={String(form.esta_activo)}
-              onValueChange={(v: any) => setForm({ ...form, esta_activo: v === "true" })}
+              value={String(form.activo)}
+              onValueChange={(v: string) => setForm({ ...form, activo: v === "true" })}
             >
               <SelectTrigger className="rounded-xl bg-white text-gray-900 dark:bg-white dark:text-gray-900">
                 <SelectValue placeholder="Selecciona" />
@@ -84,16 +90,11 @@ export default function DialogoDocente({
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <Label>Especialidad</Label>
-            <Input value={form.especialidad} onChange={(e) => setForm({ ...form, especialidad: e.target.value })} />
-          </div>
-
-          <div className="space-y-2 md:col-span-2">
-            <Label>Password / Hash</Label>
+            <Label>Departamento</Label>
             <Input
-              type="password"
-              value={form.password_hash}
-              onChange={(e) => setForm({ ...form, password_hash: e.target.value })}
+              value={form.departamento}
+              onChange={(e) => setForm({ ...form, departamento: e.target.value })}
+              placeholder="Ej. Matemáticas"
             />
           </div>
 
@@ -169,7 +170,7 @@ export default function DialogoDocente({
                                 <td></td>
                                 <td className="p-2 text-center">
                                   <Button size="sm" onClick={() => addSlot(dia)} className="gap-1 bg-blue-600 hover:bg-blue-700 text-white" title="Agregar franja">
-                                    <PlusCircle className="w-4 h-4 text-white" /> 
+                                    <PlusCircle className="w-4 h-4 text-white" />
                                     Franja
                                   </Button>
                                 </td>
