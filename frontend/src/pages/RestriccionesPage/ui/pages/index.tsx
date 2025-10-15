@@ -1,17 +1,17 @@
 import { useState, useEffect, useMemo } from "react";
-import { Filtros } from "./components/Filtros";
-import { ResumenRestricciones } from "./components/resumenrestricciones";
-import { FormularioRestriccion } from "./components/formulariorestricciones";
-import { ListaRestricciones } from "./components/listarestricciones";
-import { ConfirmacionDialog } from "./components/configuraciondialog";
+import { Filtros } from "../components/Filtros";
+import { ResumenRestricciones } from "../components/resumenrestricciones";
+import { FormularioRestriccion } from "../components/formulariorestricciones";
+import { ListaRestricciones } from "../components/listarestricciones";
+import { ConfirmacionDialog } from "../components/configuraciondialog";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../components/ui/dialog";
-import { Button } from "../../components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
-import type { RestriccionAcademica } from "../../types";
-import type { Formulario, TipoRestriccion } from "./components/formulariorestricciones";
+import type { RestriccionAcademica } from "../../domain/entities/restriccionespage/restriccionacademica";
+import type { Formulario, TipoRestriccion } from "../components/formulariorestricciones";
 
-import { db } from "../../data/restricciones";
+import { db } from "../../services/utils";
 
 // Formulario inicial
 const FORMULARIO_INICIAL: Formulario = {
@@ -51,7 +51,7 @@ export function RestriccionesPage() {
   const [dialogConfirmacionAbierto, setDialogConfirmacionAbierto] = useState(false);
   const [restriccionObjetivo, setRestriccionObjetivo] = useState<RestriccionAcademica | null>(null);
 
-  // Funciones mock
+  // Funciones mock (simulan repositorio)
   const obtenerTodasMock = async () => await db.getAll();
   const crearRestriccionMock = async (r: RestriccionAcademica) => await db.create(r);
   const actualizarRestriccionMock = async (id: string, datos: Partial<RestriccionAcademica>) =>
@@ -92,7 +92,7 @@ export function RestriccionesPage() {
     setRestriccionObjetivo(r);
   };
 
-  // Guardar restricción directamente
+  // Guardar restricción
   const handleSubmit = async () => {
     try {
       const prioridadValidada = validarPrioridad(formulario.prioridad);
@@ -152,6 +152,7 @@ export function RestriccionesPage() {
     setRestricciones(prev => prev.map(item => (item.id === r.id ? actualizado : item)));
   };
 
+  // Filtros
   const restriccionesFiltradas = useMemo(() => {
     return restricciones.filter(r => {
       const matchBusqueda = r.descripcion.toLowerCase().includes(busqueda.toLowerCase());
@@ -167,7 +168,7 @@ export function RestriccionesPage() {
     <div className="space-y-6">
       <Button onClick={abrirModalParaCrear}>Crear nueva restricción</Button>
 
-      {/* DIALOG MODAL PARA CREAR/EDITAR */}
+      {/* DIALOG MODAL CREAR/EDITAR */}
       <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
         <DialogContent>
           <DialogHeader>
@@ -177,7 +178,7 @@ export function RestriccionesPage() {
           <FormularioRestriccion
             formulario={formulario}
             setFormulario={setFormulario}
-            handleSubmit={handleSubmit} // guardado directo
+            handleSubmit={handleSubmit}
             editando={editando}
             modalCerrar={() => setModalAbierto(false)}
           />
@@ -214,12 +215,11 @@ export function RestriccionesPage() {
         setModalAbierto={setModalAbierto}
         abrirModalParaEditar={abrirModalParaEditar}
         setDialogConfirmacionAbierto={setDialogConfirmacionAbierto}
-        setAccionAConfirmar={() => {}} // solo para TypeScript
+        setAccionAConfirmar={() => {}}
         setRestriccionObjetivo={setRestriccionObjetivo}
         handleEliminar={handleEliminar}
       />
 
-      {/* Confirmación solo para eliminar */}
       <ConfirmacionDialog
         dialogConfirmacionAbierto={dialogConfirmacionAbierto}
         setDialogConfirmacionAbierto={setDialogConfirmacionAbierto}

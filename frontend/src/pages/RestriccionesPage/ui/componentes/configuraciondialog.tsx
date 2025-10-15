@@ -1,15 +1,15 @@
-// ./components/configuraciondialog.tsx
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../components/ui/dialog";
-import { Button } from "../../../components/ui/button";
-import type { RestriccionAcademica } from "../../../types";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../../components/ui/dialog";
+import { Button } from "../../../../components/ui/button";
+import type { RestriccionAcademica } from "../../Domain/entities/restriccionespage/RestriccionAcademica";
+import { confirmarAccionRestriccion, type AccionRestriccion } from "../../application/usecases/ConfirmarAccionRestriccion";
 
 interface ConfirmacionDialogProps {
   dialogConfirmacionAbierto: boolean;
   setDialogConfirmacionAbierto: (open: boolean) => void;
-  accionAConfirmar: "crear" | "editar" | "eliminar" | null;
+  accionAConfirmar: AccionRestriccion | null;
   restriccionObjetivo: RestriccionAcademica | null;
   ejecutarAccion: () => void;
-  setAccionAConfirmar: (accion: "crear" | "editar" | "eliminar" | null) => void;
+  setAccionAConfirmar: (accion: AccionRestriccion | null) => void;
   setRestriccionObjetivo: (r: RestriccionAcademica | null) => void;
 }
 
@@ -22,31 +22,27 @@ export function ConfirmacionDialog({
   setAccionAConfirmar,
   setRestriccionObjetivo,
 }: ConfirmacionDialogProps) {
+
+  // Si no hay acción a confirmar, no mostrar el diálogo
   if (!accionAConfirmar) return null;
 
-  const mensaje = (() => {
-    switch (accionAConfirmar) {
-      case "crear":
-        return "¿Deseas crear esta restricción?";
-      case "editar":
-        return "¿Deseas guardar los cambios en esta restricción?";
-      case "eliminar":
-        return `¿Deseas eliminar la restricción "${restriccionObjetivo?.descripcion}"?`;
-      default:
-        return "";
-    }
-  })();
-
-  const cerrarDialog = () => {
+  const limpiarEstados = () => {
     setDialogConfirmacionAbierto(false);
     setAccionAConfirmar(null);
     setRestriccionObjetivo(null);
   };
 
-  const confirmar = () => {
-    ejecutarAccion();
-    cerrarDialog();
-  };
+  const resultado = confirmarAccionRestriccion({
+    accion: accionAConfirmar,
+    restriccion: restriccionObjetivo,
+    ejecutar: ejecutarAccion,
+    limpiarEstados,
+  });
+
+  // Si por algún motivo no hay resultado, cerrar el diálogo
+  if (!resultado) return null;
+
+  const { mensaje, confirmar } = resultado;
 
   return (
     <Dialog open={dialogConfirmacionAbierto} onOpenChange={setDialogConfirmacionAbierto}>
@@ -56,7 +52,7 @@ export function ConfirmacionDialog({
         </DialogHeader>
         <p className="my-4">{mensaje}</p>
         <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={cerrarDialog}>
+          <Button variant="outline" onClick={limpiarEstados}>
             Cancelar
           </Button>
           <Button onClick={confirmar}>

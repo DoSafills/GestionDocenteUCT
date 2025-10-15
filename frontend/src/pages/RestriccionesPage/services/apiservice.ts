@@ -1,62 +1,53 @@
-import axios from "axios";
-import type { AxiosInstance } from "axios";
+export class ApiService {
+  private baseUrl: string;
 
-// Clase genérica para cualquier endpoint
-export class ApiService<T> {
-  protected api: AxiosInstance;
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl;
+  }
 
-  /**
-   * @param endpoint URL base del endpoint
-   * @param token Token de autorización opcional (Bearer)
-   */
-  constructor(endpoint: string, token?: string) {
-    this.api = axios.create({
-      baseURL: endpoint,
-      headers: {
-        Accept: "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
+  protected async request(
+    method: string,
+    endpoint: string,
+    data?: any,
+    token?: string
+  ): Promise<any | null> {
+    const headers: HeadersInit = {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+    };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      method,
+      headers,
+      body: data ? JSON.stringify(data) : undefined,
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error ${response.status}: ${errorText}`);
+    }
+
+    return response.status !== 204 ? await response.json() : null;
   }
 
-  /** Obtener todos los registros */
-  async getAll(): Promise<T[]> {
-    const res = await this.api.get<T[]>("");
-    return res.data;
+  protected get(endpoint = "", token?: string) {
+    return this.request("GET", endpoint, undefined, token);
   }
 
-  /** Obtener un registro por ID */
-  async getById(id: number | string): Promise<T> {
-    const res = await this.api.get<T>(`${id}`);
-    return res.data;
+  protected post(endpoint = "", data?: any, token?: string) {
+    return this.request("POST", endpoint, data, token);
   }
 
-  /** Crear un nuevo registro */
-  async create(item: Omit<T, "id">): Promise<T> {
-    const res = await this.api.post<T>("", item, {
-      headers: { "Content-Type": "application/json" },
-    });
-    return res.data;
+  protected put(endpoint = "", data?: any, token?: string) {
+    return this.request("PUT", endpoint, data, token);
   }
 
-  /** Actualizar un registro por completo */
-  async update(id: number | string, item: Partial<T>): Promise<T> {
-    const res = await this.api.put<T>(`${id}`, item, {
-      headers: { "Content-Type": "application/json" },
-    });
-    return res.data;
+  protected patch(endpoint = "", data?: any, token?: string) {
+    return this.request("PATCH", endpoint, data, token);
   }
 
-  /** Actualizar parcialmente un registro */
-  async patch(id: number | string, item: Partial<T>): Promise<T> {
-    const res = await this.api.patch<T>(`${id}`, item, {
-      headers: { "Content-Type": "application/json" },
-    });
-    return res.data;
-  }
-
-  /** Eliminar un registro */
-  async delete(id: number | string): Promise<void> {
-    await this.api.delete(`${id}`);
+  protected delete(endpoint = "", token?: string) {
+    return this.request("DELETE", endpoint, undefined, token);
   }
 }

@@ -1,22 +1,27 @@
 import { useState, useEffect, useMemo } from "react";
-import { Filtros } from "./components/Filtros";
-import { ResumenRestricciones } from "./components/resumenrestricciones";
-import { FormularioRestriccion } from "./components/formulariorestricciones";
-import { ListaRestricciones } from "./components/listarestricciones";
-import { ConfirmacionDialog } from "./components/configuraciondialog";
 
-import type { RestriccionAcademica } from "../../types";
-import type { RestriccionDTO } from "./services/api";
-import type { Formulario, TipoRestriccion } from "./components/formulariorestricciones";
+// 🧩 Componentes UI
+import { Filtros } from "../components/Filtros";
+import { ResumenRestricciones } from "../components/resumenrestricciones";
+import { FormularioRestriccion } from "../components/formulariorestricciones";
+import { ListaRestricciones } from "../components/listarestricciones";
+import { ConfirmacionDialog } from "../components/configuraciondialog";
 
+// 🧠 Entidad del dominio
+import type { RestriccionAcademica } from "../../domain/entities/restriccionespage/restriccionacademica";
+
+// 🏗️ API e infraestructura
 import {
   obtenerTodas,
   crearRestriccion,
   actualizarRestriccion,
   eliminarRestriccion,
-} from "./services/api";
+  type RestriccionDTO,
+} from "../../infrastructure/api/RestriccionesApi";
 
-// Formulario inicial
+// ⚙️ Tipos del formulario (definidos dentro del componente)
+import type { Formulario, TipoRestriccion } from "../components/formulariorestricciones";
+
 const FORMULARIO_INICIAL: Formulario = {
   tipo: "prerrequisito" as TipoRestriccion,
   prioridad: "media",
@@ -46,10 +51,12 @@ export function RestriccionesPage() {
   const [formulario, setFormulario] = useState<Formulario>(FORMULARIO_INICIAL);
 
   const [dialogConfirmacionAbierto, setDialogConfirmacionAbierto] = useState(false);
-  const [accionAConfirmar, setAccionAConfirmar] = useState<"crear" | "editar" | "eliminar" | null>(null);
+  const [accionAConfirmar, setAccionAConfirmar] = useState<
+    "crear" | "editar" | "eliminar" | null
+  >(null);
   const [restriccionObjetivo, setRestriccionObjetivo] = useState<RestriccionAcademica | null>(null);
 
-  // Cargar restricciones desde la API
+  // 🔄 Cargar restricciones desde la API
   useEffect(() => {
     obtenerTodas()
       .then((data: RestriccionDTO[]) => {
@@ -155,7 +162,7 @@ export function RestriccionesPage() {
   };
 
   const handleEliminar = async () => {
-    if (!restriccionObjetivo || !restriccionObjetivo.id) return;
+    if (!restriccionObjetivo?.id) return;
     try {
       await eliminarRestriccion(Number(restriccionObjetivo.id));
       setRestricciones(prev => prev.filter(r => r.id !== restriccionObjetivo.id));
@@ -233,11 +240,7 @@ export function RestriccionesPage() {
         restriccionObjetivo={restriccionObjetivo}
         setAccionAConfirmar={setAccionAConfirmar}
         setRestriccionObjetivo={setRestriccionObjetivo}
-        ejecutarAccion={
-          accionAConfirmar === "eliminar"
-            ? handleEliminar
-            : handleSubmit
-        }
+        ejecutarAccion={accionAConfirmar === "eliminar" ? handleEliminar : handleSubmit}
       />
     </div>
   );

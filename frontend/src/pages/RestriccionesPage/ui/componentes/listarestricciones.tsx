@@ -1,11 +1,20 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
-import { Badge } from "../../../components/ui/badge";
-import { Button } from "../../../components/ui/button";
-import { Alert, AlertDescription } from "../../../components/ui/alert";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card";
+import { Badge } from "../../../../components/ui/badge";
+import { Button } from "../../../../components/ui/button";
+import { Alert, AlertDescription } from "../../../../components/ui/alert";
 import { CheckCircle, XCircle, Edit, Trash2, AlertTriangle } from "lucide-react";
-import type { RestriccionAcademica } from "../../../types";
-import { getTipoIcon, getPrioridadColor, getAsignaturaNombre } from "../services/utils";
+
+import type { RestriccionAcademica } from "../../Domain/entities/restriccionespage/RestriccionAcademica";
+import { getTipoIcon, getPrioridadColor, getAsignaturaNombre } from "../../services/utils";
+
+// Usecases
+import { filtrarRestricciones } from "../../application/usecases/FiltrarRestricciones";
+import { toggleActivarRestriccion } from "../../application/usecases/ToggleRestriccion";
+import { abrirConfirmacion } from "../../application/usecases/ConfirmarAccionRestriccion";
+
+// ✅ Tipo actualizado para incluir 'editar'
+export type AccionRestriccion = "crear" | "eliminar" | "editar" | null;
 
 export interface ListaRestriccionesProps {
   restricciones: RestriccionAcademica[];
@@ -17,7 +26,7 @@ export interface ListaRestriccionesProps {
   setModalAbierto: (open: boolean) => void;
   abrirModalParaEditar: (restriccion: RestriccionAcademica) => void;
   setDialogConfirmacionAbierto: (open: boolean) => void;
-  setAccionAConfirmar: (accion: "crear" | "eliminar" | null) => void;
+  setAccionAConfirmar: (accion: AccionRestriccion) => void;
   setRestriccionObjetivo: (r: RestriccionAcademica | null) => void;
   handleEliminar: (r: RestriccionAcademica) => Promise<void>;
 }
@@ -37,35 +46,30 @@ export function ListaRestricciones({
   handleEliminar,
 }: ListaRestriccionesProps) {
 
-  const toggleActivarRestriccion = (id: string) => {
-    setRestricciones(prev => prev.map(r => 
-      r.id === id ? { ...r, activa: !r.activa } : r
-    ));
+  // 🔹 Manejar toggle de activación
+  const handleToggle = (id: string) => {
+    setRestricciones(toggleActivarRestriccion(restricciones, id));
   };
 
-  const abrirConfirmacion = (accion: "crear" | "eliminar", restriccion?: RestriccionAcademica) => {
-    setAccionAConfirmar(accion);
-    setRestriccionObjetivo(restriccion || null);
-    setDialogConfirmacionAbierto(true);
+  // 🔹 Abrir diálogo de confirmación
+  const handleAbrirConfirmacion = (accion: AccionRestriccion, restriccion?: RestriccionAcademica) => {
+    const estado = abrirConfirmacion(accion, restriccion);
+    setAccionAConfirmar(estado.accion);
+    setRestriccionObjetivo(estado.restriccionObjetivo);
+    setDialogConfirmacionAbierto(estado.abierto);
   };
 
+  // 🔹 Abrir modal de edición
   const editarRestriccion = (restriccion: RestriccionAcademica) => {
     abrirModalParaEditar(restriccion);
   };
 
-  const restriccionesFiltradas = restricciones.filter(restriccion => {
-    const coincideBusqueda = 
-      (restriccion.descripcion || "").toLowerCase().includes(busqueda.toLowerCase()) ||
-      (restriccion.mensaje || "").toLowerCase().includes(busqueda.toLowerCase()) ||
-      (restriccion.tipo || "").toLowerCase().includes(busqueda.toLowerCase());
-    
-    const coincideTipo = filtroTipo === "todos" || restriccion.tipo === filtroTipo;
-    const coincidePrioridad = filtroPrioridad === "todos" || restriccion.prioridad === filtroPrioridad;
-    const coincideActiva = filtroActiva === "todos" || 
-      (filtroActiva === "activa" && restriccion.activa) ||
-      (filtroActiva === "inactiva" && !restriccion.activa);
-    
-    return coincideBusqueda && coincideTipo && coincidePrioridad && coincideActiva;
+  // 🔹 Filtrar restricciones usando el usecase
+  const restriccionesFiltradas = filtrarRestricciones(restricciones, {
+    busqueda,
+    tipo: filtroTipo,
+    prioridad: filtroPrioridad,
+    activa: filtroActiva,
   });
 
   return (
@@ -95,13 +99,13 @@ export function ListaRestricciones({
                 </div>
               </div>
               <div className="flex gap-1">
-                <Button variant="ghost" size="sm" onClick={() => toggleActivarRestriccion(restriccion.id)}>
+                <Button variant="ghost" size="sm" onClick={() => handleToggle(restriccion.id)}>
                   {restriccion.activa ? <XCircle className="w-4 h-4 text-red-600" /> : <CheckCircle className="w-4 h-4 text-green-600" />}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => editarRestriccion(restriccion)}>
                   <Edit className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => abrirConfirmacion("eliminar", restriccion)}>
+                <Button variant="ghost" size="sm" onClick={() => handleAbrirConfirmacion("eliminar", restriccion)}>
                   <Trash2 className="w-4 h-4 text-destructive" />
                 </Button>
               </div>
@@ -115,8 +119,16 @@ export function ListaRestricciones({
             </Alert>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              {restriccion.parametros?.asignaturaOrigen && <div><strong>Asignatura Origen:</strong> {getAsignaturaNombre(restriccion.parametros.asignaturaOrigen)}</div>}
-              {restriccion.parametros?.asignaturaDestino && <div><strong>Asignatura Destino:</strong> {getAsignaturaNombre(restriccion.parametros.asignaturaDestino)}</div>}
+              {restriccion.parametros?.asignaturaOrigen && (
+                <div>
+                  <strong>Asignatura Origen:</strong> {getAsignaturaNombre(restriccion.parametros.asignaturaOrigen ?? "")}
+                </div>
+              )}
+              {restriccion.parametros?.asignaturaDestino && (
+                <div>
+                  <strong>Asignatura Destino:</strong> {getAsignaturaNombre(restriccion.parametros.asignaturaDestino ?? "")}
+                </div>
+              )}
               {restriccion.parametros?.salaProhibida && <div><strong>Sala Prohibida:</strong> {restriccion.parametros.salaProhibida}</div>}
               {restriccion.parametros?.especialidadRequerida && <div><strong>Especialidad Requerida:</strong> {restriccion.parametros.especialidadRequerida}</div>}
               {restriccion.parametros?.diaRestriccion && <div><strong>Día:</strong> {restriccion.parametros.diaRestriccion}</div>}

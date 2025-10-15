@@ -1,18 +1,17 @@
-import { Card, CardContent } from "../../../components/ui/card";
+import { Card, CardContent } from "../../../../components/ui/card";
+import type { RestriccionAcademica } from "../../Domain/entities/restriccionespage/RestriccionAcademica";
+import { generarResumenRestricciones, ResumenStats } from "../../application/usecases/ResumeRestricciones";
 
 interface ResumenProps {
-  restricciones: any[];
+  restricciones: RestriccionAcademica[];
 }
 
 export function ResumenRestricciones({ restricciones }: ResumenProps) {
+  const items: ResumenStats[] = generarResumenRestricciones(restricciones);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      {[
-        { color: "green-500", count: restricciones.filter(r => r.activa).length, label: "Activas" },
-        { color: "red-500", count: restricciones.filter(r => r.prioridad === "alta").length, label: "Alta Prioridad" },
-        { color: "blue-500", count: restricciones.filter(r => r.tipo === "prerrequisito").length, label: "Prerrequisitos" },
-        { color: "gray-500", count: restricciones.length, label: "Total" }
-      ].map((item, i) => (
+      {items.map((item, i) => (
         <Card key={i}>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
