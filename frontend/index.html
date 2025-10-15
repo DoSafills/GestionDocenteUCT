@@ -1,36 +1,31 @@
 <!doctype html>
-<html lang="es" class="dark">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="dark">
+    <meta name="color-scheme" content="light">
     <title>Sistema Académico UCT</title>
     <style>
-      /* Prevenir flash de contenido claro - Tema azul oscuro */
       html {
-        background-color: hsl(220 20% 8%) !important;
-        color-scheme: dark !important;
+        background-color: #fff !important;
+        color-scheme: light !important;
       }
       body {
-        background-color: hsl(220 20% 8%) !important;
-        color: hsl(210 40% 98%) !important;
+        background-color: #fff !important;
+        color: #030213 !important;
         margin: 0;
         padding: 0;
       }
       #root {
-        background-color: hsl(220 20% 8%) !important;
+        background-color: #fff !important;
         min-height: 100vh;
       }
     </style>
   </head>
   <body>
-    <!-- Div exclusivo para Header -->
     <div id="header"></div>
-
-    <!-- Div principal de la app -->
     <div id="root"></div>
-
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
