@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card";
 import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
@@ -7,11 +7,7 @@ import { CheckCircle, XCircle, Edit, Trash2, AlertTriangle } from "lucide-react"
 
 import type { RestriccionAcademica } from "../../Domain/entities/restriccionespage/RestriccionAcademica";
 import { getTipoIcon, getPrioridadColor } from "../../services/utils";
-
-// Usecases
 import { filtrarRestricciones } from "../../application/usecases/FiltrarRestricciones";
-
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../../../components/ui/dialog";
 
 export interface ListaRestriccionesProps {
   restricciones: RestriccionAcademica[];
@@ -28,8 +24,6 @@ export interface ListaRestriccionesProps {
 
 export function ListaRestricciones({
   restricciones,
-  setRestricciones,
-  setModalAbierto,
   abrirModalParaEditar,
   handleToggle,
   solicitarEliminar,
@@ -38,14 +32,6 @@ export function ListaRestricciones({
   filtroPrioridad,
   filtroActiva,
 }: ListaRestriccionesProps) {
-  const [dialogAbierto, setDialogAbierto] = useState(false);
-  const [restriccionParaEliminar, setRestriccionParaEliminar] = useState<RestriccionAcademica | null>(null);
-
-  const abrirDialogEliminar = (r: RestriccionAcademica) => {
-    setRestriccionParaEliminar(r);
-    setDialogAbierto(true);
-  };
-
   const restriccionesFiltradas = filtrarRestricciones(restricciones, {
     busqueda,
     tipo: filtroTipo,
@@ -99,7 +85,7 @@ export function ListaRestricciones({
                 <Button variant="ghost" size="sm" onClick={() => abrirModalParaEditar(restriccion)}>
                   <Edit className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => abrirDialogEliminar(restriccion)}>
+                <Button variant="ghost" size="sm" onClick={() => solicitarEliminar(restriccion)}>
                   <Trash2 className="w-4 h-4 text-destructive" />
                 </Button>
               </div>
@@ -114,31 +100,6 @@ export function ListaRestricciones({
           </CardContent>
         </Card>
       ))}
-
-      {/* 🔹 Dialogo confirmación */}
-      <Dialog open={dialogAbierto} onOpenChange={setDialogAbierto}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Confirmar eliminación</DialogTitle>
-          </DialogHeader>
-          <p className="my-4">
-            ¿Deseas eliminar la restricción "{restriccionParaEliminar?.descripcion}"?
-          </p>
-          <DialogFooter className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setDialogAbierto(false)}>Cancelar</Button>
-            <Button
-              onClick={() => {
-                if (restriccionParaEliminar) {
-                  solicitarEliminar(restriccionParaEliminar); // Solo notifica al padre
-                }
-                setDialogAbierto(false);
-              }}
-            >
-              Confirmar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
