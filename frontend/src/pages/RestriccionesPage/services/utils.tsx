@@ -1,14 +1,9 @@
 import React from "react";
-import {
-  BookOpen,
-  Shield,
-  Clock,
-  Users,
-  Calendar,
-  AlertTriangle,
-} from "lucide-react";
+import { BookOpen, Shield, Clock, Users, Calendar, AlertTriangle } from "lucide-react";
+import { db as mockDb } from "@data/restricciones"; // 🔹 Mock de base de datos
+import type { RestriccionAcademica } from "../../../types";
 
-// 🔹 Tipos posibles de restricción (se pueden ampliar fácilmente)
+// 🔹 Tipos posibles de restricción para iconos
 export type IconType =
   | "prerrequisito"
   | "secuencia_temporal"
@@ -16,9 +11,9 @@ export type IconType =
   | "profesor_especialidad"
   | "horario_conflicto"
   | "capacidad"
-  | "desconocido"; // opcional para fallback
+  | "desconocido";
 
-// 🔹 Mapa de iconos por tipo de restricción
+// 🔹 Mapa de iconos por tipo
 const iconMap: Record<IconType, React.ReactElement> = {
   prerrequisito: <BookOpen className="w-4 h-4" />,
   secuencia_temporal: <Clock className="w-4 h-4" />,
@@ -29,13 +24,14 @@ const iconMap: Record<IconType, React.ReactElement> = {
   desconocido: <AlertTriangle className="w-4 h-4" />,
 };
 
-// 🔹 Devuelve el icono correspondiente al tipo
-export const getTipoIcon = (tipo: IconType): React.ReactElement => {
-  return iconMap[tipo] ?? iconMap["desconocido"];
-};
+// 🔹 Función para obtener icono según tipo
+export const getTipoIcon = (tipo: IconType): React.ReactElement =>
+  iconMap[tipo] ?? iconMap["desconocido"];
 
-// 🔹 Devuelve la clase CSS según prioridad
-export const getPrioridadColor = (prioridad: string): string => {
+// 🔹 Tipo y función para color de prioridad
+export type Prioridad = "alta" | "media" | "baja" | "desconocido";
+
+export const getPrioridadColor = (prioridad: Prioridad | string): string => {
   switch (prioridad.toLowerCase()) {
     case "alta":
       return "bg-red-500 text-white";
@@ -48,13 +44,11 @@ export const getPrioridadColor = (prioridad: string): string => {
   }
 };
 
-// 🔹 Convierte un código de asignatura en su nombre
-export const getAsignaturaNombre = (codigo: string): string => {
-  // En el futuro podrías mapear códigos → nombres desde un servicio o contexto
-  return codigo.trim().toUpperCase();
-};
+// 🔹 Función para formatear código de asignatura
+export const getAsignaturaNombre = (codigo: string): string =>
+  codigo.trim().toUpperCase();
 
-// 🔹 Lista de días de la semana (para selects o formularios)
+// 🔹 Lista de días de la semana
 export const diasSemana = [
   { valor: "lunes", nombre: "Lunes" },
   { valor: "martes", nombre: "Martes" },
@@ -64,3 +58,32 @@ export const diasSemana = [
   { valor: "sabado", nombre: "Sábado" },
   { valor: "domingo", nombre: "Domingo" },
 ];
+
+// 🔹 Mock de asignaturas
+export const asignaturasMock = [
+  { codigo: "MAT101", nombre: "Matemáticas I", creditos: 4 },
+  { codigo: "FIS101", nombre: "Física I", creditos: 4 },
+  { codigo: "PROG101", nombre: "Programación I", creditos: 3 },
+  { codigo: "QUI101", nombre: "Química I", creditos: 3 },
+  { codigo: "HIS101", nombre: "Historia", creditos: 2 },
+];
+
+// 🔹 Funciones para interactuar con la base de datos simulada
+export const db = mockDb; // 🔹 Exportamos db para que sea accesible
+
+export const getAllRestricciones = async (): Promise<RestriccionAcademica[]> =>
+  await db.getAll();
+
+export const createRestriccion = async (
+  r: Omit<RestriccionAcademica, "id" | "fechaCreacion" | "creadoPor">
+) => await db.create(r);
+
+export const updateRestriccion = async (
+  id: string,
+  datos: Partial<RestriccionAcademica>
+) => await db.update(id, datos);
+
+export const deleteRestriccion = async (id: string) => await db.delete(id);
+
+export const toggleEstadoRestriccion = async (id: string) =>
+  await db.toggleEstado(id);

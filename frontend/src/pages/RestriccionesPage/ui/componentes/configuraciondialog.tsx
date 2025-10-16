@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../../co
 import { Button } from "../../../../components/ui/button";
 import type { RestriccionAcademica } from "../../Domain/entities/restriccionespage/RestriccionAcademica";
 import { confirmarAccionRestriccion, type AccionRestriccion } from "../../application/usecases/ConfirmarAccionRestriccion";
+import { useMemo } from "react";
 
 interface ConfirmacionDialogProps {
   dialogConfirmacionAbierto: boolean;
@@ -23,7 +24,6 @@ export function ConfirmacionDialog({
   setRestriccionObjetivo,
 }: ConfirmacionDialogProps) {
 
-  // Si no hay acción a confirmar, no mostrar el diálogo
   if (!accionAConfirmar) return null;
 
   const limpiarEstados = () => {
@@ -32,14 +32,17 @@ export function ConfirmacionDialog({
     setRestriccionObjetivo(null);
   };
 
-  const resultado = confirmarAccionRestriccion({
-    accion: accionAConfirmar,
-    restriccion: restriccionObjetivo,
-    ejecutar: ejecutarAccion,
-    limpiarEstados,
-  });
+  // Memoizar el resultado para que no se ejecute en cada render
+  const resultado = useMemo(() => {
+    if (!accionAConfirmar || !restriccionObjetivo) return null;
+    return confirmarAccionRestriccion({
+      accion: accionAConfirmar,
+      restriccion: restriccionObjetivo,
+      ejecutar: ejecutarAccion,
+      limpiarEstados,
+    });
+  }, [accionAConfirmar, restriccionObjetivo, ejecutarAccion]);
 
-  // Si por algún motivo no hay resultado, cerrar el diálogo
   if (!resultado) return null;
 
   const { mensaje, confirmar } = resultado;
