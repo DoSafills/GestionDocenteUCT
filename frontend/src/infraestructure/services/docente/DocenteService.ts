@@ -11,7 +11,7 @@ type Repo = IRepository<DocenteConUsuario> & {
   search?: (t: string) => Promise<DocenteConUsuario[]>
 }
 
-const useMock = false
+const useMock = true
 
 let repo: Repo = useMock ? new DocenteMockRepository() : new DocenteApiRepository()
 
