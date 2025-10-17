@@ -20,15 +20,23 @@ export class EdificioService
 
   private factory = (dto: EdificioDTO) => new Edificio(dto);
 
+  private parseHttp(e: any): { status?: number; detail?: string } {
+    const msg = String(e?.message ?? e ?? '');
+    const m = msg.match(/Error\s+(\d{3}):\s*([\s\S]*)$/);
+    return m ? { status: Number(m[1]), detail: m[2]?.trim() } : {};
+  }
+
   async obtenerTodas(): Promise<Edificio[]> {
     try {
       const list = await this.repo.getAll(true);
       return list.map(this.factory);
     } catch (e: any) {
-      if (String(e?.message || '').includes('404')) return [];
+      const { status } = this.parseHttp(e);
+      if (status === 404) return [];
       throw e;
     }
   }
+
   async obtenerPorId(id: number): Promise<Edificio | undefined> {
     try {
       const dto = await this.repo.getById(id);
@@ -37,24 +45,54 @@ export class EdificioService
       return undefined;
     }
   }
+
   async crearNueva(data: EdificioCreateDTO): Promise<Edificio> {
-    const dto = await this.repo.create(data as any);
-    return this.factory(dto);
-  }
-  async actualizar(id: number, data: Partial<EdificioCreateDTO>): Promise<Edificio> {
-    const dto = await this.repo.update(id, data as any);
-    return this.factory(dto);
-  }
-  async eliminar(id: number): Promise<void> {
-    await this.repo.delete(id);
-  }
-  async listarPorCampus(campusId: number): Promise<Edificio[]> {
-    if (!this.repo.getByCampus) {
-      const all = await this.repo.getAll(true);
-      return all.filter(e => e.campus_id === campusId).map(this.factory);
+    try {
+      const dto = await this.repo.create(data as any);
+      return this.factory(dto);
+    } catch (e: any) {
+      const { status, detail } = this.parseHttp(e);
+      if (status === 404) throw new Error(detail || 'Campus asociado no existe');
+      throw e;
     }
-    const list = await this.repo.getByCampus(campusId);
-    return list.map(this.factory);
+  }
+
+  async actualizar(id: number, data: Partial<EdificioCreateDTO>): Promise<Edificio> {
+    try {
+      const dto = await this.repo.update(id, data as any);
+      return this.factory(dto);
+    } catch (e: any) {
+      const { status, detail } = this.parseHttp(e);
+      if (status === 404) {
+        throw new Error(detail || 'Edificio o campus no encontrado');
+      }
+      throw e;
+    }
+  }
+
+  async eliminar(id: number): Promise<void> {
+    try {
+      await this.repo.delete(id);
+    } catch (e: any) {
+      const { status, detail } = this.parseHttp(e);
+      if (status === 404) throw new Error(detail || 'Edificio no encontrado');
+      throw e;
+    }
+  }
+
+  async listarPorCampus(campusId: number): Promise<Edificio[]> {
+    try {
+      if (!this.repo.getByCampus) {
+        const all = await this.repo.getAll(true);
+        return all.filter(e => e.campus_id === campusId).map(this.factory);
+      }
+      const list = await this.repo.getByCampus(campusId);
+      return list.map(this.factory);
+    } catch (e: any) {
+      const { status } = this.parseHttp(e);
+      if (status === 404) return []; 
+      throw e;
+    }
   }
 }
 
