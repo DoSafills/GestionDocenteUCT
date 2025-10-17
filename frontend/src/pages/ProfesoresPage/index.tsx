@@ -4,8 +4,8 @@ import { User } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import type { DiaSemana, RestriccionHorarioGuardar } from "../../types";
-import { docenteService } from "./deps";
-import type { DocenteConUsuario, DocenteCreateDTO, DocenteUpdateDTO } from "@/domain/docentes/types";
+import { docenteService } from "../../infraestructure/services/docente/DocenteService";
+import type { DocenteConUsuario, DocenteCreateDTO} from "@/domain/docentes/types";
 import { normalize } from "@/utils/string";
 
 import AccionesHeader from "./components/AccionesHeader";
@@ -101,7 +101,7 @@ function restriccionesASemana(restricciones: RestriccionHorarioGuardar[]): Seman
   return base;
 }
 
-type FormState = DocenteCreateDTO
+type FormState = DocenteCreateDTO;
 
 export function ProfesoresPage() {
   const [items, setItems] = useState<DocenteConUsuario[]>([]);
@@ -124,8 +124,10 @@ export function ProfesoresPage() {
   };
 
   const listar = async () => {
-    const data = debouncedSearch ? await docenteService.search(debouncedSearch) : await docenteService.list(true);
-    setItems(data);
+    const entidades = debouncedSearch
+      ? await docenteService.buscar(debouncedSearch)
+      : await docenteService.obtenerTodas();
+    setItems(entidades.map((e) => e.toDTO()));
   };
 
   useEffect(() => { listar(); }, [debouncedSearch]);
@@ -158,15 +160,27 @@ export function ProfesoresPage() {
 
     try {
       if (editando) {
-        const patch: DocenteUpdateDTO = { nombre: form.nombre, email: form.email, departamento: form.departamento, activo: form.activo };
-        await docenteService.update(editando.id, patch);
+        // ✅ usa el service nuevo
+        await docenteService.actualizarParcial(editando.id, {
+          nombre: form.nombre,
+          email: form.email,
+          activo: form.activo,
+          departamento: form.departamento,
+        });
         const payload = semanaATransfer(semana, editando.id);
         setRestriccionesLocal((prev) => ({ ...prev, [editando.id]: payload }));
         toast.success("Docente actualizado");
       } else {
-        const created = await docenteService.create(form);
-        const payload = semanaATransfer(semana, created.id);
-        setRestriccionesLocal((prev) => ({ ...prev, [created.id]: payload }));
+        // ✅ usa el service nuevo
+        const created = await docenteService.crear({
+          nombre: form.nombre,
+          email: form.email,
+          departamento: form.departamento,
+          activo: form.activo,
+        });
+        const createdId = created.id;
+        const restr = semanaATransfer(semana, createdId);
+        setRestriccionesLocal((prev) => ({ ...prev, [createdId]: restr }));
         toast.success("Docente creado");
       }
       await listar();
@@ -181,7 +195,7 @@ export function ProfesoresPage() {
   const confirmarEliminar = async () => {
     if (!aEliminar) return;
     try {
-      await docenteService.remove(aEliminar.id);
+      await docenteService.eliminar(aEliminar.id);
       setRestriccionesLocal((prev) => { const cp = { ...prev }; delete cp[aEliminar.id]; return cp; });
       await listar();
       toast.success("Docente eliminado");
