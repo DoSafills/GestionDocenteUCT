@@ -5,21 +5,18 @@ import type { IRepository } from '@/domain/repositories/IRepository';
 import { SalaApiRepository } from '@/infraestructure/repositories/sala/SalaApiRepository';
 import { SalaMockRepository } from '@/infraestructure/repositories/sala/SalaMockRepository';
 import { ENDPOINTS } from '@/endpoints';
+import type { ISalaService } from '@/domain/interfaces/ISalaService';
+import type { ISalaRepository } from '@/domain/repositories/ISalaRepository';
 
-type Repo = IRepository<SalaDTO> & {
-  getAllPaginated?(skip?: number, limit?: number): Promise<SalaDTO[]>;
-  getByCodigo?(codigo: string): Promise<SalaDTO>;
-  getByEdificio?(edificioId: number): Promise<SalaDTO[]>;
-  getByTipo?(tipo: SalaTipo): Promise<SalaDTO[]>;
-  getByCapacidad?(min?: number, max?: number): Promise<SalaDTO[]>;
-  getDisponibles?(bloqueId?: number): Promise<SalaDTO[]>;
-};
+type Repo = IRepository<SalaDTO> & ISalaRepository;
 
-export class SalaService implements IService<Sala, SalaDTO> {
+export class SalaService
+  implements IService<Sala, SalaDTO>, ISalaService { 
   private repo: Repo;
   constructor(repo?: Repo) {
     this.repo = (repo ?? new SalaApiRepository(ENDPOINTS.SALAS)) as Repo;
   }
+
   private factory = (dto: SalaDTO) => new Sala(dto);
 
   async obtenerTodas(): Promise<Sala[]> {

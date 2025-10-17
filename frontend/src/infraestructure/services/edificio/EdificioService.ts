@@ -6,13 +6,18 @@ import { EdificioApiRepository } from '@/infraestructure/repositories/edificio/E
 import { EdificioMockRepository } from '@/infraestructure/repositories/edificio/EdificioMockRepository';
 import { ENDPOINTS } from '@/endpoints';
 
-type Repo = IRepository<EdificioDTO> & { getByCampus?(campusId: number): Promise<EdificioDTO[]> };
+import type { IEdificioService } from '@/domain/interfaces/IEdificioService';
+import type { IEdificioRepository } from '@/domain/repositories/IEdificioRepository';
 
-export class EdificioService implements IService<Edificio, EdificioDTO> {
+type Repo = IRepository<EdificioDTO> & IEdificioRepository;
+
+export class EdificioService
+  implements IService<Edificio, EdificioDTO>, IEdificioService {
   private repo: Repo;
   constructor(repo?: Repo) {
     this.repo = (repo ?? new EdificioApiRepository(ENDPOINTS.EDIFICIO)) as Repo;
   }
+
   private factory = (dto: EdificioDTO) => new Edificio(dto);
 
   async obtenerTodas(): Promise<Edificio[]> {

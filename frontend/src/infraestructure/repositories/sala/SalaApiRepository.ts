@@ -1,7 +1,10 @@
 import { ApiRepository } from '@/infraestructure/repositories/ApiRepository';
 import type { SalaDTO, SalaTipo } from '@/domain/salas/types';
+import type { ISalaRepository } from '@domain/repositories/ISalaRepository';
 
-export class SalaApiRepository extends ApiRepository<SalaDTO> {
+export class SalaApiRepository
+  extends ApiRepository<SalaDTO>
+  implements ISalaRepository { // <-- aquí
   constructor(endpoint: string) {
     super(endpoint);
   }

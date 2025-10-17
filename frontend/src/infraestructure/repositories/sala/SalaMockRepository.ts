@@ -1,8 +1,11 @@
 import { MockRepository } from '@/infraestructure/repositories/MockRepository';
 import type { SalaDTO, SalaTipo } from '@/domain/salas/types';
 import { salasMock } from '@/data/salas';
+import type { ISalaRepository } from '@/domain/repositories/ISalaRepository';
 
-export class SalaMockRepository extends MockRepository<SalaDTO> {
+export class SalaMockRepository
+  extends MockRepository<SalaDTO>
+  implements ISalaRepository { 
   constructor() {
     super(salasMock);
   }
