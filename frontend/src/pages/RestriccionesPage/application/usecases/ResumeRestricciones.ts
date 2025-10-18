@@ -1,4 +1,4 @@
-import type { RestriccionAcademica } from "../../Domain/entities/restriccionespage/RestriccionAcademica";
+import type { RestriccionAcademica } from "@domain/entities/restriccionespage/RestriccionAcademica";
 
 export interface ResumenStats {
   label: string;

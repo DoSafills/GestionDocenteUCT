@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import type { RestriccionAcademica } from "../../Domain/entities/restriccionespage/RestriccionAcademica";
+import type { RestriccionAcademica } from "@domain/entities/restriccionespage/RestriccionAcademica";
 import type { Formulario } from "../usecases/FormularioRestriccionService";
 import { db } from "../../services/utils";
 

@@ -13,7 +13,7 @@ import {
 } from "../../../../components/ui/dialog";
 import { Button } from "../../../../components/ui/button";
 import { useRestriccionesPage } from "../../application/usecases/useRestricciones";
-import type { RestriccionAcademica } from "../../Domain/entities/restriccionespage/RestriccionAcademica";
+import type { RestriccionAcademica } from "@domain/entities/restriccionespage/RestriccionAcademica";
 
 export function RestriccionesPage() {
   const {
@@ -104,7 +104,7 @@ export function RestriccionesPage() {
             <Button variant="outline" onClick={cancelarEliminar}>
               Cancelar
             </Button>
-            <Button variant="default" onClick={confirmarEliminar}>
+            <Button variant="destructive" onClick={confirmarEliminar}>
               Eliminar
             </Button>
           </DialogFooter>

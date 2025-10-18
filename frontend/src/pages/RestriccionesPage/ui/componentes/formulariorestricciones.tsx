@@ -5,10 +5,11 @@ import { Input } from "../../../../components/ui/input";
 import { Textarea } from "../../../../components/ui/textarea";
 import { Switch } from "../../../../components/ui/switch";
 import { asignaturasMock } from "../../../../data/asignaturas";
-import { diasSemana } from "../../services/utils"
+import { diasSemana } from "../../services/utils";
 import { FormularioRestriccionService } from "../../application/usecases/FormularioRestriccionService";
 import type { Formulario } from "../../application/usecases/FormularioRestriccionService";
-import type { TipoRestriccion } from "../../Domain/entities/restriccionespage/RestriccionAcademica";
+import type { TipoRestriccion } from "@domain/entities/restriccionespage/RestriccionAcademica";
+
 interface FormularioProps {
   inicial: Formulario;
   onSubmit: (formulario: Formulario) => void;
@@ -204,8 +205,12 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
         {renderParametrosEspecificos()}
       </div>
       <div className="flex justify-end gap-3 pt-4">
-        <button className="btn-outline" onClick={modalCerrar}>Cancelar</button>
-        <button className="btn-primary" onClick={handleSubmit}>{editando ? "Actualizar" : "Agregar"} Restricción</button>
+        <button
+          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
+          onClick={handleSubmit}
+        >
+          {editando ? "Actualizar" : "Agregar"} Restricción
+        </button>
       </div>
     </div>
   );

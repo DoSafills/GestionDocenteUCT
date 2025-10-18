@@ -1,5 +1,5 @@
 import { Card, CardContent } from "../../../../components/ui/card";
-import type { RestriccionAcademica } from "../../Domain/entities/restriccionespage/RestriccionAcademica";
+import type { RestriccionAcademica } from "@domain/entities/restriccionespage/RestriccionAcademica";
 import { generarResumenRestricciones } from "../../application/usecases/ResumeRestricciones";
 import type { ResumenStats } from "../../application/usecases/ResumeRestricciones";
 

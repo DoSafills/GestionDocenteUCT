@@ -1,4 +1,4 @@
-import type{ TipoRestriccion } from "../../Domain/entities/restriccionespage/RestriccionAcademica";
+import type{ TipoRestriccion } from "@domain/entities/restriccionespage/RestriccionAcademica";
 
 export interface ParametrosRestriccion {
   docente_rut?: string;

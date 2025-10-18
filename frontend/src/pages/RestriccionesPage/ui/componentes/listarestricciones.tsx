@@ -5,7 +5,7 @@ import { Button } from "../../../../components/ui/button";
 import { Alert, AlertDescription } from "../../../../components/ui/alert";
 import { CheckCircle, XCircle, Edit, Trash2, AlertTriangle } from "lucide-react";
 
-import type { RestriccionAcademica } from "../../Domain/entities/restriccionespage/RestriccionAcademica";
+import type { RestriccionAcademica } from "@domain/entities/restriccionespage/RestriccionAcademica";
 import { getTipoIcon, getPrioridadColor } from "../../services/utils";
 import { filtrarRestricciones } from "../../application/usecases/FiltrarRestricciones";
 

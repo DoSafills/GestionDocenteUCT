@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../../components/ui/dialog";
 import { Button } from "../../../../components/ui/button";
-import type { RestriccionAcademica } from "../../Domain/entities/restriccionespage/RestriccionAcademica";
+import type { RestriccionAcademica } from "@domain/entities/restriccionespage/RestriccionAcademica";
 import { confirmarAccionRestriccion, type AccionRestriccion } from "../../application/usecases/ConfirmarAccionRestriccion";
 import { useMemo } from "react";
 
