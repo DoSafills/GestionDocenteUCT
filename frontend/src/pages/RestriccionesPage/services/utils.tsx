@@ -1,6 +1,6 @@
 import React from "react";
 import { BookOpen, Shield, Clock, Users, Calendar, AlertTriangle } from "lucide-react";
-import { db as mockDb } from "@data/restricciones"; // 🔹 Mock de base de datos
+import { db as mockDb } from "../../../infraestructure/repositories/RestriccionesMockRepository"; // 🔹 Mock de base de datos
 import type { RestriccionAcademica } from "../../../types";
 
 // 🔹 Tipos posibles de restricción para iconos
@@ -76,14 +76,23 @@ export const getAllRestricciones = async (): Promise<RestriccionAcademica[]> =>
 
 export const createRestriccion = async (
   r: Omit<RestriccionAcademica, "id" | "fechaCreacion" | "creadoPor">
-) => await db.create(r);
+): Promise<RestriccionAcademica> => {
+  const nuevo: RestriccionAcademica = {
+    ...r,
+    id: Date.now(), // ejemplo simple de id único
+    fechaCreacion: "",
+    creadoPor: "usuario_mock", // reemplazar según contexto real
+  };
+  return await db.create(nuevo);
+};
 
 export const updateRestriccion = async (
-  id: string,
+  id: string | number,
   datos: Partial<RestriccionAcademica>
-) => await db.update(id, datos);
+) => await db.update(Number(id), datos);
 
-export const deleteRestriccion = async (id: string) => await db.delete(id);
+export const deleteRestriccion = async (id: string | number) =>
+  await db.delete(Number(id));
 
-export const toggleEstadoRestriccion = async (id: string) =>
-  await db.toggleEstado(id);
+export const toggleEstadoRestriccion = async (id: string | number) =>
+  await db.toggleEstado(Number(id));

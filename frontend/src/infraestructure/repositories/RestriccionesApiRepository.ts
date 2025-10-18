@@ -1,89 +1,57 @@
-import { ApiRepository } from './ApiRepository';
-import type { RestriccionAcademica } from '@/domain/entities/restriccionespage/RestriccionAcademica';
+import { ApiService } from '../../api/Restriccionesapiservice';
 
-export class RestriccionRepository extends ApiRepository<RestriccionAcademica> {
-    constructor() {
-        // Endpoint base de la API de restricciones
-        super('https://sgh.inf.uct.cl/api/restricciones');
-    }
+export class ApiRepository<T extends { id: number }> extends ApiService {
+  protected cache: T[] = [];
 
-    /**
-     * Actualización parcial de una restricción (PATCH)
-     */
-    async patch(id: number, item: Partial<Omit<RestriccionAcademica, 'id'>>): Promise<RestriccionAcademica> {
-        const res = await fetch(`${this.endpoint}/${id}`, {
-            method: 'PATCH',
-            headers: this.getHeaders(),
-            body: JSON.stringify(item),
-        });
+  constructor(baseUrl: string) {
+    super(baseUrl);
+  }
 
-        const updated = await this.handleResponse<RestriccionAcademica>(res);
+  async getAll(forceRefresh = false): Promise<T[]> {
+    if (this.cache.length > 0 && !forceRefresh) return structuredClone(this.cache);
 
-        // Actualizamos la caché local
-        const index = this.cache.findIndex(x => x.id === updated.id);
-        if (index !== -1) this.cache[index] = updated;
-        else this.cache.unshift(updated);
+    const data = await this.get();
+    this.cache = data;
+    return structuredClone(this.cache);
+  }
 
-        return structuredClone(updated);
-    }
+  async getById(id: number): Promise<T> {
+    const cached = this.cache.find(x => x.id === id);
+    if (cached) return structuredClone(cached);
 
-    /**
-     * Obtener restricciones filtradas por tipo
-     */
-    async getByTipo(tipo: string, forceRefresh = false): Promise<RestriccionAcademica[]> {
-        const all = await this.getAll(forceRefresh);
-        return all.filter(r => r.tipo === tipo);
-    }
+    const data = await this.get(`/${id}`);
+    if (!data) throw new Error(`Item con id ${id} no encontrado`);
 
-    /**
-     * Sobrescribimos create para asegurar que los booleanos y prioridad se envían correctamente
-     */
-    async create(item: Omit<RestriccionAcademica, 'id'>): Promise<RestriccionAcademica> {
-        // Aseguramos que los booleanos y prioridad estén definidos
-        const body = {
-            tipo: item.tipo,
-            valor: item.valor,
-            prioridad: item.prioridad ?? 1,
-            restriccion_blanda: item.restriccion_blanda ?? false,
-            restriccion_dura: item.restriccion_dura ?? false,
-        };
+    this.cache.push(data);
+    return structuredClone(data);
+  }
 
-        const res = await fetch(this.endpoint, {
-            method: 'POST',
-            headers: this.getHeaders(),
-            body: JSON.stringify(body),
-        });
+  async create(item: Omit<T, 'id'>): Promise<T> {
+    const data = await this.post('', item);
+    this.cache.push(data);
+    return structuredClone(data);
+  }
 
-        const data = await this.handleResponse<RestriccionAcademica>(res);
+  async update(id: number, item: Partial<Omit<T, 'id'>>): Promise<T> {
+    const data = await this.put(`/${id}`, item);
+    const index = this.cache.findIndex(x => x.id === id);
+    if (index !== -1) this.cache[index] = data;
+    else this.cache.push(data);
+    return structuredClone(data);
+  }
 
-        this.cache.unshift(data);
+  // Cambiado a patchItem para evitar conflicto de tipos con ApiService
+  async patchItem(id: number, item: Partial<Omit<T, 'id'>>): Promise<T> {
+    const data = await super.patch(`/${id}`, item);
+    const index = this.cache.findIndex(x => x.id === id);
+    if (index !== -1) this.cache[index] = data;
+    else this.cache.push(data);
+    return structuredClone(data);
+  }
 
-        return structuredClone(data);
-    }
-
-    /**
-     * Sobrescribimos update para asegurar consistencia de campos
-     */
-    async update(id: number, item: Partial<Omit<RestriccionAcademica, 'id'>>): Promise<RestriccionAcademica> {
-        const body = {
-            ...item,
-            prioridad: item.prioridad ?? 1,
-            restriccion_blanda: item.restriccion_blanda ?? false,
-            restriccion_dura: item.restriccion_dura ?? false,
-        };
-
-        const res = await fetch(`${this.endpoint}/${id}`, {
-            method: 'PUT',
-            headers: this.getHeaders(),
-            body: JSON.stringify(body),
-        });
-
-        const updated = await this.handleResponse<RestriccionAcademica>(res);
-
-        const index = this.cache.findIndex(x => x.id === updated.id);
-        if (index !== -1) this.cache[index] = updated;
-        else this.cache.push(updated);
-
-        return structuredClone(updated);
-    }
+  // Cambiado a deleteItem para evitar conflicto de tipos con ApiService
+  async deleteItem(id: number): Promise<void> {
+    await super.delete(`/${id}`);
+    this.cache = this.cache.filter(x => x.id !== id);
+  }
 }

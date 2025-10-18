@@ -43,15 +43,22 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
                 <Select
                   value={t === "origen" ? p.asignaturaOrigen : p.asignaturaDestino}
                   onValueChange={(value) =>
-                    setFormulario(FormularioRestriccionService.actualizarParametro(formulario,
-                      t === "origen" ? "asignaturaOrigen" : "asignaturaDestino",
-                      value
-                    ))
+                    setFormulario(
+                      FormularioRestriccionService.actualizarParametro(
+                        formulario,
+                        t === "origen" ? "asignaturaOrigen" : "asignaturaDestino",
+                        value
+                      )
+                    )
                   }
                 >
                   <SelectTrigger><SelectValue placeholder="Seleccionar asignatura" /></SelectTrigger>
                   <SelectContent className="max-h-60 overflow-y-auto bg-white text-black">
-                    {asignaturasMock.map(a => <SelectItem key={a.id} value={a.codigo}>{a.codigo} - {a.nombre}</SelectItem>)}
+                    {asignaturasMock.map(a => (
+                      <SelectItem key={a.id} value={a.codigo}>
+                        {a.codigo} - {a.nombre}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -65,11 +72,19 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
               <Label>Asignatura</Label>
               <Select
                 value={p.asignaturaOrigen}
-                onValueChange={(value) => setFormulario(FormularioRestriccionService.actualizarParametro(formulario, "asignaturaOrigen", value))}
+                onValueChange={(value) =>
+                  setFormulario(
+                    FormularioRestriccionService.actualizarParametro(formulario, "asignaturaOrigen", value)
+                  )
+                }
               >
                 <SelectTrigger><SelectValue placeholder="Seleccionar asignatura" /></SelectTrigger>
                 <SelectContent className="max-h-60 overflow-y-auto bg-white text-black">
-                  {asignaturasMock.map(a => <SelectItem key={a.id} value={a.codigo}>{a.codigo} - {a.nombre}</SelectItem>)}
+                  {asignaturasMock.map(a => (
+                    <SelectItem key={a.id} value={a.codigo}>
+                      {a.codigo} - {a.nombre}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -77,9 +92,13 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
               <Label>Tipo de Sala Prohibida</Label>
               <Select
                 value={p.salaProhibida}
-                onValueChange={(value) => setFormulario(FormularioRestriccionService.actualizarParametro(formulario, "salaProhibida", value))}
+                onValueChange={(value) =>
+                  setFormulario(
+                    FormularioRestriccionService.actualizarParametro(formulario, "salaProhibida", value)
+                  )
+                }
               >
-                <SelectTrigger><SelectValue placeholder="Seleccionar tipo" ></SelectValue></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Seleccionar tipo" /></SelectTrigger>
                 <SelectContent className="bg-white text-black">
                   <SelectItem value="aula">Aula</SelectItem>
                   <SelectItem value="laboratorio">Laboratorio</SelectItem>
@@ -97,11 +116,19 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
               <Label>Asignatura</Label>
               <Select
                 value={p.asignaturaOrigen}
-                onValueChange={(value) => setFormulario(FormularioRestriccionService.actualizarParametro(formulario, "asignaturaOrigen", value))}
+                onValueChange={(value) =>
+                  setFormulario(
+                    FormularioRestriccionService.actualizarParametro(formulario, "asignaturaOrigen", value)
+                  )
+                }
               >
                 <SelectTrigger><SelectValue placeholder="Seleccionar asignatura" /></SelectTrigger>
                 <SelectContent className="max-h-60 overflow-y-auto bg-white text-black">
-                  {asignaturasMock.map(a => <SelectItem key={a.id} value={a.codigo}>{a.codigo} - {a.nombre}</SelectItem>)}
+                  {asignaturasMock.map(a => (
+                    <SelectItem key={a.id} value={a.codigo}>
+                      {a.codigo} - {a.nombre}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -109,7 +136,11 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
               <Label>Especialidad Requerida</Label>
               <Input
                 value={p.especialidadRequerida || ""}
-                onChange={e => setFormulario(FormularioRestriccionService.actualizarParametro(formulario, "especialidadRequerida", e.target.value))}
+                onChange={(e) =>
+                  setFormulario(
+                    FormularioRestriccionService.actualizarParametro(formulario, "especialidadRequerida", e.target.value)
+                  )
+                }
                 placeholder="Matemáticas, Física, etc."
               />
             </div>
@@ -122,22 +153,46 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
               <Label>Día</Label>
               <Select
                 value={p.diaRestriccion}
-                onValueChange={(value) => setFormulario(FormularioRestriccionService.actualizarParametro(formulario, "diaRestriccion", value))}
+                onValueChange={(value) =>
+                  setFormulario(
+                    FormularioRestriccionService.actualizarParametro(formulario, "diaRestriccion", value)
+                  )
+                }
               >
                 <SelectTrigger><SelectValue placeholder="Seleccionar día" /></SelectTrigger>
                 <SelectContent className="bg-white text-black">
                   <SelectItem value="todos">Todos los días</SelectItem>
-                  {diasSemana.map(d => <SelectItem key={d.valor} value={d.valor}>{d.nombre}</SelectItem>)}
+                  {diasSemana.map(d => (
+                    <SelectItem key={d.valor} value={d.valor}>
+                      {d.nombre}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label>Hora Inicio</Label>
-              <Input type="time" value={p.horaInicioRestriccion || ""} onChange={e => setFormulario(FormularioRestriccionService.actualizarParametro(formulario, "horaInicioRestriccion", e.target.value))}/>
+              <Input
+                type="time"
+                value={p.horaInicioRestriccion || ""}
+                onChange={(e) =>
+                  setFormulario(
+                    FormularioRestriccionService.actualizarParametro(formulario, "horaInicioRestriccion", e.target.value)
+                  )
+                }
+              />
             </div>
             <div className="space-y-2">
               <Label>Hora Fin</Label>
-              <Input type="time" value={p.horaFinRestriccion || ""} onChange={e => setFormulario(FormularioRestriccionService.actualizarParametro(formulario, "horaFinRestriccion", e.target.value))}/>
+              <Input
+                type="time"
+                value={p.horaFinRestriccion || ""}
+                onChange={(e) =>
+                  setFormulario(
+                    FormularioRestriccionService.actualizarParametro(formulario, "horaFinRestriccion", e.target.value)
+                  )
+                }
+              />
             </div>
           </div>
         );
@@ -150,7 +205,9 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
     <div className="space-y-6">
       {errores.length > 0 && (
         <div className="bg-red-100 text-red-700 p-2 rounded">
-          {errores.map((e,i) => <div key={i}>{e}</div>)}
+          {errores.map((e, i) => (
+            <div key={i}>{e}</div>
+          ))}
         </div>
       )}
       <div className="space-y-4">
@@ -159,7 +216,11 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
           <Label>Tipo de Restricción</Label>
           <Select
             value={formulario.tipo}
-            onValueChange={v => setFormulario(FormularioRestriccionService.actualizarCampo(formulario, "tipo", v as TipoRestriccion))}
+            onValueChange={(v) =>
+              setFormulario(
+                FormularioRestriccionService.actualizarCampo(formulario, "tipo", v as TipoRestriccion)
+              )
+            }
           >
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent className="bg-white text-black">
@@ -173,16 +234,44 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
         </div>
         <div className="space-y-2">
           <Label>Descripción *</Label>
-          <Input value={formulario.descripcion} onChange={e => setFormulario(FormularioRestriccionService.actualizarCampo(formulario, "descripcion", e.target.value))} placeholder="Descripción breve de la restricción"/>
+          <Input
+            value={formulario.descripcion}
+            onChange={(e) =>
+              setFormulario(
+                FormularioRestriccionService.actualizarCampo(formulario, "descripcion", e.target.value)
+              )
+            }
+            placeholder="Descripción breve de la restricción"
+          />
         </div>
         <div className="space-y-2">
           <Label>Mensaje de Error *</Label>
-          <Textarea value={formulario.mensaje} onChange={e => setFormulario(FormularioRestriccionService.actualizarCampo(formulario, "mensaje", e.target.value))} rows={3} placeholder="Mensaje que se mostrará cuando no se cumpla la restricción"/>
+          <Textarea
+            value={formulario.mensaje}
+            onChange={(e) =>
+              setFormulario(
+                FormularioRestriccionService.actualizarCampo(formulario, "mensaje", e.target.value)
+              )
+            }
+            rows={3}
+            placeholder="Mensaje que se mostrará cuando no se cumpla la restricción"
+          />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Prioridad</Label>
-            <Select value={formulario.prioridad} onValueChange={v => setFormulario(FormularioRestriccionService.actualizarCampo(formulario, "prioridad", v))}>
+            <Select
+              value={formulario.prioridad}
+              onValueChange={(v) =>
+                setFormulario(
+                  FormularioRestriccionService.actualizarCampo(
+                    formulario,
+                    "prioridad",
+                    v as "alta" | "media" | "baja" // ✅ corrección tipado
+                  )
+                )
+              }
+            >
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent className="bg-white text-black">
                 <SelectItem value="alta">Alta</SelectItem>
@@ -194,7 +283,14 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
           <div className="space-y-2">
             <Label>Estado</Label>
             <div className="flex items-center space-x-2 h-10">
-              <Switch checked={formulario.activa} onCheckedChange={v => setFormulario(FormularioRestriccionService.actualizarCampo(formulario, "activa", v))}/>
+              <Switch
+                checked={formulario.activa}
+                onCheckedChange={(v) =>
+                  setFormulario(
+                    FormularioRestriccionService.actualizarCampo(formulario, "activa", v)
+                  )
+                }
+              />
               <span className="text-sm">{formulario.activa ? "Activa" : "Inactiva"}</span>
             </div>
           </div>
