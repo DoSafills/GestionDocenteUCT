@@ -23,7 +23,7 @@ export interface ParametrosRestriccion {
 }
 
 export interface RestriccionAcademica {
-  id?: string;
+  id?: number;
   tipo: TipoRestriccion;
   descripcion: string;
   mensaje: string;

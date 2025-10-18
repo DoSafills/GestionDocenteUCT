@@ -1,55 +1,87 @@
 import type { RestriccionAcademica } from "../../types";
+import { MockRepository } from "@/infraestructure/repositories/MockRepository";
 
-export class RestriccionesMockRepository {
-  private data: RestriccionAcademica[];
+const restriccionesIniciales: RestriccionAcademica[] = [
+  {
+    id: 1,
+    tipo: "prerrequisito",
+    descripcion: "Debe cursar Matemáticas I antes de II",
+    activa: true,
+    prioridad: "alta",
+    parametros: {
+      asignaturaOrigen: "MAT101",
+      asignaturaDestino: "MAT102",
+      salaProhibida: "",
+      docente_rut: "",
+      especialidadRequerida: "",
+      diaRestriccion: "",
+      horaInicioRestriccion: "",
+      horaFinRestriccion: "",
+    },
+    mensaje: "No puedes inscribir Matemáticas II sin Matemáticas I",
+    fechaCreacion: "2025-10-04",
+    creadoPor: "admin",
+  },
+];
 
-  constructor(initialData: RestriccionAcademica[]) {
-    this.data = [...initialData];
+export class RestriccionAcademicaMockRepository extends MockRepository<RestriccionAcademica> {
+  constructor() {
+    super(restriccionesIniciales);
   }
 
-  private wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
   async getAll(): Promise<RestriccionAcademica[]> {
-    await this.wait(200);
     return structuredClone(this.data);
   }
 
-  async getById(id: string): Promise<RestriccionAcademica> {
-    await this.wait(200);
-    const found = this.data.find(r => r.id === id);
-    if (!found) throw new Error(`Restricción con id ${id} no encontrada`);
-    return structuredClone(found);
+  async getById(id: number): Promise<RestriccionAcademica> {
+    const r = this.data.find((r) => r.id === id);
+    if (!r) throw new Error(`Restricción con id ${id} no encontrada`);
+    return structuredClone(r);
   }
 
-  async create(item: Omit<RestriccionAcademica, "id" | "fechaCreacion" | "creadoPor">): Promise<RestriccionAcademica> {
-    await this.wait(200);
-    const newItem: RestriccionAcademica = {
-      ...item,
-      id: Date.now().toString(),
-      fechaCreacion: new Date().toISOString().split("T")[0],
-      creadoPor: "admin"
-    };
-    this.data.push(newItem);
-    return structuredClone(newItem);
+  async create(r: RestriccionAcademica): Promise<RestriccionAcademica> {
+    this.data.push(r);
+    return structuredClone(r);
   }
 
-  async update(id: string, item: Partial<Omit<RestriccionAcademica, "id" | "fechaCreacion" | "creadoPor">>): Promise<RestriccionAcademica> {
-    await this.wait(200);
-    const index = this.data.findIndex(r => r.id === id);
+  async update(id: number, cambios: Partial<RestriccionAcademica>): Promise<RestriccionAcademica> {
+    const index = this.data.findIndex((r) => r.id === id);
     if (index === -1) throw new Error(`Restricción con id ${id} no encontrada`);
-    this.data[index] = { ...this.data[index], ...item };
+    this.data[index] = { ...this.data[index], ...cambios };
     return structuredClone(this.data[index]);
   }
 
-  async delete(id: string): Promise<void> {
-    await this.wait(200);
-    this.data = this.data.filter(r => r.id !== id);
+  async delete(id: number): Promise<void> {
+    const index = this.data.findIndex((r) => r.id === id);
+    if (index === -1) throw new Error(`Restricción con id ${id} no encontrada`);
+    this.data.splice(index, 1);
   }
 
-  async toggleEstado(id: string): Promise<RestriccionAcademica | undefined> {
-    await this.wait(200);
-    const r = this.data.find(r => r.id === id);
-    if (r) r.activa = !r.activa;
-    return structuredClone(r);
+  async toggleEstado(id: number): Promise<RestriccionAcademica> {
+    const restriccion = this.data.find((r) => r.id === id);
+    if (!restriccion) throw new Error(`Restricción con id ${id} no encontrada`);
+    restriccion.activa = !restriccion.activa;
+    return structuredClone(restriccion);
+  }
+
+  async findByTipo(tipo: string): Promise<RestriccionAcademica[]> {
+    return structuredClone(this.data.filter((r) => r.tipo === tipo));
+  }
+
+  async findByPrioridad(prioridad: string): Promise<RestriccionAcademica[]> {
+    return structuredClone(this.data.filter((r) => r.prioridad === prioridad));
+  }
+
+  async search(query: string): Promise<RestriccionAcademica[]> {
+    const q = query.toLowerCase();
+    return structuredClone(
+      this.data.filter(
+        (r) =>
+          r.descripcion.toLowerCase().includes(q) ||
+          r.mensaje.toLowerCase().includes(q)
+      )
+    );
   }
 }
+
+export const db = new RestriccionAcademicaMockRepository();

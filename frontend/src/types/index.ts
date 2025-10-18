@@ -150,7 +150,7 @@ export interface Asignatura {
 }
 
 export interface RestriccionAcademica {
-    id: string;
+    id: number;
     tipo:
         | 'prerrequisito'
         | 'sala_prohibida'

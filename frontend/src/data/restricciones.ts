@@ -3,7 +3,7 @@ import type { RestriccionAcademica } from "../types";
 // Array en memoria
 let restricciones: RestriccionAcademica[] = [
   {
-    id: "1",
+    id: 1,
     tipo: "prerrequisito",
     descripcion: "Debe cursar Matemáticas I antes de II",
     activa: true,
@@ -37,7 +37,7 @@ export const db = {
     await wait(200);
     const nueva: RestriccionAcademica = {
       ...restriccion,
-      id: Date.now().toString(),
+      id: Date.now(), // <-- número en vez de string
       fechaCreacion: new Date().toISOString().split("T")[0],
       creadoPor: "admin"
     };
@@ -45,7 +45,7 @@ export const db = {
     return nueva;
   },
 
-  update: async (id: string, datos: Partial<RestriccionAcademica>) => {
+  update: async (id: number, datos: Partial<RestriccionAcademica>) => {
     await wait(200);
     const index = restricciones.findIndex(r => r.id === id);
     if (index === -1) throw new Error("No encontrada");
@@ -53,19 +53,19 @@ export const db = {
     return restricciones[index];
   },
 
-  delete: async (id: string) => {
+  delete: async (id: number) => {
     await wait(200);
     restricciones = restricciones.filter(r => r.id !== id);
   },
 
-  toggleEstado: async (id: string) => {
+  toggleEstado: async (id: number) => {
     await wait(200);
     const r = restricciones.find(r => r.id === id);
     if (r) r.activa = !r.activa;
     return r;
   },
 
-  findById: async (id: string) => {
+  findById: async (id: number) => {
     await wait(200);
     return restricciones.find(r => r.id === id);
   }

@@ -1,43 +1,73 @@
-import type { IRepository } from './IRepository';
+import { ApiService } from './ApiService';
 
-export class MockRepository<T extends { id: number }> implements IRepository<T> {
-    protected data: T[];
+export class ApiRepository<T extends { id: number }> extends ApiService {
+  protected cache: T[] = [];
 
-    constructor(initialData: T[]) {
-        this.data = [...initialData];
+  constructor(baseUrl: string) {
+    super(baseUrl);
+  }
+
+  /**
+   * Obtener todos los items
+   */
+  async getAll(forceRefresh = false): Promise<T[]> {
+    if (this.cache.length > 0 && !forceRefresh) {
+      return structuredClone(this.cache);
     }
 
-    async getAll(): Promise<T[]> {
-        return structuredClone(this.data);
-    }
+    const data = await this.get();
+    this.cache = data;
+    return structuredClone(this.cache);
+  }
 
-    async getById(id: number): Promise<T> {
-        const found = this.data.find((item) => item.id === id);
+  /**
+   * Obtener item por ID
+   */
+  async getById(id: number): Promise<T | null> {
+    const cached = this.cache.find(x => x.id === id);
+    if (cached) return structuredClone(cached);
 
-        if (!found) throw new Error(`Item con id ${id} no encontrado`);
+    const data = await this.get(`/${id}`);
+    if (data) this.cache.push(data);
+    return data ? structuredClone(data) : null;
+  }
 
-        return structuredClone(found);
-    }
+  /**
+   * Crear un item
+   */
+  async create(item: Omit<T, 'id'>): Promise<T> {
+    const data = await this.post('', item);
+    this.cache.unshift(data);
+    return structuredClone(data);
+  }
 
-    async create(item: Omit<T, 'id'>): Promise<T> {
-        const newItem = { ...item, id: this.data.length + 1 } as T;
-        this.data.push(newItem);
-        return structuredClone(newItem);
-    }
+  /**
+   * Actualizar item completo (PUT)
+   */
+  async update(id: number, item: Partial<Omit<T, 'id'>>): Promise<T> {
+    const data = await this.put(`/${id}`, item);
+    const index = this.cache.findIndex(x => x.id === id);
+    if (index !== -1) this.cache[index] = data;
+    else this.cache.push(data);
+    return structuredClone(data);
+  }
 
-    async update(id: number, item: Partial<Omit<T, 'id'>>): Promise<T> {
-        const index = this.data.findIndex((d) => d.id === id);
+  /**
+   * Actualización parcial (PATCH)
+   */
+  async patch(id: number, item: Partial<Omit<T, 'id'>>): Promise<T> {
+    const data = await this.patch(`/${id}`, item);
+    const index = this.cache.findIndex(x => x.id === id);
+    if (index !== -1) this.cache[index] = data;
+    else this.cache.unshift(data);
+    return structuredClone(data);
+  }
 
-        if (index === -1) throw new Error(`Item con id ${id} no encontrado`);
-
-        this.data[index] = { ...this.data[index], ...item };
-        return structuredClone(this.data[index]);
-    }
-
-    async delete(id: number): Promise<void> {
-        const index = this.data.findIndex((d) => d.id === id);
-        if (index === -1) throw new Error(`Item con id ${id} no encontrado`);
-
-        this.data.splice(index, 1);
-    }
+  /**
+   * Eliminar item
+   */
+  async deleteById(id: number): Promise<void> {
+    await this.delete(`/${id}`);
+    this.cache = this.cache.filter(x => x.id !== id);
+  }
 }

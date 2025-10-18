@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
-import type { RestriccionAcademica } from "@domain/entities/restriccionespage/RestriccionAcademica";
 import type { Formulario } from "../usecases/FormularioRestriccionService";
-import { db } from "../../services/utils";
+import { db } from "@infraestructure/repositories/RestriccionesMockRepository";
+import type { RestriccionAcademica as DomainRestriccion } from "@domain/entities/restriccionespage/RestriccionAcademica";
+import type { RestriccionAcademica } from "@/types/index"; // <- tipo esperado por db y hook
 
 // 🔹 Validación de prioridad
 const validarPrioridad = (p: string): "alta" | "media" | "baja" => {
@@ -24,10 +25,31 @@ export const FORMULARIO_INICIAL: Formulario = {
     diaRestriccion: "",
     horaInicioRestriccion: "",
     horaFinRestriccion: "",
+    fechaCreacion: "",
+    creadoPor: "",
   },
 };
 
-// 🔹 Hook combinado
+// 🔹 Contador de IDs numérico
+let contadorId = Date.now();
+
+// 🔹 Función helper: convierte Domain → Tipo esperado
+const normalizarRestriccion = (r: DomainRestriccion): RestriccionAcademica => ({
+  id: r.id ?? ++contadorId,
+  tipo: r.tipo,
+  descripcion: r.descripcion,
+  mensaje: r.mensaje,
+  prioridad: validarPrioridad(r.prioridad ?? "media"),
+  activa: r.activa,
+  fechaCreacion: r.parametros.fechaCreacion ?? "",
+  creadoPor: r.parametros.creadoPor ?? "",
+  parametros: {
+    ...r.parametros,
+    fechaCreacion: undefined, // removemos duplicado
+    creadoPor: undefined,     // removemos duplicado
+  },
+});
+
 export function useRestriccionesPage() {
   const [restricciones, setRestricciones] = useState<RestriccionAcademica[]>([]);
   const [busqueda, setBusqueda] = useState("");
@@ -35,22 +57,20 @@ export function useRestriccionesPage() {
   const [filtroPrioridad, setFiltroPrioridad] = useState<string>("todos");
   const [filtroActiva, setFiltroActiva] = useState<string>("todos");
 
-  // Modal creación/edición
   const [modalAbierto, setModalAbierto] = useState(false);
   const [editando, setEditando] = useState(false);
   const [formulario, setFormulario] = useState<Formulario>(FORMULARIO_INICIAL);
   const [restriccionParaEditar, setRestriccionParaEditar] = useState<RestriccionAcademica | null>(null);
 
-  // Modal confirmación eliminación
   const [modalEliminarAbierto, setModalEliminarAbierto] = useState(false);
   const [restriccionParaEliminar, setRestriccionParaEliminar] = useState<RestriccionAcademica | null>(null);
 
-  // 🔹 Cargar restricciones al inicio
+  // 🔹 Cargar restricciones iniciales
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await db.getAll();
-        setRestricciones(data.map((r) => ({ ...r, prioridad: validarPrioridad(r.prioridad ?? "media") })));
+        const data: DomainRestriccion[] = await db.getAll();
+        setRestricciones(data.map(normalizarRestriccion));
       } catch (error) {
         console.error("Error cargando restricciones:", error);
       }
@@ -65,23 +85,34 @@ export function useRestriccionesPage() {
     restriccionParaEditar: RestriccionAcademica | null
   ) => {
     const prioridadValidada = validarPrioridad(formData.prioridad);
+
     if (editando && restriccionParaEditar?.id) {
       await db.update(restriccionParaEditar.id, { ...formData, prioridad: prioridadValidada });
       setRestricciones((prev) =>
         prev.map((r) =>
-          r.id === restriccionParaEditar.id ? { ...r, ...formData, prioridad: prioridadValidada } : r
+          r.id === restriccionParaEditar.id
+            ? normalizarRestriccion({
+                ...formData,
+                id: r.id,
+                parametros: {
+                  ...formData.parametros,
+                  fechaCreacion: r.fechaCreacion,
+                  creadoPor: r.creadoPor,
+                },
+              })
+            : r
         )
       );
     } else {
-      const nuevaRestriccion: RestriccionAcademica = {
-        id: crypto.randomUUID(),
-        tipo: formData.tipo,
-        prioridad: prioridadValidada,
-        descripcion: formData.descripcion,
-        mensaje: formData.mensaje,
-        activa: formData.activa,
-        parametros: formData.parametros,
-      };
+      const nuevaRestriccion: RestriccionAcademica = normalizarRestriccion({
+        id: ++contadorId,
+        ...formData,
+        parametros: {
+          ...formData.parametros,
+          fechaCreacion: formData.parametros.fechaCreacion ?? "",
+          creadoPor: formData.parametros.creadoPor ?? "",
+        },
+      });
       const creada = await db.create(nuevaRestriccion);
       setRestricciones((prev) => [...prev, creada]);
     }
@@ -92,24 +123,34 @@ export function useRestriccionesPage() {
     if (!r.id) return;
     const actualizado = await db.toggleEstado(r.id);
     if (!actualizado) return;
-    setRestricciones((prev) => prev.map((item) => (item.id === r.id ? actualizado : item)));
+    setRestricciones((prev) =>
+      prev.map((item) => (item.id === r.id ? normalizarRestriccion(actualizado) : item))
+    );
   };
 
-  // 🔹 Abrir modal creación/edición
+  // 🔹 Modal creación/edición
   const abrirModalParaCrear = () => {
     setFormulario(FORMULARIO_INICIAL);
     setEditando(false);
     setRestriccionParaEditar(null);
     setModalAbierto(true);
   };
+
   const abrirModalParaEditar = (r: RestriccionAcademica) => {
-    setFormulario({ ...r });
+    setFormulario({
+      tipo: r.tipo,
+      prioridad: r.prioridad,
+      descripcion: r.descripcion,
+      mensaje: r.mensaje,
+      activa: r.activa,
+      parametros: r.parametros,
+    });
     setEditando(true);
     setRestriccionParaEditar(r);
     setModalAbierto(true);
   };
 
-  // 🔹 Abrir/cancelar modal de eliminación
+  // 🔹 Modal eliminación
   const abrirConfirmacionEliminar = (r: RestriccionAcademica) => {
     setRestriccionParaEliminar(r);
     setModalEliminarAbierto(true);
@@ -118,8 +159,6 @@ export function useRestriccionesPage() {
     setRestriccionParaEliminar(null);
     setModalEliminarAbierto(false);
   };
-
-  // 🔹 Confirmar eliminación
   const confirmarEliminar = async () => {
     if (!restriccionParaEliminar?.id) return;
     await db.delete(restriccionParaEliminar.id);
@@ -133,7 +172,8 @@ export function useRestriccionesPage() {
       const matchBusqueda = r.descripcion.toLowerCase().includes(busqueda.toLowerCase());
       const matchTipo = filtroTipo === "todos" || r.tipo === filtroTipo;
       const matchPrioridad = filtroPrioridad === "todos" || r.prioridad === filtroPrioridad;
-      const matchActiva = filtroActiva === "todos" || (filtroActiva === "activa" ? r.activa : !r.activa);
+      const matchActiva =
+        filtroActiva === "todos" || (filtroActiva === "activa" ? r.activa : !r.activa);
       return matchBusqueda && matchTipo && matchPrioridad && matchActiva;
     });
   }, [restricciones, busqueda, filtroTipo, filtroPrioridad, filtroActiva]);

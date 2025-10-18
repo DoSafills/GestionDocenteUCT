@@ -1,4 +1,4 @@
-import type{ TipoRestriccion } from "@domain/entities/restriccionespage/RestriccionAcademica";
+import type { TipoRestriccion } from "@domain/entities/restriccionespage/RestriccionAcademica";
 
 export interface ParametrosRestriccion {
   docente_rut?: string;
@@ -12,6 +12,8 @@ export interface ParametrosRestriccion {
   diaRestriccion?: string;
   horaInicioRestriccion?: string;
   horaFinRestriccion?: string;
+  fechaCreacion?: string; // agregado mínimo
+  creadoPor?: string;     // agregado mínimo
 }
 
 export interface Formulario {
@@ -35,14 +37,18 @@ export class FormularioRestriccionService {
     };
   }
 
-  static actualizarCampo(formulario: Formulario, campo: keyof Formulario, valor: any): Formulario {
+  static actualizarCampo<K extends keyof Formulario>(
+    formulario: Formulario,
+    campo: K,
+    valor: Formulario[K]
+  ): Formulario {
     return { ...formulario, [campo]: valor };
   }
 
-  static actualizarParametro(
+  static actualizarParametro<K extends keyof ParametrosRestriccion>(
     formulario: Formulario,
-    parametro: keyof ParametrosRestriccion,
-    valor: any
+    parametro: K,
+    valor: ParametrosRestriccion[K]
   ): Formulario {
     return {
       ...formulario,
@@ -52,6 +58,7 @@ export class FormularioRestriccionService {
 
   static validar(formulario: Formulario): string[] {
     const errores: string[] = [];
+
     if (!formulario.descripcion.trim()) errores.push("La descripción es obligatoria");
     if (!formulario.mensaje.trim()) errores.push("El mensaje es obligatorio");
 
@@ -61,18 +68,29 @@ export class FormularioRestriccionService {
         if (!formulario.parametros.asignaturaOrigen) errores.push("Asignatura origen requerida");
         if (!formulario.parametros.asignaturaDestino) errores.push("Asignatura destino requerida");
         break;
+
       case "sala_prohibida":
         if (!formulario.parametros.asignaturaOrigen) errores.push("Asignatura requerida");
         if (!formulario.parametros.salaProhibida) errores.push("Tipo de sala requerido");
         break;
+
       case "profesor_especialidad":
         if (!formulario.parametros.asignaturaOrigen) errores.push("Asignatura requerida");
         if (!formulario.parametros.especialidadRequerida) errores.push("Especialidad requerida");
         break;
+
       case "horario_conflicto":
         if (!formulario.parametros.diaRestriccion) errores.push("Día requerido");
-        if (!formulario.parametros.horaInicioRestriccion) errores.push("Hora inicio requerida");
-        if (!formulario.parametros.horaFinRestriccion) errores.push("Hora fin requerida");
+
+        const horaInicio = formulario.parametros.horaInicioRestriccion;
+        const horaFin = formulario.parametros.horaFinRestriccion;
+        const horaRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+        if (!horaInicio) errores.push("Hora inicio requerida");
+        else if (!horaRegex.test(horaInicio)) errores.push("Hora inicio inválida");
+
+        if (!horaFin) errores.push("Hora fin requerida");
+        else if (!horaRegex.test(horaFin)) errores.push("Hora fin inválida");
         break;
     }
 
