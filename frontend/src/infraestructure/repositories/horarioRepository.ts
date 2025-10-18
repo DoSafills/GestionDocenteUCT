@@ -1,12 +1,16 @@
-import { clasesMock } from "../../../data/clases";
-import { seccionesMock } from "../../../data/secciones";
-import { asignaturasMock } from "../../../data/asignaturas";
-import { bloquesMock } from "../../../data/bloques";
-import { edificiosMock } from "../../../data/edificios";
-import { salasMock } from "../../../data/salas";
-import { docentesMock } from "../../../data/docentes";
-import type { HorarioCompleto, HorarioDetalle, FiltrosHorario } from "../types/horario";
 
+// reemplazar por servicios
+import { clasesMock } from "@data/clases";
+import { seccionesMock } from "@data/secciones";
+import { asignaturasMock } from "@data/asignaturas";
+import { bloquesMock } from "@data/bloques";
+import { edificiosMock } from "@data/edificios";
+import { salasMock } from "@data/salas";
+import { docentesMock } from "@data/docentes";
+import type { HorarioCompleto, HorarioDetalle, FiltrosHorario } from "@types/horario";
+
+// USAR IRepository
+ 
 export class HorarioRepository {
   obtenerPorSeccionId(seccionId: string): HorarioCompleto[] {
     // Acepta id numérico en string

@@ -32,7 +32,8 @@
       "@data/*": ["data/*"],
       "@domain/*": ["domain/*"],
       "@infraestructure/*": ["infraestructure/*"],
-      "@endpoints/*": ["endpoints/*"]
+      "@endpoints/*": ["endpoints/*"],
+	  "@application/*": ["application/*"]
     }
   },
   "include": ["src"]
