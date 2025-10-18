@@ -29,9 +29,11 @@
       "@pages/*": ["pages/*"],
       "@utils/*": ["utils/*"],
       "@types/*": ["types/*"],
-      "@api/*": ["api/*"],
       "@data/*": ["data/*"],
-      "@endpoints/*": ["endpoints/*"]
+      "@domain/*": ["domain/*"],
+      "@infraestructure/*": ["infraestructure/*"],
+      "@endpoints/*": ["endpoints/*"],
+	  "@application/*": ["application/*"]
     }
   },
   "include": ["src"]

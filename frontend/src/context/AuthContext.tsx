@@ -1,7 +1,7 @@
 // src/context/AuthContext.tsx
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { setAccessToken, clearAccessToken } from "../auth/tokenStore";
-import { ENDPOINTS } from "../endpoints";
+import { ENDPOINTS } from "../infraestructure/endpoints/index";
 import type { AuthContextType, LoginRequest, LoginResponse, RefreshResponse } from "../pages/LoginPage/types";
 
 const THIRTY_MIN_MS = 30 * 60 * 1000;
@@ -15,7 +15,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const refreshIntervalRef = useRef<number | null>(null);
 
   const loginApi = async (payload: LoginRequest): Promise<LoginResponse> => {

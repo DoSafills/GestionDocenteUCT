@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { HorarioService } from '../services/horarioService';
+import { HorarioService } from '../../../application/services/horarioService';
 import type { HorarioDetalle, FiltrosHorario } from '../types/horario';
 
 export const useHorarios = () => {
