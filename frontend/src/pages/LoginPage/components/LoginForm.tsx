@@ -1,9 +1,9 @@
-// src/pages/LoginPage/components/LoginForm.tsx
+
 import React, { useState } from "react";
 import { useAuthContext } from "../hooks/AuthProvider";
 
 export default function LoginForm() {
-  // ✅ el hook va DENTRO del componente
+ 
   const { login, isLoading, error } = useAuthContext();
 
   const [email, setEmail] = useState("");
@@ -11,8 +11,7 @@ export default function LoginForm() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // (opcional) logs de depuración:
-    // console.log("submit login", { email, passwordLength: password.length });
+    
     await login({ email, password });
   }
 

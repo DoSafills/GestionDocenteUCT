@@ -1,5 +1,5 @@
-// Si necesitas el usuario en esta página, reusa tus tipos reales:
-import type { Estudiante, Docente, Admin } from "../../../types"; // ajusta ruta si fuese necesario
+
+import type { Estudiante, Docente, Admin } from "../../../types"; 
 
 // ====== DTOs de API (tal como responde/espera el backend) ======
 export interface LoginRequestDto {
@@ -22,7 +22,7 @@ export interface RefreshResponseDto {
 // ====== Tipos de dominio (lo que usa la UI/hook/repo) ======
 export interface LoginCredentials {
   email: string;
-  password: string; // usamos 'password' en UI y mapeamos a 'contrasena' en services
+  password: string; 
 }
 
 export interface Tokens {

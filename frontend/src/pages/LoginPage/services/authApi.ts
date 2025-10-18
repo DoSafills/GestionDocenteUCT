@@ -1,4 +1,4 @@
-// src/pages/LoginPage/services/authApi.ts
+
 import * as real from "./authApi.real";
 import * as mock from "./authApi.mock";
 

@@ -4,7 +4,7 @@ let accessExpAtMem: number | undefined = undefined; // epoch ms
 const REFRESH_KEY = "auth.refresh.token";
 
 export const tokenStorage = {
-  // ACCESS (memoria -> delega en tu store global)
+  
   setAccess(token: string | null, accessExpAt?: number) {
     setAccessToken(token);
     accessExpAtMem = accessExpAt;
