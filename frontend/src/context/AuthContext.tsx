@@ -79,8 +79,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // --- Autologin al montar ---
   useEffect(() => {
-    // ⚡ Siempre marcar autenticado sin pedir token
-    setIsAuthenticated(true);
+    const refresh_token = localStorage.getItem("refresh_token");
+    if (!refresh_token) return;
+
+    (async () => {
+      try {
+        const { access_token } = await refreshApi(refresh_token);
+        setAccessToken(access_token);
+        setIsAuthenticated(true);
+        scheduleRefresh();
+      } catch {
+        logout();
+      }
+    })();
+
+    return clearRefreshInterval;
   }, []);
 
   // --- Refresh al volver de background ---

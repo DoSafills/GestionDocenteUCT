@@ -96,5 +96,5 @@ export class EdificioService
   }
 }
 
-// export const edificioService = new EdificioService(new EdificioApiRepository());
-export const edificioService = new EdificioService(new EdificioMockRepository());
+export const edificioService = new EdificioService();
+// export const edificioService = new EdificioService(new EdificioMockRepository());

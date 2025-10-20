@@ -179,5 +179,5 @@ export class SalaService
   }
 }
 
-// export const salaService = new SalaService(new SalaApiRepository());
-export const salaService = new SalaService(new SalaMockRepository());
+export const salaService = new SalaService();
+// export const salaService = new SalaService(new SalaMockRepository());
