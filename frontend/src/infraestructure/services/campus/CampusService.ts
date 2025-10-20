@@ -75,5 +75,5 @@ export class CampusService implements IService<Campus, CampusDTO> {
   }
 }
 
-export const campusService = new CampusService();
-// export const campusService = new CampusService(new CampusMockRepository());
+// export const campusService = new CampusService();
+export const campusService = new CampusService(new CampusMockRepository());
