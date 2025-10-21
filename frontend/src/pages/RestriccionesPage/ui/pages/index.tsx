@@ -13,7 +13,8 @@ import {
 } from "../../../../components/ui/dialog";
 import { Button } from "../../../../components/ui/button";
 import { useRestriccionesPage } from "../../application/usecases/useRestricciones";
-import type { RestriccionAcademica } from "@domain/entities/restriccionespage/RestriccionAcademica";
+import type { RestriccionAcademica, TipoRestriccion } from "@domain/entities/restriccionespage/RestriccionAcademica";
+import { Table as TableIcon, XCircle, CheckCircle, AlertTriangle } from "lucide-react";
 
 export function RestriccionesPage() {
   const {
@@ -38,18 +39,15 @@ export function RestriccionesPage() {
     setRestricciones,
   } = useRestriccionesPage();
 
-  // 🔹 Estado para modal de eliminación
   const [modalEliminarAbierto, setModalEliminarAbierto] = useState(false);
   const [restriccionParaEliminar, setRestriccionParaEliminar] = useState<RestriccionAcademica | null>(null);
 
-  // Cancelar eliminación
-  const cancelarEliminar = () => {
+  const cancelarEliminar = (): void => {
     setModalEliminarAbierto(false);
     setRestriccionParaEliminar(null);
   };
 
-  // Confirmar eliminación
-  const confirmarEliminar = () => {
+  const confirmarEliminar = (): void => {
     if (restriccionParaEliminar) {
       setRestricciones(prev =>
         prev.filter(r => r.id !== restriccionParaEliminar.id)
@@ -57,6 +55,14 @@ export function RestriccionesPage() {
       setModalEliminarAbierto(false);
       setRestriccionParaEliminar(null);
     }
+  };
+
+  // 🔹 Iconos por tipo, capacidad incluye prerrequisito/secuencia temporal
+  const iconosPorTipo: Record<TipoRestriccion, React.ReactNode> = {
+    sala_prohibida: <AlertTriangle />,
+    horario_conflicto: <XCircle />,
+    capacidad: <TableIcon />,
+    profesor_especialidad: <CheckCircle />,
   };
 
   return (
@@ -91,7 +97,7 @@ export function RestriccionesPage() {
       </Dialog>
 
       {/* 🔹 Modal de confirmación de eliminación */}
-      <Dialog open={modalEliminarAbierto} onOpenChange={() => {}}>
+      <Dialog open={modalEliminarAbierto} onOpenChange={setModalEliminarAbierto}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirmar eliminación</DialogTitle>
@@ -132,7 +138,7 @@ export function RestriccionesPage() {
         setRestricciones={setRestricciones}
         abrirModalParaEditar={abrirModalParaEditar}
         handleToggle={toggleRestriccion}
-        // 🔹 Aquí pasamos la restricción directamente al modal
+        iconosPorTipo={iconosPorTipo} // pasamos iconos actualizados
         solicitarEliminar={(r: RestriccionAcademica) => {
           setRestriccionParaEliminar(r);
           setModalEliminarAbierto(true);

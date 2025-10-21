@@ -166,6 +166,7 @@ export interface RestriccionAcademica {
         diaRestriccion?: string;
         horaInicioRestriccion?: string;
         horaFinRestriccion?: string;
+        capacidadMaxima?: number;
         [key: string]: any;
     };
     mensaje: string;

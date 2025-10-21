@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../../../components
 import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
 import { Alert, AlertDescription } from "../../../../components/ui/alert";
-import { CheckCircle, XCircle, Edit, Trash2, AlertTriangle } from "lucide-react";
+import { Edit, Trash2, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 
 import type { RestriccionAcademica } from "@domain/entities/restriccionespage/RestriccionAcademica";
 import { getTipoIcon, getPrioridadColor } from "../../services/utils";
@@ -18,14 +18,12 @@ export interface ListaRestriccionesProps {
   filtroActiva: string;
   setModalAbierto: (open: boolean) => void;
   abrirModalParaEditar: (restriccion: RestriccionAcademica) => void;
-  handleToggle: (r: RestriccionAcademica) => Promise<void>;
   solicitarEliminar: (r: RestriccionAcademica) => void; // Solo notifica al padre
 }
 
 export function ListaRestricciones({
   restricciones,
   abrirModalParaEditar,
-  handleToggle,
   solicitarEliminar,
   busqueda,
   filtroTipo,
@@ -79,9 +77,7 @@ export function ListaRestricciones({
                 </div>
               </div>
               <div className="flex gap-1">
-                <Button variant="ghost" size="sm" onClick={() => handleToggle(restriccion)}>
-                  {restriccion.activa ? <XCircle className="w-4 h-4 text-red-600" /> : <CheckCircle className="w-4 h-4 text-green-600" />}
-                </Button>
+                {/* Botón de activar/desactivar eliminado */}
                 <Button variant="ghost" size="sm" onClick={() => abrirModalParaEditar(restriccion)}>
                   <Edit className="w-4 h-4" />
                 </Button>

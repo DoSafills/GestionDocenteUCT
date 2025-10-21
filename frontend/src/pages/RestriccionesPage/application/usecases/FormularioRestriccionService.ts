@@ -14,6 +14,7 @@ export interface ParametrosRestriccion {
   horaFinRestriccion?: string;
   fechaCreacion?: string; // agregado mínimo
   creadoPor?: string;     // agregado mínimo
+  capacidadMaxima?: number;
 }
 
 export interface Formulario {
@@ -28,7 +29,7 @@ export interface Formulario {
 export class FormularioRestriccionService {
   static inicializar(): Formulario {
     return {
-      tipo: "prerrequisito",
+      tipo: "sala_prohibida",
       descripcion: "",
       mensaje: "",
       prioridad: "media",
@@ -63,12 +64,6 @@ export class FormularioRestriccionService {
     if (!formulario.mensaje.trim()) errores.push("El mensaje es obligatorio");
 
     switch (formulario.tipo) {
-      case "prerrequisito":
-      case "secuencia_temporal":
-        if (!formulario.parametros.asignaturaOrigen) errores.push("Asignatura origen requerida");
-        if (!formulario.parametros.asignaturaDestino) errores.push("Asignatura destino requerida");
-        break;
-
       case "sala_prohibida":
         if (!formulario.parametros.asignaturaOrigen) errores.push("Asignatura requerida");
         if (!formulario.parametros.salaProhibida) errores.push("Tipo de sala requerido");
@@ -91,6 +86,13 @@ export class FormularioRestriccionService {
 
         if (!horaFin) errores.push("Hora fin requerida");
         else if (!horaRegex.test(horaFin)) errores.push("Hora fin inválida");
+        break;
+
+      case "capacidad":
+        const capacidad = formulario.parametros.capacidadMaxima;
+        if (capacidad === undefined || capacidad <= 0 || isNaN(capacidad)) {
+          errores.push("Capacidad máxima debe ser un número mayor a 0");
+        }
         break;
     }
 

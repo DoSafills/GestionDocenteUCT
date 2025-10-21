@@ -33,38 +33,6 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
   const renderParametrosEspecificos = () => {
     const p = formulario.parametros;
     switch (formulario.tipo) {
-      case "prerrequisito":
-      case "secuencia_temporal":
-        return (
-          <div className="grid grid-cols-2 gap-4">
-            {["origen", "destino"].map((t) => (
-              <div key={t} className="space-y-2">
-                <Label>Asignatura {t === "origen" ? "Origen" : "Destino"}</Label>
-                <Select
-                  value={t === "origen" ? p.asignaturaOrigen : p.asignaturaDestino}
-                  onValueChange={(value) =>
-                    setFormulario(
-                      FormularioRestriccionService.actualizarParametro(
-                        formulario,
-                        t === "origen" ? "asignaturaOrigen" : "asignaturaDestino",
-                        value
-                      )
-                    )
-                  }
-                >
-                  <SelectTrigger><SelectValue placeholder="Seleccionar asignatura" /></SelectTrigger>
-                  <SelectContent className="max-h-60 overflow-y-auto bg-white text-black">
-                    {asignaturasMock.map(a => (
-                      <SelectItem key={a.id} value={a.codigo}>
-                        {a.codigo} - {a.nombre}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            ))}
-          </div>
-        );
       case "sala_prohibida":
         return (
           <div className="grid grid-cols-2 gap-4">
@@ -109,6 +77,7 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
             </div>
           </div>
         );
+
       case "profesor_especialidad":
         return (
           <div className="space-y-4">
@@ -146,6 +115,7 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
             </div>
           </div>
         );
+
       case "horario_conflicto":
         return (
           <div className="grid grid-cols-3 gap-4">
@@ -196,6 +166,53 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
             </div>
           </div>
         );
+
+      case "capacidad":
+        return (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Asignatura</Label>
+              <Select
+                value={p.asignaturaOrigen}
+                onValueChange={(value) =>
+                  setFormulario(
+                    FormularioRestriccionService.actualizarParametro(formulario, "asignaturaOrigen", value)
+                  )
+                }
+              >
+                <SelectTrigger><SelectValue placeholder="Seleccionar asignatura" /></SelectTrigger>
+                <SelectContent className="max-h-60 overflow-y-auto bg-white text-black">
+                  {asignaturasMock.map(a => (
+                    <SelectItem key={a.id} value={a.codigo}>
+                      {a.codigo} - {a.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Capacidad Máxima</Label>
+              <Input
+                type="number"
+                min={1}
+                step={1}
+                value={p.capacidadMaxima ?? ""}
+                onChange={(e) => {
+                  const valor = e.target.value;
+                  setFormulario(
+                    FormularioRestriccionService.actualizarParametro(
+                      formulario,
+                      "capacidadMaxima",
+                      valor === "" ? undefined : parseInt(valor, 10)
+                    )
+                  );
+                }}
+                placeholder="Ejemplo: 40"
+              />
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -210,8 +227,8 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
           ))}
         </div>
       )}
+
       <div className="space-y-4">
-        {/* Tipo, Descripción, Mensaje, Prioridad, Activa */}
         <div className="space-y-2">
           <Label>Tipo de Restricción</Label>
           <Select
@@ -224,14 +241,14 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
           >
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent className="bg-white text-black">
-              <SelectItem value="prerrequisito">Prerrequisito</SelectItem>
               <SelectItem value="sala_prohibida">Sala Prohibida</SelectItem>
               <SelectItem value="horario_conflicto">Conflicto de Horario</SelectItem>
+              <SelectItem value="capacidad">Capacidad</SelectItem>
               <SelectItem value="profesor_especialidad">Especialidad de Profesor</SelectItem>
-              <SelectItem value="secuencia_temporal">Secuencia Temporal</SelectItem>
             </SelectContent>
           </Select>
         </div>
+
         <div className="space-y-2">
           <Label>Descripción *</Label>
           <Input
@@ -244,6 +261,7 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
             placeholder="Descripción breve de la restricción"
           />
         </div>
+
         <div className="space-y-2">
           <Label>Mensaje de Error *</Label>
           <Textarea
@@ -257,6 +275,7 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
             placeholder="Mensaje que se mostrará cuando no se cumpla la restricción"
           />
         </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Prioridad</Label>
@@ -267,7 +286,7 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
                   FormularioRestriccionService.actualizarCampo(
                     formulario,
                     "prioridad",
-                    v as "alta" | "media" | "baja" // ✅ corrección tipado
+                    v as "alta" | "media" | "baja"
                   )
                 )
               }
@@ -280,6 +299,7 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
               </SelectContent>
             </Select>
           </div>
+
           <div className="space-y-2">
             <Label>Estado</Label>
             <div className="flex items-center space-x-2 h-10">
@@ -296,10 +316,12 @@ export function FormularioRestriccion({ inicial, onSubmit, modalCerrar, editando
           </div>
         </div>
       </div>
+
       <div className="space-y-4">
         <h4>Parámetros Específicos</h4>
         {renderParametrosEspecificos()}
       </div>
+
       <div className="flex justify-end gap-3 pt-4">
         <button
           className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
