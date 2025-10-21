@@ -1,13 +1,7 @@
-export interface CampusMock {
-  id: number;
-  nombre: string;
-  direccion: string;
-}
+import type { CampusDTO } from '@/domain/campus/types';
 
-export const CAMPUS_MOCK: CampusMock[] = [
-  {
-    id: 1,
-    nombre: "Campus Juan Pablo II",
-    direccion: "Dirección referencial (mock)",
-  },
+export const campusMock: CampusDTO[] = [
+  { id: 1, nombre: 'Central', direccion: 'Av. Principal 123' },
+  { id: 2, nombre: 'Norte', direccion: 'Ruta 5 Km 10' },
+  { id: 3, nombre: 'Sur', direccion: 'Calle 8 #456' },
 ];
