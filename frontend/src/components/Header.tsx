@@ -1,4 +1,4 @@
-import logo from '../img/logo.png'; // Importa la imagen desde src
+import logo from '/logo.png'; // Importa la imagen desde src
 
 function Header() {
     return (
