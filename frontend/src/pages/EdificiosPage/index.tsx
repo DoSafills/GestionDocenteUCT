@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
@@ -7,141 +7,172 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "../../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Textarea } from "../../components/ui/textarea";
-import { Plus, Search, Building, MapPin, Users, Monitor, Edit, Trash2, Calendar } from "lucide-react";
+import { Plus, Search, Building, MapPin, Users, Monitor, Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import type { Edificio, Sala, Campus } from "../../types";
-import { campusMock, edificiosMock, salasMock, asignaturasMock } from "../../data/mock-data";
+import { campusService } from "@/infraestructure/services/campus/CampusService";
+import { edificioService } from "@/infraestructure/services/edificio/EdificioService";
+import { salaService } from "@/infraestructure/services/sala/SalaService";
 
+import type { CampusDTO } from "@/domain/campus/types";
+import type { EdificioDTO, EdificioCreateDTO } from "@/domain/edificios/types";
+import type { SalaDTO, SalaCreateDTO } from "@/domain/salas/types";
+
+// Tipos válidos para Sala según backend
+type SalaTipo = "aula" | "laboratorio" | "auditorio" | "taller" | "sala_conferencias";
 
 export function EdificiosPage() {
-  const [campus, setCampus] = useState<Campus[]>(campusMock);
-  const [edificios, setEdificios] = useState<Edificio[]>(edificiosMock);
-  const [salas, setSalas] = useState<Sala[]>(salasMock);
+  // Estados con DTOs (más simples para render)
+  const [campus, setCampus] = useState<CampusDTO[]>([]);
+  const [edificios, setEdificios] = useState<EdificioDTO[]>([]);
+  const [salas, setSalas] = useState<SalaDTO[]>([]);
+
+  const [loading, setLoading] = useState(true);
+
+  // Filtros/estado UI
   const [busqueda, setBusqueda] = useState("");
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
   const [edificioSeleccionado, setEdificioSeleccionado] = useState<string>("todos");
-  const [modalAbierto, setModalAbierto] = useState(false);
-  const [modalSalaAbierto, setModalSalaAbierto] = useState(false);
-  const [editandoEdificio, setEditandoEdificio] = useState<Edificio | null>(null);
-  const [editandoSala, setEditandoSala] = useState<{ edificioId: number | string; sala: Sala | null }>({ edificioId: "", sala: null });
 
-  const [formularioEdificio, setFormularioEdificio] = useState({
+  // Modales
+  const [modalEdificioAbierto, setModalEdificioAbierto] = useState(false);
+  const [modalSalaAbierto, setModalSalaAbierto] = useState(false);
+
+  // Edición
+  const [editandoEdificio, setEditandoEdificio] = useState<EdificioDTO | null>(null);
+  const [editandoSala, setEditandoSala] = useState<{ edificioId: number | ""; sala: SalaDTO | null }>({ edificioId: "", sala: null });
+
+  // Formularios
+  const [formularioEdificio, setFormularioEdificio] = useState<{
+    nombre: string;
+    pisos: string; // string para Input; se convierte a number al enviar
+    campus_id: number | "";
+  }>({
     nombre: "",
-    tipo: "",
-    campus_id: campus[0]?.id || 1
+    pisos: "",
+    campus_id: "",
   });
 
-  const [formularioSala, setFormularioSala] = useState({
+  const [formularioSala, setFormularioSala] = useState<{
+    codigo: string;
+    capacidad: string; // string para Input
+    tipo: SalaTipo;
+    equipamiento: string;
+    disponible: boolean;
+  }>({
     codigo: "",
     capacidad: "",
-    tipo: "aula" as "aula" | "laboratorio" | "auditorio" | "sala_computacion",
+    tipo: "aula",
     equipamiento: "",
-    esta_disponible: true
+    disponible: true,
   });
 
+  // ---------- Carga inicial ----------
+  useEffect(() => {
+    (async () => {
+      try {
+        const [campusList, edificiosList, salasList] = await Promise.all([
+          campusService.obtenerTodas(),
+          edificioService.obtenerTodas(),
+          // Traer muchas salas (paginación simple)
+          salaService.buscar(0, 1000),
+        ]);
+        setCampus(campusList.map(c => c.toDTO()));
+        setEdificios(edificiosList.map(e => e.toDTO()));
+        setSalas(salasList.map(s => s.toDTO()));
+      } catch (e: any) {
+        toast.error(e?.message ?? "No se pudo cargar la información.");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
-  // Obtener campus por id
+  // ---------- Helpers ----------
   const getCampusNombre = (campus_id: number) => {
-    const campusObj = campus.find(c => c.id === campus_id);
-    return campusObj ? campusObj.nombre : "";
+    const c = campus.find(x => x.id === campus_id);
+    return c ? c.nombre : "";
   };
 
-  // Filtrar salas por edificio
-  const getSalasPorEdificio = (edificioId: number) => {
-    return salas.filter(sala => sala.edificio_id === edificioId);
-  };
+  const getSalasPorEdificio = (edificioId: number) => salas.filter(s => s.edificio_id === edificioId);
 
-  // Obtener asignaturas asignadas a cada sala
-  const getAsignaturasEnSala = (salaId: string) => {
-    return asignaturasMock.filter(asig => asig.salaId === salaId);
-  };
-
-  const handleSubmitEdificio = () => {
-    if (!formularioEdificio.nombre || !formularioEdificio.tipo) {
-      toast.error("Por favor completa los campos obligatorios");
-      return;
-    }
-    const nuevoId = editandoEdificio?.id ?? (edificios.length > 0 ? Math.max(...edificios.map(e => e.id)) + 1 : 1);
-    const nuevoEdificio: Edificio = {
-      id: nuevoId,
-      nombre: formularioEdificio.nombre,
-      tipo: formularioEdificio.tipo,
-      campus_id: formularioEdificio.campus_id
-    };
-    if (editandoEdificio) {
-      setEdificios(prev => prev.map(e => e.id === editandoEdificio.id ? nuevoEdificio : e));
-      toast.success("Edificio actualizado exitosamente");
-    } else {
-      setEdificios(prev => [...prev, nuevoEdificio]);
-      toast.success("Edificio agregado exitosamente");
-    }
-    resetFormularioEdificio();
-    setModalAbierto(false);
-  };
-
-  const handleSubmitSala = () => {
-    if (!formularioSala.codigo || !formularioSala.capacidad || !editandoSala.edificioId) {
-      toast.error("Por favor completa los campos obligatorios");
-      return;
-    }
-    const nuevoId = editandoSala.sala?.id ?? (salas.length > 0 ? Math.max(...salas.map(s => s.id)) + 1 : 1);
-    const nuevaSala: Sala = {
-      id: nuevoId,
-      codigo: formularioSala.codigo,
-      capacidad: parseInt(formularioSala.capacidad),
-      tipo: formularioSala.tipo,
-      esta_disponible: formularioSala.esta_disponible,
-      edificio_id: Number(editandoSala.edificioId),
-      equipamiento: formularioSala.equipamiento
-    };
-    if (editandoSala.sala) {
-      setSalas(prev => prev.map(s => s.id === editandoSala.sala!.id ? nuevaSala : s));
-      toast.success("Sala actualizada exitosamente");
-    } else {
-      setSalas(prev => [...prev, nuevaSala]);
-      toast.success("Sala agregada exitosamente");
-    }
-    resetFormularioSala();
-    setModalSalaAbierto(false);
-  };
-
+  // ---------- Edificio: crear/editar ----------
   const resetFormularioEdificio = () => {
-    setFormularioEdificio({ nombre: "", tipo: "", campus_id: campus[0]?.id || 1 });
+    setFormularioEdificio({
+      nombre: "",
+      pisos: "",
+      campus_id: campus.length ? campus[0].id : "",
+    });
     setEditandoEdificio(null);
   };
 
+  const abrirModalCrearEdificio = () => {
+    resetFormularioEdificio();
+    setModalEdificioAbierto(true);
+  };
+
+  const editarEdificioClick = (edificio: EdificioDTO) => {
+    setFormularioEdificio({
+      nombre: edificio.nombre,
+      pisos: edificio.pisos != null ? String(edificio.pisos) : "",
+      campus_id: edificio.campus_id,
+    });
+    setEditandoEdificio(edificio);
+    setModalEdificioAbierto(true);
+  };
+
+  const handleSubmitEdificio = async () => {
+    if (!formularioEdificio.nombre || !formularioEdificio.campus_id) {
+      toast.error("Por favor completa los campos obligatorios (nombre y campus).");
+      return;
+    }
+
+    const payload: EdificioCreateDTO = {
+      nombre: formularioEdificio.nombre.trim(),
+      campus_id: Number(formularioEdificio.campus_id),
+      pisos: formularioEdificio.pisos ? Number(formularioEdificio.pisos) : undefined,
+    };
+
+    try {
+      if (editandoEdificio) {
+        const updated = await edificioService.actualizar(editandoEdificio.id, payload);
+        const dto = updated.toDTO();
+        setEdificios(prev => prev.map(e => (e.id === dto.id ? dto : e)));
+        toast.success("Edificio actualizado exitosamente");
+      } else {
+        const created = await edificioService.crearNueva(payload);
+        const dto = created.toDTO();
+        setEdificios(prev => [...prev, dto]);
+        toast.success("Edificio agregado exitosamente");
+      }
+      resetFormularioEdificio();
+      setModalEdificioAbierto(false);
+    } catch (e: any) {
+      toast.error(e?.message ?? "No se pudo guardar el edificio.");
+    }
+  };
+
+  const eliminarEdificio = async (id: number) => {
+    try {
+      await edificioService.eliminar(id);
+      setEdificios(prev => prev.filter(e => e.id !== id));
+      setSalas(prev => prev.filter(s => s.edificio_id !== id)); // Limpia salas asociadas en UI
+      toast.success("Edificio eliminado exitosamente");
+    } catch (e: any) {
+      toast.error(e?.message ?? "No se pudo eliminar el edificio.");
+    }
+  };
+
+  // ---------- Sala: crear/editar ----------
   const resetFormularioSala = () => {
     setFormularioSala({
       codigo: "",
       capacidad: "",
       tipo: "aula",
       equipamiento: "",
-      esta_disponible: true
+      disponible: true,
     });
     setEditandoSala({ edificioId: "", sala: null });
-  };
-
-  const editarEdificio = (edificio: Edificio) => {
-    setFormularioEdificio({
-      nombre: edificio.nombre,
-      tipo: edificio.tipo,
-      campus_id: edificio.campus_id
-    });
-    setEditandoEdificio(edificio);
-    setModalAbierto(true);
-  };
-
-  const editarSala = (edificioId: number, sala: Sala) => {
-    setFormularioSala({
-      codigo: sala.codigo,
-      capacidad: sala.capacidad.toString(),
-      tipo: sala.tipo as "aula" | "laboratorio" | "auditorio" | "sala_computacion",
-      equipamiento: sala.equipamiento,
-      esta_disponible: sala.esta_disponible
-    });
-    setEditandoSala({ edificioId, sala });
-    setModalSalaAbierto(true);
   };
 
   const agregarSala = (edificioId: number) => {
@@ -150,16 +181,98 @@ export function EdificiosPage() {
     setModalSalaAbierto(true);
   };
 
-  const eliminarEdificio = (id: number) => {
-    setEdificios(prev => prev.filter(e => e.id !== id));
-    setSalas(prev => prev.filter(s => s.edificio_id !== id)); // Eliminar salas asociadas
-    toast.success("Edificio eliminado exitosamente");
+  const editarSalaClick = (edificioId: number, sala: SalaDTO) => {
+    setFormularioSala({
+      codigo: sala.codigo,
+      capacidad: String(sala.capacidad),
+      tipo: sala.tipo as SalaTipo,
+      equipamiento: sala.equipamiento ?? "",
+      disponible: !!sala.disponible,
+    });
+    setEditandoSala({ edificioId, sala });
+    setModalSalaAbierto(true);
   };
 
-  const eliminarSala = (edificioId: number, salaId: number) => {
-    setSalas(prev => prev.filter(s => s.id !== salaId));
-    toast.success("Sala eliminada exitosamente");
+  const handleSubmitSala = async () => {
+    if (!formularioSala.codigo || !formularioSala.capacidad || !editandoSala.edificioId) {
+      toast.error("Por favor completa código, capacidad y edificio.");
+      return;
+    }
+
+    const payload: SalaCreateDTO = {
+      codigo: formularioSala.codigo.trim().toUpperCase(),
+      capacidad: Number(formularioSala.capacidad),
+      tipo: formularioSala.tipo,
+      disponible: formularioSala.disponible,
+      equipamiento: formularioSala.equipamiento?.trim() || undefined,
+      edificio_id: Number(editandoSala.edificioId),
+    };
+
+    try {
+      if (editandoSala.sala) {
+        const updated = await salaService.actualizar(editandoSala.sala.id, payload);
+        const dto = updated.toDTO();
+        setSalas(prev => prev.map(s => (s.id === dto.id ? dto : s)));
+        toast.success("Sala actualizada exitosamente");
+      } else {
+        const created = await salaService.crearNueva(payload);
+        const dto = created.toDTO();
+        setSalas(prev => [...prev, dto]);
+        toast.success("Sala agregada exitosamente");
+      }
+      resetFormularioSala();
+      setModalSalaAbierto(false);
+    } catch (e: any) {
+      toast.error(e?.message ?? "No se pudo guardar la sala.");
+    }
   };
+
+  const eliminarSala = async (_edificioId: number, salaId: number) => {
+    try {
+      await salaService.eliminar(salaId);
+      setSalas(prev => prev.filter(s => s.id !== salaId));
+      toast.success("Sala eliminada exitosamente");
+    } catch (e: any) {
+      toast.error(e?.message ?? "No se pudo eliminar la sala.");
+    }
+  };
+
+  // ---------- Filtros memo ----------
+  const edificiosFiltrados = useMemo(() => {
+    const term = busqueda.trim().toLowerCase();
+
+    return edificios
+      .filter(edificio => {
+        if (edificioSeleccionado !== "todos" && String(edificio.id) !== edificioSeleccionado) return false;
+
+        const campusNombre = getCampusNombre(edificio.campus_id).toLowerCase();
+        const pisosStr = edificio.pisos != null ? String(edificio.pisos) : "";
+        const edificioCoincide =
+          edificio.nombre.toLowerCase().includes(term) ||
+          campusNombre.includes(term) ||
+          pisosStr.includes(term);
+
+        // Buscar también por salas del edificio (código, tipo, equipamiento)
+        const salasCoinciden = salas.some(sala =>
+          sala.edificio_id === edificio.id &&
+          (
+            sala.codigo.toLowerCase().includes(term) ||
+            sala.tipo.toLowerCase().includes(term) ||
+            (sala.equipamiento ?? "").toLowerCase().includes(term)
+          )
+        );
+
+        return term === "" || edificioCoincide || salasCoinciden;
+      });
+  }, [edificios, salas, edificioSeleccionado, busqueda, campus]);
+
+  if (loading) {
+    return (
+      <div className="py-16 text-center text-muted-foreground">
+        Cargando edificios y salas…
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -171,12 +284,12 @@ export function EdificiosPage() {
             Administra la infraestructura y asignación de espacios físicos
           </p>
         </div>
-        
+
         <div className="flex gap-2">
-          <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
+          <Dialog open={modalEdificioAbierto} onOpenChange={setModalEdificioAbierto}>
             <DialogTrigger asChild>
               <div>
-                <Button variant="default" onClick={resetFormularioEdificio}>
+                <Button variant="default" onClick={abrirModalCrearEdificio}>
                   <Plus className="w-4 h-4 mr-2" />
                   Agregar Edificio
                 </Button>
@@ -190,7 +303,7 @@ export function EdificiosPage() {
                   </span>
                 </DialogTitle>
               </DialogHeader>
-              
+
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="nombre" style={{color: '#000', fontWeight: 'bold', background: 'transparent', zIndex: 10}}>Nombre del Edificio *</Label>
@@ -201,15 +314,18 @@ export function EdificiosPage() {
                     placeholder="Edificio Biblioteca"
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="tipo" style={{color: '#000', fontWeight: 'bold', zIndex: 10}}>Tipo de Edificio *</Label>
+                  <Label htmlFor="pisos" style={{color: '#000', fontWeight: 'bold', zIndex: 10}}>Pisos (opcional)</Label>
                   <Input
-                    id="tipo"
-                    value={formularioEdificio.tipo}
-                    onChange={(e) => setFormularioEdificio(prev => ({ ...prev, tipo: e.target.value }))}
-                    placeholder="cientifico, ingenieria, administrativo, etc."
+                    id="pisos"
+                    type="number"
+                    value={formularioEdificio.pisos}
+                    onChange={(e) => setFormularioEdificio(prev => ({ ...prev, pisos: e.target.value }))}
+                    placeholder="5"
                   />
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="campus_id" style={{color: '#000', fontWeight: 'bold', zIndex: 10}}>Campus *</Label>
                   <Select
@@ -231,10 +347,10 @@ export function EdificiosPage() {
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4">
-                  <Button className="!bg-gray-200 !text-black !hover:bg-gray-300 dark:!bg-gray-700 dark:!text-white dark:!hover:bg-gray-600" onClick={() => setModalAbierto(false)}>
-                     Cancelar
+                  <Button className="!bg-gray-200 !text-black !hover:bg-gray-300 dark:!bg-gray-700 dark:!text-white dark:!hover:bg-gray-600" onClick={() => setModalEdificioAbierto(false)}>
+                    Cancelar
                   </Button>
-                 <Button className="!bg-blue-500 !text-white !hover:bg-blue-600" onClick={handleSubmitEdificio}>
+                  <Button className="!bg-blue-500 !text-white !hover:bg-blue-600" onClick={handleSubmitEdificio}>
                     {editandoEdificio ? "Actualizar" : "Agregar"} Edificio
                   </Button>
                 </div>
@@ -249,13 +365,13 @@ export function EdificiosPage() {
                   {editandoSala.sala ? "Editar Sala" : "Agregar Nueva Sala"}
                 </DialogTitle>
               </DialogHeader>
-              
+
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="edificio">Edificio *</Label>
-                  <Select 
-                    value={editandoSala.edificioId?.toString()} 
-                    onValueChange={(value) => setEditandoSala(prev => ({ ...prev, edificioId: value }))}
+                  <Select
+                    value={editandoSala.edificioId !== "" ? String(editandoSala.edificioId) : ""}
+                    onValueChange={(value) => setEditandoSala(prev => ({ ...prev, edificioId: Number(value) }))}
                     disabled={!!editandoSala.sala}
                   >
                     <SelectTrigger>
@@ -263,7 +379,7 @@ export function EdificiosPage() {
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-zinc-900">
                       {edificios.map(edificio => (
-                        <SelectItem key={edificio.id} value={edificio.id.toString()}>
+                        <SelectItem key={edificio.id} value={String(edificio.id)}>
                           {edificio.nombre}
                         </SelectItem>
                       ))}
@@ -295,9 +411,9 @@ export function EdificiosPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="tipo">Tipo de Sala</Label>
-                  <Select 
-                    value={formularioSala.tipo} 
-                    onValueChange={(value: any) => setFormularioSala(prev => ({ ...prev, tipo: value }))}
+                  <Select
+                    value={formularioSala.tipo}
+                    onValueChange={(value: SalaTipo) => setFormularioSala(prev => ({ ...prev, tipo: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -306,7 +422,8 @@ export function EdificiosPage() {
                       <SelectItem value="aula">Aula</SelectItem>
                       <SelectItem value="laboratorio">Laboratorio</SelectItem>
                       <SelectItem value="auditorio">Auditorio</SelectItem>
-                      <SelectItem value="sala_computacion">Sala de Computación</SelectItem>
+                      <SelectItem value="taller">Taller</SelectItem>
+                      <SelectItem value="sala_conferencias">Sala de Conferencias</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -326,8 +443,8 @@ export function EdificiosPage() {
                   <input
                     type="checkbox"
                     id="disponible"
-                    checked={formularioSala.esta_disponible}
-                    onChange={(e) => setFormularioSala(prev => ({ ...prev, esta_disponible: e.target.checked }))}
+                    checked={formularioSala.disponible}
+                    onChange={(e) => setFormularioSala(prev => ({ ...prev, disponible: e.target.checked }))}
                     className="rounded"
                   />
                   <Label htmlFor="disponible">Disponible para uso</Label>
@@ -354,13 +471,13 @@ export function EdificiosPage() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
-                placeholder="Buscar por sala, edificio o código..."
+                placeholder="Buscar por sala, edificio, campus o código..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 className="pl-10"
               />
             </div>
-            
+
             <Select value={edificioSeleccionado} onValueChange={setEdificioSeleccionado}>
               <SelectTrigger>
                 <SelectValue placeholder="Filtrar por edificio" />
@@ -368,7 +485,7 @@ export function EdificiosPage() {
               <SelectContent className="bg-white dark:bg-zinc-900">
                 <SelectItem value="todos">Todos los edificios</SelectItem>
                 {edificios.map(edificio => (
-                  <SelectItem key={edificio.id} value={edificio.id.toString()}>
+                  <SelectItem key={edificio.id} value={String(edificio.id)}>
                     {edificio.nombre}
                   </SelectItem>
                 ))}
@@ -377,14 +494,15 @@ export function EdificiosPage() {
 
             <Select value={filtroTipo} onValueChange={setFiltroTipo}>
               <SelectTrigger>
-                <SelectValue placeholder="Filtrar por tipo" />
+                <SelectValue placeholder="Filtrar por tipo de sala" />
               </SelectTrigger>
               <SelectContent className="bg-white dark:bg-zinc-900">
                 <SelectItem value="todos">Todos los tipos</SelectItem>
                 <SelectItem value="aula">Aula</SelectItem>
                 <SelectItem value="laboratorio">Laboratorio</SelectItem>
                 <SelectItem value="auditorio">Auditorio</SelectItem>
-                <SelectItem value="sala_computacion">Sala de Computación</SelectItem>
+                <SelectItem value="taller">Taller</SelectItem>
+                <SelectItem value="sala_conferencias">Sala de Conferencias</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -393,186 +511,146 @@ export function EdificiosPage() {
 
       {/* Vista por edificios */}
       <div className="space-y-6">
-        {edificios
-          .filter(edificio => {
-            // Mostrar edificio si su nombre, tipo o campus coinciden con la búsqueda, o si alguna de sus salas coincide
-            const campusNombre = getCampusNombre(edificio.campus_id).toLowerCase();
-            const edificioCoincide =
-              edificio.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-              edificio.tipo.toLowerCase().includes(busqueda.toLowerCase()) ||
-              campusNombre.includes(busqueda.toLowerCase());
-            const salasCoinciden = salas.some(sala =>
-              sala.edificio_id === edificio.id &&
-              (
-                sala.codigo.toLowerCase().includes(busqueda.toLowerCase()) ||
-                sala.tipo.toLowerCase().includes(busqueda.toLowerCase()) ||
-                sala.equipamiento.toLowerCase().includes(busqueda.toLowerCase())
-              )
-            );
-            return busqueda.trim() === "" || edificioCoincide || salasCoinciden;
-          })
-          .map(edificio => {
-            const salasEdificio = salas.filter(s => s.edificio_id === edificio.id);
-            // Filtrar salas por búsqueda y tipo
-            const salasFiltradas = salasEdificio.filter(sala => {
-              const coincideBusqueda =
-                sala.codigo.toLowerCase().includes(busqueda.toLowerCase()) ||
-                sala.tipo.toLowerCase().includes(busqueda.toLowerCase()) ||
-                sala.equipamiento.toLowerCase().includes(busqueda.toLowerCase()) ||
-                edificio.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-                getCampusNombre(edificio.campus_id).toLowerCase().includes(busqueda.toLowerCase());
-              const coincideTipo = filtroTipo === "todos" || sala.tipo === filtroTipo;
-              return coincideBusqueda && coincideTipo;
-            });
-            // Si no hay salas que coincidan y tampoco el edificio, no mostrar nada
-            if (salasFiltradas.length === 0 && busqueda && !edificio.nombre.toLowerCase().includes(busqueda.toLowerCase())) {
-              return null;
-            }
-            return (
-              <Card key={edificio.id}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Building className="w-6 h-6 text-primary" />
-                      <div>
-                        <CardTitle className="flex items-center gap-2">
-                          {edificio.nombre}
-                          <Badge variant="outline">{edificio.tipo}</Badge>
-                        </CardTitle>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <MapPin className="w-4 h-4" />
-                          Campus: {getCampusNombre(edificio.campus_id)}
-                        </div>
+        {edificiosFiltrados.map(edificio => {
+          // Salas del edificio con filtros
+          const salasEdificio = getSalasPorEdificio(edificio.id).filter(sala => {
+            const term = busqueda.trim().toLowerCase();
+            const coincideBusqueda =
+              sala.codigo.toLowerCase().includes(term) ||
+              sala.tipo.toLowerCase().includes(term) ||
+              (sala.equipamiento ?? "").toLowerCase().includes(term) ||
+              edificio.nombre.toLowerCase().includes(term) ||
+              getCampusNombre(edificio.campus_id).toLowerCase().includes(term);
+            const coincideTipo = filtroTipo === "todos" || sala.tipo === filtroTipo;
+            return coincideBusqueda && coincideTipo;
+          });
+
+          if (salasEdificio.length === 0 && busqueda && !edificio.nombre.toLowerCase().includes(busqueda.toLowerCase())) {
+            return null;
+          }
+
+          return (
+            <Card key={edificio.id}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Building className="w-6 h-6 text-primary" />
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        {edificio.nombre}
+                          {edificio.pisos != null && (
+                            <Badge variant="outline">
+                              {edificio.pisos} {edificio.pisos === 1 ? "piso" : "pisos"}
+                            </Badge>
+                          )}
+                      </CardTitle>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <MapPin className="w-4 h-4" />
+                        Campus: {getCampusNombre(edificio.campus_id)}
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => agregarSala(edificio.id)}
-                      >
-                        <Plus className="w-4 h-4 mr-1" />
-                        Agregar Sala
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => editarEdificio(edificio)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => eliminarEdificio(edificio.id)}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    </div>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {salasFiltradas.map(sala => {
-                      const asignaturasEnSala = getAsignaturasEnSala(sala.codigo);
-                      return (
-                        <Card key={sala.id} className="hover:shadow-md transition-shadow">
-                          <CardHeader className="pb-3">
-                            <div className="flex items-center justify-between">
-                              <CardTitle className="text-base">{sala.codigo}</CardTitle>
-                              <div className="flex gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => editarSala(edificio.id, sala)}
-                                >
-                                  <Edit className="w-3 h-3" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => eliminarSala(edificio.id, sala.id)}
-                                >
-                                  <Trash2 className="w-3 h-3 text-destructive" />
-                                </Button>
-                              </div>
-                            </div>
-                            <div className="flex gap-2">
-                              <Badge variant="secondary">{sala.tipo}</Badge>
-                              <Badge variant={sala.esta_disponible ? "default" : "destructive"}>
-                                {sala.esta_disponible ? "Disponible" : "No disponible"}
-                              </Badge>
-                            </div>
-                          </CardHeader>
-                          <CardContent className="space-y-3">
-                            <div className="flex items-center gap-2 text-sm">
-                              <Users className="w-4 h-4 text-muted-foreground" />
-                              <span>Capacidad: {sala.capacidad} Personas</span>
-                            </div>
-                            {sala.equipamiento && (
-                              <div className="space-y-1">
-                                <p className="text-sm">Equipamiento:</p>
-                                <div className="flex flex-wrap gap-1">
-                                  {sala.equipamiento.split(',').map((equipo, index) => (
-                                    <Badge key={index} variant="outline" className="text-xs">
-                                      {equipo.trim()}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                            {asignaturasEnSala.length > 0 && (
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-2">
-                                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                                  <p className="text-sm">Asignaturas Programadas:</p>
-                                </div>
-                                <div className="space-y-1">
-                                  {asignaturasEnSala.map(asignatura => (
-                                    <div key={asignatura.id} className="text-xs p-2 rounded" style={{ backgroundColor: "#e4e4e7" }}>
-                                      <div className="flex justify-between items-center">
-                                        <span className="font-medium">{asignatura.codigo}</span>
-                                        <Badge variant="outline" className="text-xs">
-                                          {asignatura.estado}
-                                        </Badge>
-                                      </div>
-                                      <p className="text-muted-foreground">{asignatura.nombre}</p>
-                                      <p className="text-muted-foreground">
-                                        {asignatura.horarios.map(h => 
-                                          `${h.dia} ${h.horaInicio}-${h.horaFin}`
-                                        ).join(', ')}
-                                      </p>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => agregarSala(edificio.id)}
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Agregar Sala
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => editarEdificioClick(edificio)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => eliminarEdificio(edificio.id)}
+                    >
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
                   </div>
-                  {salasFiltradas.length === 0 && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Monitor className="w-8 h-8 mx-auto mb-2" />
-                      <p>No hay salas en este edificio</p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-2"
-                        onClick={() => agregarSala(edificio.id)}
-                      >
-                        Agregar primera sala
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
+                </div>
+              </CardHeader>
+
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {salasEdificio.map(sala => (
+                    <Card key={sala.id} className="hover:shadow-md transition-shadow">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-base">{sala.codigo}</CardTitle>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => editarSalaClick(edificio.id, sala)}
+                            >
+                              <Edit className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => eliminarSala(edificio.id, sala.id)}
+                            >
+                              <Trash2 className="w-3 h-3 text-destructive" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge variant="secondary">{sala.tipo}</Badge>
+                          <Badge variant={sala.disponible ? "default" : "destructive"}>
+                            {sala.disponible ? "Disponible" : "No disponible"}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Users className="w-4 h-4 text-muted-foreground" />
+                          <span>Capacidad: {sala.capacidad} Personas</span>
+                        </div>
+                        {sala.equipamiento && (
+                          <div className="space-y-1">
+                            <p className="text-sm">Equipamiento:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {sala.equipamiento.split(',').map((equipo, index) => (
+                                <Badge key={index} variant="outline" className="text-xs">
+                                  {equipo.trim()}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {salasEdificio.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Monitor className="w-8 h-8 mx-auto mb-2" />
+                    <p>No hay salas en este edificio</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => agregarSala(edificio.id)}
+                    >
+                      Agregar primera sala
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
-      {edificios.length === 0 && (
+      {edificiosFiltrados.length === 0 && (
         <Card>
           <CardContent className="text-center py-12">
             <Building className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -580,7 +658,7 @@ export function EdificiosPage() {
             <p className="text-muted-foreground mb-4">
               Comienza agregando tu primer edificio para gestionar las salas
             </p>
-            <Button onClick={resetFormularioEdificio}>
+            <Button onClick={abrirModalCrearEdificio}>
               <Plus className="w-4 h-4 mr-2" />
               Agregar Primer Edificio
             </Button>
