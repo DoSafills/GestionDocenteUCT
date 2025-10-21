@@ -1,5 +1,6 @@
 
 // reemplazar por servicios
+// USAR IRepository
 import { clasesMock } from "@data/clases";
 import { seccionesMock } from "@data/secciones";
 import { asignaturasMock } from "@data/asignaturas";
@@ -8,8 +9,6 @@ import { edificiosMock } from "@data/edificios";
 import { salasMock } from "@data/salas";
 import { docentesMock } from "@data/docentes";
 import type { HorarioCompleto, HorarioDetalle, FiltrosHorario } from "@types/horario";
-
-// USAR IRepository
  
 export class HorarioRepository {
   obtenerPorSeccionId(seccionId: string): HorarioCompleto[] {
