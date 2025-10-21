@@ -8,7 +8,7 @@ let CURRENT_REFRESH = "refresh_mock_1";
 
 export async function apiLogin(params: { email: string; password: string }) {
   await new Promise(r => setTimeout(r, LATENCY));
-  if (!params.email.includes("@")) return err(new AuthError("Correo inválido", "BAD_REQUEST"));
+  if (!params.email.includes("@uct")) return err(new AuthError("Correo inválido", "BAD_REQUEST"));
   if (params.password === "fail")   return err(new AuthError("Credenciales inválidas", "UNAUTHORIZED"));
 
   // expires_in cortito para probar el auto-refresh
