@@ -1,18 +1,18 @@
 // src/pages/RestriccionesPage/ui/pages/index.tsx
 import React, { useState } from "react";
-import { Filtros } from "../componentes/Filtros";
-import { ResumenRestricciones } from "../componentes/resumenrestricciones";
-import { ListaRestricciones } from "../componentes/listarestricciones";
-import { FormularioRestriccion } from "../componentes/formulariorestricciones";
+import { Filtros } from "./ui/componentes/Filtros";
+import { ResumenRestricciones } from "./ui/componentes/resumenrestricciones";
+import { ListaRestricciones } from "./ui/componentes/listarestricciones";
+import { FormularioRestriccion } from "./ui/componentes/formulariorestricciones";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "../../../../components/ui/dialog";
-import { Button } from "../../../../components/ui/button";
-import { useRestriccionesPage } from "../../application/usecases/useRestricciones";
+} from "../../components/ui/dialog";
+import { Button } from "../../components/ui/button";
+import { useRestriccionesPage } from "./application/usecases/useRestricciones";
 import type { RestriccionAcademica, TipoRestriccion } from "@domain/entities/restriccionespage/RestriccionAcademica";
 import { Table as TableIcon, XCircle, CheckCircle, AlertTriangle } from "lucide-react";
 

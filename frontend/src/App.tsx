@@ -5,7 +5,7 @@ import { ProfesoresPage } from "@pages/ProfesoresPage";
 import { EdificiosPage } from "@pages/EdificiosPage";
 import { AsignaturasPage } from "@pages/AsignaturasPage";
 import { HorariosPage } from "@pages/HorariosPage";
-import { RestriccionesPage } from "@pages/RestriccionesPage/ui/pages/index";
+import { RestriccionesPage } from "@pages/RestriccionesPage";
 import { CursosPage } from "./components/cursos/CursosPage";
 
 import LoginPage from "./pages/LoginPage"; 
