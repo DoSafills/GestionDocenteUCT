@@ -1,5 +1,3 @@
-
-// NUEVOS TIPOS EN BASE AL MER
 export type DiaSemana = 'LUNES' | 'MARTES' | 'MIERCOLES' | 'JUEVES' | 'VIERNES' | 'SABADO';
 
 export interface Campus {
@@ -12,7 +10,7 @@ export interface Edificio {
   id: number;
   nombre: string;
   tipo: string;
-  campus_id: number; // FK → Campus.id
+  campus_id: number;
 }
 
 export interface Sala {
@@ -21,7 +19,7 @@ export interface Sala {
   capacidad: number;
   tipo: string;
   esta_disponible: boolean;
-  edificio_id: number; // FK → Edificio.id
+  edificio_id: number;
   equipamiento: string;
 }
 
@@ -78,9 +76,7 @@ export interface Admin {
     super_admin: boolean;
 }
 
-// Tipos principales para el sistema académico
 
-// Tipos básicos
 export interface Profesor {
     id: string;
     nombre: string;
@@ -93,7 +89,7 @@ export interface Profesor {
         horasInicio: string;
         horasFin: string;
     };
-    experiencia: number; // años
+    experiencia: number;
     estado: 'activo' | 'inactivo';
     fechaContratacion: string;
 }
@@ -108,7 +104,7 @@ export interface HorarioSala {
     profesorId: string;
 }
 
-// Nuevo tipo para horarios manuales
+
 export interface HorarioManual {
     id: string;
     salaId: string;
@@ -130,7 +126,7 @@ export interface HorarioManual {
 
 export interface Asignatura {
     id: string;
-    codigo: string; // ej: MAT1105-07
+    codigo: string;
     nombre: string;
     creditos: number;
     semestre: number;
@@ -142,7 +138,7 @@ export interface Asignatura {
         horaInicio: string;
         horaFin: string;
     }[];
-    prerrequisitos: string[]; // códigos de asignaturas
+    prerrequisitos: string[]; 
     cupos: number;
     inscritos: number;
     estado: 'planificada' | 'programada' | 'en_curso' | 'finalizada';
@@ -150,7 +146,7 @@ export interface Asignatura {
 }
 
 export interface RestriccionAcademica {
-    id: string;
+    id: number;
     tipo:
         | 'prerrequisito'
         | 'sala_prohibida'
@@ -170,26 +166,13 @@ export interface RestriccionAcademica {
         diaRestriccion?: string;
         horaInicioRestriccion?: string;
         horaFinRestriccion?: string;
+        capacidadMaxima?: number;
         [key: string]: any;
     };
     mensaje: string;
     fechaCreacion: string;
     creadoPor: string;
 }
-
-// Tipos heredados del sistema anterior (adaptados)
-// export interface Estudiante {
-//   id?: string;
-//   nombre: string;
-//   apellido: string;
-//   email: string;
-//   telefono: string;
-//   edad: number;
-//   carrera: string;
-//   semestre: number;
-//   asignaturasAprobadas: string[];
-//   asignaturasInscritas: string[];
-// }
 
 export interface Curso {
     id: string;
@@ -237,7 +220,7 @@ export interface ValidacionResult {
     advertencias: string[];
 }
 
-// Tipos para conflictos y validaciones
+
 export interface ConflictoHorario {
     id: string;
     tipo: 'profesor_multiple' | 'sala_multiple' | 'estudiante_multiple';

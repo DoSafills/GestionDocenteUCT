@@ -1,5 +1,5 @@
-import { Input } from "../../../components/ui/input";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../../components/ui/select";
+import { Input } from "../../../../components/ui/input";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../../../components/ui/select";
 import { Search } from "lucide-react";
 
 interface FiltrosProps {
@@ -13,12 +13,26 @@ interface FiltrosProps {
   setFiltroActiva: (val: string) => void;
 }
 
-export function Filtros({ busqueda, setBusqueda, filtroTipo, setFiltroTipo, filtroPrioridad, setFiltroPrioridad, filtroActiva, setFiltroActiva }: FiltrosProps) {
+export function Filtros({
+  busqueda,
+  setBusqueda,
+  filtroTipo,
+  setFiltroTipo,
+  filtroPrioridad,
+  setFiltroPrioridad,
+  filtroActiva,
+  setFiltroActiva,
+}: FiltrosProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-        <Input placeholder="Buscar restricciones..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} className="pl-10" />
+        <Input
+          placeholder="Buscar restricciones..."
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          className="pl-10"
+        />
       </div>
 
       <Select value={filtroTipo} onValueChange={setFiltroTipo}>
