@@ -1,8 +1,8 @@
-
+// src/pages/DashboardPage/index.tsx
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Users, Building, BookOpen, Settings, TrendingUp, MapPin } from 'lucide-react';
+import { Users, Building, BookOpen, Settings } from 'lucide-react';
 import { useDashboardStats } from './useDashboardStats';
 
 export default function DashboardPage() {
@@ -12,8 +12,11 @@ export default function DashboardPage() {
     return <div className="p-6">Cargando dashboard…</div>;
   }
   if (error || !stats) {
-    return <div className="p-6 text-red-600">Error: {error ?? "No hay datos"}</div>;
+    return <div className="p-6 text-red-600">Error: {error ?? 'No hay datos'}</div>;
   }
+
+  const ultimas = stats.ultimasRestricciones ?? [];
+  const edificios = stats.edificiosConSalas ?? [];
 
   return (
     <div className="flex-1 p-6 space-y-6">
@@ -47,8 +50,15 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats.salasDisponibles}</div>
-            <Progress value={Math.min(100, (stats.salasDisponibles / Math.max(1, stats.salasDisponibles)) * 100)} className="mt-2" />
-            <p className="text-xs text-muted-foreground">Disponibilidad actual</p>
+            <Progress
+              value={Math.round(
+                (stats.salasDisponibles / Math.max(1, stats.salasTotal)) * 100
+              )}
+              className="mt-2"
+            />
+            <p className="text-xs text-muted-foreground">
+              Disponibles de {stats.salasTotal} salas totales
+            </p>
           </CardContent>
         </Card>
 
@@ -65,31 +75,58 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
+        {/* Últimas restricciones agregadas */}
         <Card>
           <CardHeader>
-            <CardTitle>Restricciones activas</CardTitle>
+            <CardTitle>Últimas restricciones agregadas</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary">{stats.restriccionesActivas}</Badge>
-              <span className="text-muted-foreground text-sm">Reglas vigentes</span>
-            </div>
+            {ultimas.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Sin registros recientes.</p>
+            ) : (
+              <ul className="space-y-2">
+                {ultimas.map((r) => (
+                  <li key={r.id} className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">{r.tipo ?? 'General'}</p>
+                      {r.descripcion && (
+                        <p className="text-xs text-muted-foreground line-clamp-2">
+                          {r.descripcion}
+                        </p>
+                      )}
+                    </div>
+                    <Badge variant="secondary" className="shrink-0">
+                      {r.fecha ?? '—'}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
           </CardContent>
         </Card>
 
+        {/* Edificios con sus cantidades de salas */}
         <Card>
           <CardHeader>
-            <CardTitle>Tendencias</CardTitle>
+            <CardTitle>Edificios y cantidad de salas</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <TrendingUp className="h-4 w-4" />
-              <span className="text-sm">Estructura modular conectada a repos/mock/services</span>
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <MapPin className="h-4 w-4" />
-              <span className="text-sm">Edificios de todos los campus consolidados</span>
-            </div>
+          <CardContent>
+            {edificios.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No hay salas registradas.</p>
+            ) : (
+              <div className="space-y-2">
+                {edificios.slice(0, 8).map((e) => (
+                  <div key={String(e.id)} className="flex items-center justify-between text-sm">
+                    <div className="truncate">
+                      <span className="font-medium">
+                        {e.nombre ?? e.codigo ?? `Edificio ${e.id}`}
+                      </span>
+                    </div>
+                    <span className="text-muted-foreground">{e.totalSalas} salas</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
