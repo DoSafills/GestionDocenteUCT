@@ -1,10 +1,14 @@
 // src/pages/DashboardPage/useDashboardStats.ts
 import { useEffect, useState } from "react";
-import { DocenteMockRepository } from "@/infraestructure/repositories/docente/DocenteMockRepository";
-import { SalaMockRepository } from "@/infraestructure/repositories/sala/SalaMockRepository";
-import { EdificioMockRepository } from "@/infraestructure/repositories/edificio/EdificioMockRepository";
-import { asignaturaService } from "@/infraestructure/services/AsignaturaService";
-import { db as restriccionesDB } from "@/data/restricciones";
+// src/pages/DashboardPage/useDashboardStats.ts
+import { DocenteMockRepository } from "../../infraestructure/repositories/docente/DocenteMockRepository";
+import { SalaMockRepository } from "../../infraestructure/repositories/sala/SalaMockRepository";
+// (si todavía importas el de edificios)
+import { EdificioMockRepository } from "../../infraestructure/repositories/edificio/EdificioMockRepository";
+
+import { asignaturaService } from "../../infraestructure/services/AsignaturaService";
+import { db as restriccionesDB } from "../../data/restricciones";
+
 
 export type UltimaRestriccion = {
   id: string | number;
