@@ -1,14 +1,13 @@
 // src/pages/DashboardPage/useDashboardStats.ts
 import { useEffect, useState } from "react";
-// src/pages/DashboardPage/useDashboardStats.ts
-import { DocenteMockRepository } from "../../infraestructure/repositories/docente/DocenteMockRepository";
-import { SalaMockRepository } from "../../infraestructure/repositories/sala/SalaMockRepository";
-// (si todavía importas el de edificios)
-import { EdificioMockRepository } from "../../infraestructure/repositories/edificio/EdificioMockRepository";
 
+// Usamos data/* para evitar errores de resolución de módulos en Vercel
+import { docentesMock } from "../../data/docentes";
+import { salasMock } from "../../data/salas";
+
+// Estos sí existen en tu repo
 import { asignaturaService } from "../../infraestructure/services/AsignaturaService";
 import { db as restriccionesDB } from "../../data/restricciones";
-
 
 export type UltimaRestriccion = {
   id: string | number;
@@ -33,7 +32,7 @@ export type DashboardStats = {
   asignaturasTotal: number;
   restriccionesActivas: number;
 
-  // NUEVO
+  // vistas nuevas
   ultimasRestricciones: UltimaRestriccion[];
   edificiosConSalas: EdificioConSalas[];
 };
@@ -61,29 +60,39 @@ export function useDashboardStats() {
 
     (async () => {
       try {
-        const docentesRepo = new DocenteMockRepository();
-        const salaRepo     = new SalaMockRepository();
-        const edificioRepo = new EdificioMockRepository(); // puede no tener getAll → safeGetAll
+        // 📌 Datos base 100% locales (sin repos)
+        const docentes      = docentesMock ?? [];
+        const salas         = salasMock ?? [];
 
-        const [docentes, asignaturas, salas, restricciones, edificiosMeta] = await Promise.all([
-          safeGetAll<any>("DocentesRepo", docentesRepo),
+        // 📌 Servicios existentes (con fallback si no tienen getAll)
+        const [asignaturas, restricciones] = await Promise.all([
           safeGetAll<any>("AsignaturaService", asignaturaService),
-          safeGetAll<any>("SalaRepo", salaRepo),
           safeGetAll<any>("RestriccionesDB", restriccionesDB),
-          safeGetAll<any>("EdificioRepo", edificioRepo),
         ]);
 
-        // Contadores base
-        const docentesTotal      = docentes.length;
-        const docentesActivos    = docentes.filter((d) => (d.activo ?? d.esta_activo) === true).length;
+        // Totales / derivados
+        const docentesTotal    = docentes.length;
+        const docentesActivos  = docentes.filter((d: any) => (d.activo ?? d.esta_activo) === true).length;
 
-        const salasTotal         = salas.length;
-        const salasDisponibles   = salas.filter((s) => (s.disponible ?? s.esta_disponible) === true).length;
+        const salasTotal       = salas.length;
+        const salasDisponibles = salas.filter((s: any) => (s.disponible ?? s.esta_disponible) === true).length;
 
-        const asignaturasTotal   = asignaturas.length;
-        const restriccionesActivas = restricciones.filter((r) => !!r.activa).length;
+        // Conteo de edificios por ID desde salas (edificio_id | edificioId)
+        const counts = new Map<string | number, number>();
+        for (const s of salas) {
+          const id = (s as any).edificio_id ?? (s as any).edificioId ?? null;
+          if (id == null) continue;
+          counts.set(id, (counts.get(id) ?? 0) + 1);
+        }
+        const edificiosConSalas: EdificioConSalas[] = Array.from(counts.entries())
+          .map(([id, totalSalas]) => ({ id, totalSalas }))
+          .sort((a, b) => b.totalSalas - a.totalSalas);
 
-        // === ÚLTIMAS RESTRICCIONES ===
+        const edificiosTotal = edificiosConSalas.length;
+        const asignaturasTotal = asignaturas.length;
+        const restriccionesActivas = restricciones.filter((r: any) => !!r.activa).length;
+
+        // Últimas restricciones agregadas (max 5)
         const ultimasRestricciones: UltimaRestriccion[] = [...restricciones]
           .sort((a, b) => {
             const ta = Date.parse(a?.fechaCreacion ?? "");
@@ -94,38 +103,12 @@ export function useDashboardStats() {
           .map((r) => ({
             id: r.id,
             tipo: r.tipo ?? "General",
-            fecha: (r.fechaCreacion && !Number.isNaN(Date.parse(r.fechaCreacion)))
-              ? new Date(r.fechaCreacion).toISOString().slice(0, 10)
-              : "—",
+            fecha:
+              r.fechaCreacion && !Number.isNaN(Date.parse(r.fechaCreacion))
+                ? new Date(r.fechaCreacion).toISOString().slice(0, 10)
+                : "—",
             descripcion: r.descripcion,
           }));
-
-        // === EDIFICIOS CON CANTIDAD DE SALAS ===
-        // Conteo por ID desde las salas (edificio_id | edificioId)
-        const counts = new Map<string | number, number>();
-        for (const s of salas) {
-          const id = (s as any).edificio_id ?? (s as any).edificioId ?? null;
-          if (id == null) continue;
-          counts.set(id, (counts.get(id) ?? 0) + 1);
-        }
-
-        // Intentamos enriquecer con nombre/código si existe meta
-        const metaById = new Map<string | number, any>();
-        for (const e of edificiosMeta) metaById.set(e.id, e);
-
-        const edificiosConSalas: EdificioConSalas[] = Array.from(counts.entries())
-          .map(([id, totalSalas]) => {
-            const meta = metaById.get(id);
-            return {
-              id,
-              nombre: meta?.nombre,
-              codigo: meta?.codigo,
-              totalSalas,
-            };
-          })
-          .sort((a, b) => b.totalSalas - a.totalSalas);
-
-        const edificiosTotal = edificiosConSalas.length;
 
         if (mounted) {
           setStats({
