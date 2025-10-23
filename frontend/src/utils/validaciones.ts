@@ -81,7 +81,6 @@ export function calcularProgreso(disponibles: number, total: number): number {
 }
 
 /**
- *   ---===: Avance por Oscar Zapata :===---
  *   (Solo especificado para diferenciar de otras utilidades)
 
  * Estas funciones no tienen efectos secundarios y retornan booleanos o objetos
