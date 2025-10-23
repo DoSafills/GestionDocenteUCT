@@ -1,12 +1,9 @@
 // src/pages/DashboardPage/useDashboardStats.ts
 import { useEffect, useState } from "react";
 
-// Usamos data/* para evitar errores de resolución de módulos en Vercel
+// 100% locales (evitan errores de resolución en Vercel)
 import { docentesMock } from "../../data/docentes";
 import { salasMock } from "../../data/salas";
-
-// Estos sí existen en tu repo
-import { asignaturaService } from "../../infraestructure/services/AsignaturaService";
 import { db as restriccionesDB } from "../../data/restricciones";
 
 export type UltimaRestriccion = {
@@ -32,7 +29,6 @@ export type DashboardStats = {
   asignaturasTotal: number;
   restriccionesActivas: number;
 
-  // vistas nuevas
   ultimasRestricciones: UltimaRestriccion[];
   edificiosConSalas: EdificioConSalas[];
 };
@@ -60,21 +56,34 @@ export function useDashboardStats() {
 
     (async () => {
       try {
-        // 📌 Datos base 100% locales (sin repos)
-        const docentes      = docentesMock ?? [];
-        const salas         = salasMock ?? [];
+        // Datos base 100% locales (sin repos ni servicios)
+        const docentes = docentesMock ?? [];
+        const salas = salasMock ?? [];
 
-        // 📌 Servicios existentes (con fallback si no tienen getAll)
-        const [asignaturas, restricciones] = await Promise.all([
-          safeGetAll<any>("AsignaturaService", asignaturaService),
-          safeGetAll<any>("RestriccionesDB", restriccionesDB),
-        ]);
+        // Intento opcional de cargar cursos (no rompe build si no existe)
+        let asignaturas: any[] = [];
+        try {
+          const path = "../../data/cursos";
+          // @ts-ignore - evitar que Vite resuelva en build
+          const mod = await import(/* @vite-ignore */ path);
+          asignaturas =
+            (Array.isArray(mod?.cursosMock) && mod.cursosMock) ||
+            (Array.isArray(mod?.asignaturasMock) && mod.asignaturasMock) ||
+            (Array.isArray(mod?.default) && (mod.default as any[])) ||
+            (Object.values(mod).find((v) => Array.isArray(v)) as any[]) ||
+            [];
+        } catch {
+          asignaturas = [];
+        }
+
+        // Restricciones desde db (con fallback si no tuviera getAll)
+        const restricciones = await safeGetAll<any>("RestriccionesDB", restriccionesDB);
 
         // Totales / derivados
-        const docentesTotal    = docentes.length;
-        const docentesActivos  = docentes.filter((d: any) => (d.activo ?? d.esta_activo) === true).length;
+        const docentesTotal = docentes.length;
+        const docentesActivos = docentes.filter((d: any) => (d.activo ?? d.esta_activo) === true).length;
 
-        const salasTotal       = salas.length;
+        const salasTotal = salas.length;
         const salasDisponibles = salas.filter((s: any) => (s.disponible ?? s.esta_disponible) === true).length;
 
         // Conteo de edificios por ID desde salas (edificio_id | edificioId)
@@ -87,8 +96,8 @@ export function useDashboardStats() {
         const edificiosConSalas: EdificioConSalas[] = Array.from(counts.entries())
           .map(([id, totalSalas]) => ({ id, totalSalas }))
           .sort((a, b) => b.totalSalas - a.totalSalas);
-
         const edificiosTotal = edificiosConSalas.length;
+
         const asignaturasTotal = asignaturas.length;
         const restriccionesActivas = restricciones.filter((r: any) => !!r.activa).length;
 
@@ -130,7 +139,9 @@ export function useDashboardStats() {
       }
     })();
 
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   return { stats, loading, error };
