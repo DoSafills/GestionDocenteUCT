@@ -12,10 +12,13 @@ import {
     LogOut, // <-- importamos ícono de lucide-react
 } from 'lucide-react';
 import Header from './Header';
-import { useAuth } from '../context/AuthContext';
+
+import { useAuthContext as useAuth } from "@/pages/LoginPage/hooks/AuthProvider"; // <-- importamos logout
+
 
 import { useWindowWidth } from '@/hooks/useWindowWidth';
 const SIDEBAR_BREAKPOINT = 1024;
+
 
 interface LayoutProps {
     children: ReactNode;

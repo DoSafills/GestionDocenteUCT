@@ -1,4 +1,6 @@
-import type { IRepository } from './IRepository';
+
+import type { IRepository } from '@/domain/repositories/IRepository';
+
 
 export class MockRepository<T extends { id: number }> implements IRepository<T> {
     protected data: T[];

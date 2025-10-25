@@ -1,68 +1,39 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { Button } from '@components/ui/button';
 import { Card, CardContent } from '@components/ui/card';
 import { BookOpen, Plus } from 'lucide-react';
-import { toast } from 'sonner';
 
-import type { Asignatura } from './types';
 import { AsignaturaCard } from './components/AsignaturaCard';
 import { AsignaturaFormDialog } from './components/AsignaturaFormDialog';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { SearchBar } from './components/SearchBar';
 
-import { asignaturasMock } from '@data/asignaturas';
+import { useAsignaturasPage } from './hooks/useAsignaturasPage';
 
 export function AsignaturasPage() {
-    const [asignaturas, setAsignaturas] = useState<Asignatura[]>(asignaturasMock);
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [selectedAsignaturaId, setSelectedAsignaturaId] = useState<number | undefined>(undefined);
+    const {
+        asignaturas,
+        filteredAsignaturas,
+        loading,
+        dialogOpen,
+        alertOpen,
+        selectedAsignaturaId,
+        selectedEliminarId,
 
-    const [alertOpen, setAlertOpen] = useState(false);
-    const [selectedEliminarId, setSelectedEliminarId] = useState<number | undefined>(undefined);
+        setDialogOpen,
+        setAlertOpen,
+        setSearchQuery,
+        handleAgregar,
+        handleEditar,
+        handleEliminarClick,
+        handleEliminarConfirm,
+        handleSubmit,
+        fetchAsignaturas,
+    } = useAsignaturasPage();
 
-    const [searchQuery, setSearchQuery] = useState('');
-
-    const handleAgregar = () => {
-        setSelectedAsignaturaId(undefined);
-        setDialogOpen(true);
-    };
-
-    const handleEditar = (id: number) => {
-        setSelectedAsignaturaId(id);
-        setDialogOpen(true);
-    };
-
-    const handleEliminarClick = (id: number) => {
-        setSelectedEliminarId(id);
-        setAlertOpen(true);
-    };
-
-    const handleEliminarConfirm = () => {
-        if (selectedEliminarId !== undefined) {
-            setAsignaturas((prev) => prev.filter((a) => a.id !== selectedEliminarId));
-            toast.success('Asignatura eliminada');
-            setSelectedEliminarId(undefined);
-            setAlertOpen(false);
-        }
-    };
-
-    const handleSubmit = (data: Omit<Asignatura, 'id'>) => {
-        if (selectedAsignaturaId) {
-            setAsignaturas((prev) => prev.map((a) => (a.id === selectedAsignaturaId ? { ...a, ...data } : a)));
-            toast.success('Asignatura actualizada');
-        } else {
-            const newId = Math.max(...asignaturas.map((a) => a.id), 0) + 1;
-            setAsignaturas((prev) => [...prev, { id: newId, ...data }]);
-            toast.success('Asignatura agregada');
-        }
-        setDialogOpen(false);
-    };
-
-    const filteredAsignaturas = asignaturas.filter(
-        (a) =>
-            a.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            a.codigo.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
+    useEffect(() => {
+        fetchAsignaturas();
+    }, []);
 
     return (
         <div className='space-y-6'>
@@ -77,34 +48,36 @@ export function AsignaturasPage() {
                 </Button>
             </div>
 
-            {/* Barra de búsqueda */}
-
             <Card>
                 <CardContent className='p-4'>
                     <SearchBar onSearch={setSearchQuery} />
                 </CardContent>
             </Card>
 
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                {filteredAsignaturas.length > 0 ? (
-                    filteredAsignaturas.map((asig) => (
-                        <AsignaturaCard
-                            key={asig.id}
-                            asignatura={asig}
-                            onEditar={() => handleEditar(asig.id)}
-                            onEliminar={() => handleEliminarClick(asig.id)}
-                        />
-                    ))
-                ) : (
-                    <Card>
-                        <CardContent className='text-center py-12'>
-                            <BookOpen className='w-12 h-12 text-muted-foreground mx-auto mb-4' />
-                            <h3 className='text-lg mb-2'>No hay asignaturas registradas</h3>
-                            <p className='text-muted-foreground'>Comienza agregando tu primera asignatura</p>
-                        </CardContent>
-                    </Card>
-                )}
-            </div>
+            {loading ? (
+                <p className='text-center text-muted-foreground py-12'>Cargando asignaturas...</p>
+            ) : (
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                    {filteredAsignaturas.length > 0 ? (
+                        filteredAsignaturas.map((asig) => (
+                            <AsignaturaCard
+                                key={asig.id}
+                                asignatura={asig}
+                                onEditar={() => handleEditar(asig.id)}
+                                onEliminar={() => handleEliminarClick(asig.id)}
+                            />
+                        ))
+                    ) : (
+                        <Card>
+                            <CardContent className='text-center py-12'>
+                                <BookOpen className='w-12 h-12 text-muted-foreground mx-auto mb-4' />
+                                <h3 className='text-lg mb-2'>No hay asignaturas registradas</h3>
+                                <p className='text-muted-foreground'>Comienza agregando tu primera asignatura</p>
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
+            )}
 
             <AsignaturaFormDialog
                 open={dialogOpen}
