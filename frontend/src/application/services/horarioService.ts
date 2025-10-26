@@ -1,5 +1,5 @@
-import { HorarioRepository } from "../repository/horarioRepository";
-import type { HorarioDetalle, FiltrosHorario } from "../types/horario";
+import { HorarioRepository } from "@/infraestructure/repositories/horarioRepository";
+import type { HorarioDetalle, FiltrosHorario } from "@/types/horario";
 
 export class HorarioService {
   private repository: HorarioRepository;

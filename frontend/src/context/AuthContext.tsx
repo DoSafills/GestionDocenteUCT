@@ -1,7 +1,7 @@
 // src/context/AuthContext.tsx
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { setAccessToken, clearAccessToken } from "../auth/tokenStore";
-import { ENDPOINTS } from "../endpoints";
+import { ENDPOINTS } from "../infraestructure/endpoints/index";
 import type { AuthContextType, LoginRequest, LoginResponse, RefreshResponse } from "../pages/LoginPage/types";
 
 const THIRTY_MIN_MS = 30 * 60 * 1000;
