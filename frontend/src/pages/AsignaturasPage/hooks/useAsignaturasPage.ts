@@ -1,7 +1,7 @@
 // src/hooks/useAsignaturasPage.ts
 import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
-import { asignaturaService } from '@/infraestructure/services/AsignaturaService';
+import { asignaturaService } from '@/application/services/AsignaturaService';
 import type { Asignatura } from '@/domain/entities/Asignatura';
 import type { NuevaAsignaturaDTO, ActualizarAsignaturaDTO } from '@/domain/entities/Asignatura/types';
 

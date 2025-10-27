@@ -4,7 +4,7 @@ import { Sala } from '@/domain/salas';
 import type { IRepository } from '@/domain/repositories/IRepository';
 import { SalaApiRepository } from '@/infraestructure/repositories/sala/SalaApiRepository';
 import { SalaMockRepository } from '@/infraestructure/repositories/sala/SalaMockRepository';
-import { ENDPOINTS } from '@/endpoints';
+import { ENDPOINTS } from '@/infraestructure/endpoints';
 import type { ISalaService } from '@/domain/interfaces/ISalaService';
 import type { ISalaRepository } from '@/domain/repositories/ISalaRepository';
 

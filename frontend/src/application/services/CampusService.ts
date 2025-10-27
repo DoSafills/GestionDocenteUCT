@@ -4,7 +4,7 @@ import { Campus } from '@/domain/campus';
 import type { IRepository } from '@/domain/repositories/IRepository';
 import { CampusApiRepository } from '@/infraestructure/repositories/campus/CampusApiRepository';
 import { CampusMockRepository } from '@/infraestructure/repositories/campus/CampusMockRepository';
-import { ENDPOINTS } from '@/endpoints';
+import { ENDPOINTS } from '@/infraestructure/endpoints';
 
 export class CampusService implements IService<Campus, CampusDTO> {
   private repo: IRepository<CampusDTO>;

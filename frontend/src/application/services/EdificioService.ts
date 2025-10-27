@@ -4,7 +4,7 @@ import { Edificio } from '@/domain/edificios';
 import type { IRepository } from '@/domain/repositories/IRepository';
 import { EdificioApiRepository } from '@/infraestructure/repositories/edificio/EdificioApiRepository';
 import { EdificioMockRepository } from '@/infraestructure/repositories/edificio/EdificioMockRepository';
-import { ENDPOINTS } from '@/endpoints';
+import { ENDPOINTS } from '@/infraestructure/endpoints';
 
 import type { IEdificioService } from '@/domain/interfaces/IEdificioService';
 import type { IEdificioRepository } from '@/domain/repositories/IEdificioRepository';

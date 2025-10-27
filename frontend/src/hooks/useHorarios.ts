@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { HorarioService } from '../../../application/services/horarioService';
-import type { HorarioDetalle, FiltrosHorario } from '../types/horario';
+import { HorarioService } from '@/application/services/horarioService';
+import type { HorarioDetalle, FiltrosHorario } from '@/pages/HorariosPage/types/horario';
 
 export const useHorarios = () => {
   const [horarios, setHorarios] = useState<HorarioDetalle[]>([]);

@@ -1,6 +1,6 @@
 // frontend/src/infraestructure/repositories/docente/DocenteApiRepository.ts
 import { ApiRepository } from "../ApiRepository";
-import { ENDPOINTS } from "../../../endpoints";
+import { ENDPOINTS } from "../../endpoints";
 import { normalize } from "../../../utils/string";
 import type { DocenteConUsuario, DocenteCreateDTO, DocenteUpdateDTO } from "../../../domain/docentes/types";
 

@@ -10,9 +10,9 @@ import { Textarea } from "../../components/ui/textarea";
 import { Plus, Search, Building, MapPin, Users, Monitor, Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { campusService } from "@/infraestructure/services/campus/CampusService";
-import { edificioService } from "@/infraestructure/services/edificio/EdificioService";
-import { salaService } from "@/infraestructure/services/sala/SalaService";
+import { campusService } from "@/application/services/CampusService";
+import { edificioService } from "@/application/services/EdificioService";
+import { salaService } from "@/application/services/SalaService";
 
 import type { CampusDTO } from "@/domain/campus/types";
 import type { EdificioDTO, EdificioCreateDTO } from "@/domain/edificios/types";
