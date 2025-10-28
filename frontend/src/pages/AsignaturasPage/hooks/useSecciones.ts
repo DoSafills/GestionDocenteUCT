@@ -1,7 +1,7 @@
 // src/hooks/useSecciones.ts
 import { useEffect, useState } from 'react';
 import type { Seccion } from '@/domain/entities/Seccion';
-import { seccionService } from '@/infraestructure/services/SeccionService';
+import { seccionService } from '@/application/services/SeccionService';
 import type { NuevaSeccionDTO, ActualizarSeccionDTO } from '@/domain/entities/Seccion/types';
 
 export function useSecciones(asignaturaId?: number) {

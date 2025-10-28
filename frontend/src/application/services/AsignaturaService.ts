@@ -5,8 +5,7 @@ import {
     type AsignaturaApiRepository,
 } from '@infraestructure/repositories/Asignaturas';
 
-import { Asignatura } from '@/domain/entities/Asignatura';
-import type { AsignaturaDTO } from '@/domain/entities/Asignatura/types';
+import { Asignatura, type AsignaturaDTO } from '@domain/entities/Asignatura';
 import { normalize } from '@utils/string';
 import { BaseService } from './BaseService';
 

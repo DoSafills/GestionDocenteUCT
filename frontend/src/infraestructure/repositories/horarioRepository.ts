@@ -39,7 +39,6 @@ export class HorarioRepository {
     let clasesFiltradas = [...clasesMock];
 
     if (filtros.seccionId) {
-      // Si es numérico, filtra por id; si no, filtra por código de sección después de construir
       if (/^\d+$/.test(filtros.seccionId)) {
         clasesFiltradas = clasesFiltradas.filter((c) => String(c.seccion_id) === filtros.seccionId);
       }
@@ -50,10 +49,14 @@ export class HorarioRepository {
     }
 
     if (filtros.salaId) {
-      // admite exacto o prefijo de edificio (CJP07)
-      clasesFiltradas = clasesFiltradas.filter(
-        (c) => c.sala_codigo?.includes(filtros.salaId!) || c.sala_codigo === filtros.salaId
-      );
+      clasesFiltradas = clasesFiltradas.filter((c) => c.sala_codigo === filtros.salaId);
+    }
+
+    if (filtros.edificioId) {
+      clasesFiltradas = clasesFiltradas.filter((c) => {
+        const salaCodigo = c.sala_codigo;
+        return salaCodigo?.startsWith(filtros.edificioId!);
+      });
     }
 
     if (filtros.bloqueId) {
@@ -66,7 +69,13 @@ export class HorarioRepository {
 
     let completos = this.construirHorariosCompletos(clasesFiltradas);
 
-    // Si seccionId no es numérico pero parece un código (p. ej. "MAT101-01"), filtra por código tras construir
+    if (filtros.carrera) {
+      completos = completos.filter((h) => {
+        const carrera = (h as any).asignatura.carrera;
+        return carrera === filtros.carrera;
+      });
+    }
+
     if (filtros.seccionId && !/^\d+$/.test(filtros.seccionId)) {
       completos = completos.filter((h) => h.seccion.codigo?.includes(filtros.seccionId as string));
     }
@@ -75,22 +84,34 @@ export class HorarioRepository {
       completos = completos.filter((h) => Number((h as any).bloque.dia_semana) === filtros.dia);
     }
 
+    if (filtros.busqueda) {
+      const busq = filtros.busqueda.toLowerCase();
+      completos = completos.filter((h) => {
+        const asignaturaNombre = (h as any).asignatura.nombre?.toLowerCase() || '';
+        const docenteNombre = (h as any).docente.nombre?.toLowerCase() || '';
+        const salaCodigo = (h as any).sala.codigo?.toLowerCase() || '';
+        const seccionCodigo = (h as any).seccion.codigo?.toLowerCase() || '';
+        return asignaturaNombre.includes(busq) || 
+               docenteNombre.includes(busq) || 
+               salaCodigo.includes(busq) ||
+               seccionCodigo.includes(busq);
+      });
+    }
+
     return completos;
   }
 
   private construirHorariosCompletos(clases: any[]): HorarioCompleto[] {
-    // Join salas con edificios (por edificio_id)
     const edifById = new Map(edificiosMock.map((e: any) => [e.id, e]));
     const salasEnriquecidas = salasMock.map((s: any) => {
       const edif = edifById.get(s.edificio_id);
-      const edificioNombre = (edif?.nombre ?? "").trim(); // "CJP07 - Ricardo Ferrando"
-      const edificioCodigo = (edificioNombre.split(" ")[0] || "").trim(); // "CJP07"
-      const numero = (String(s.codigo).split(/[_-]/).pop() || String(s.codigo)).toString();
+      const edificioNombre = edif?.nombre ?? "";
+      const numero = (String(s.codigo).split('-').pop() || String(s.codigo)).toString();
       return {
         codigo: String(s.codigo),
         numero,
         capacidad: Number(s.capacidad ?? 0),
-        edificio: { codigo: edificioCodigo, nombre: edificioNombre },
+        edificio: { codigo: edificioNombre, nombre: edificioNombre },
       };
     });
 

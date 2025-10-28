@@ -1,5 +1,5 @@
 import type { AsignaturaDTO } from '@/domain/entities/Asignatura/types';
-import { ENDPOINTS } from '@/endpoints';
+import { ENDPOINTS } from '@/infraestructure/endpoints';
 import { ApiRepository } from '../ApiRepository';
 import { MockRepository } from '../MockRepository';
 import asignaturasMock from '@/infraestructure/mocks/asignaturas.mock';

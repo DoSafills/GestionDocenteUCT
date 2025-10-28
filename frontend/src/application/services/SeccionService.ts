@@ -3,7 +3,7 @@ import {
     seccionMockRepository,
     type SeccionApiRepository,
     type SeccionMockRepository,
-} from '../repositories/Secciones';
+} from '../../infraestructure/repositories/Secciones';
 
 import { Seccion } from '@/domain/entities/Seccion';
 import type { SeccionDTO } from '@/domain/entities/Seccion/types';

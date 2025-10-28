@@ -39,3 +39,5 @@ export class Asignatura extends BaseEntity<AsignaturaDTO> {
         this.data.semestre = value;
     }
 }
+
+export * from './types';

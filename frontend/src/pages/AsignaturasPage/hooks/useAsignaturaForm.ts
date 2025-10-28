@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { asignaturaService } from '@infraestructure/services/AsignaturaService';
+import { asignaturaService } from '@/application/services/AsignaturaService';
 
 export function useAsignaturaForm(asignaturaId?: number) {
     const [form, setForm] = useState({
