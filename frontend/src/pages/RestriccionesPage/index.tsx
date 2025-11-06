@@ -1,4 +1,3 @@
-// src/pages/RestriccionesPage/ui/pages/index.tsx
 import React, { useState } from "react";
 import { Filtros } from "./ui/componentes/Filtros";
 import { ResumenRestricciones } from "./ui/componentes/resumenrestricciones";
@@ -14,7 +13,7 @@ import {
 import { Button } from "../../components/ui/button";
 import { useRestriccionesPage } from "./application/usecases/useRestricciones";
 import type { RestriccionAcademica, TipoRestriccion } from "@domain/entities/restriccionespage/RestriccionAcademica";
-import { Table as TableIcon, XCircle, CheckCircle, AlertTriangle } from "lucide-react";
+import { Table as TableIcon, XCircle, CheckCircle, AlertTriangle, Plus } from "lucide-react";
 
 export function RestriccionesPage() {
   const {
@@ -66,15 +65,27 @@ export function RestriccionesPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <Button onClick={abrirModalParaCrear}>Crear nueva restricción</Button>
+    <div className="space-y-6 p-6">
+      {/* Header con título y botón de crear */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Restricciones Académicas</h1>
+          <p className="text-muted-foreground mt-1">
+            Gestiona las reglas y limitaciones del sistema de horarios
+          </p>
+        </div>
+        <Button onClick={abrirModalParaCrear} size="lg" className="gap-2">
+          <Plus className="w-5 h-5" />
+          Nueva Restricción
+        </Button>
+      </div>
 
       {/* 🔹 Modal de creación / edición */}
       <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
-        <DialogContent>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              {editando ? "Editar Restricción" : "Crear Restricción"}
+            <DialogTitle className="text-2xl">
+              {editando ? "Editar Restricción" : "Crear Nueva Restricción"}
             </DialogTitle>
           </DialogHeader>
 
@@ -98,14 +109,22 @@ export function RestriccionesPage() {
 
       {/* 🔹 Modal de confirmación de eliminación */}
       <Dialog open={modalEliminarAbierto} onOpenChange={setModalEliminarAbierto}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Confirmar eliminación</DialogTitle>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Confirmar eliminación
+            </DialogTitle>
           </DialogHeader>
-          <p className="py-4">
-            ¿Seguro que deseas eliminar la restricción{" "}
-            <strong>{restriccionParaEliminar?.descripcion}</strong>?
-          </p>
+          <div className="py-4">
+            <p className="text-gray-700">
+              ¿Estás seguro de que deseas eliminar la restricción{" "}
+              <strong className="text-gray-900">{restriccionParaEliminar?.descripcion}</strong>?
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Esta acción no se puede deshacer.
+            </p>
+          </div>
           <DialogFooter className="flex justify-end space-x-2">
             <Button variant="outline" onClick={cancelarEliminar}>
               Cancelar

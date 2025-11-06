@@ -2,11 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { AuthState, LoginCredentials } from "../types/auth";
 import { loginRepo, refreshRepo, logoutRepo, getAccessTokenRepo } from "../repository/authRepository";
 // import { AuthService } from "@/infraestructure/services/AuthService";
+
 export function useAuth() {
-  const [state, setState] = useState<AuthState>(() => {
-    const { token, accessExpAt } = getAccessTokenRepo();
-    if (token) return { status: "authenticated", tokens: { access: token, refresh: "", expiresIn: 0, accessExpAt } };
-    return { status: "anonymous" };
+  // TEMPORAL: Bypass de autenticación para desarrollo
+  const [state, setState] = useState<AuthState>({
+    status: "authenticated",
+    tokens: { access: "dev-token", refresh: "dev-refresh", expiresIn: 9999999, accessExpAt: Date.now() + 9999999 }
   });
 
   const refreshTimer = useRef<number | null>(null);
