@@ -88,7 +88,7 @@ export const ModalEdificio = ({
               >
                 <SelectValue placeholder="Selecciona un campus" />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-zinc-900">
+              <SelectContent className="bg-white dark:white">
                 {campus.map(c => (
                   <SelectItem key={c.id} value={String(c.id)}>{c.nombre}</SelectItem>
                 ))}

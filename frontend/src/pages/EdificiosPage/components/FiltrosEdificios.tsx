@@ -41,7 +41,7 @@ export const FiltrosEdificios = ({
             <SelectTrigger>
               <SelectValue placeholder="Filtrar por edificio" />
             </SelectTrigger>
-            <SelectContent className="bg-white dark:bg-zinc-900">
+            <SelectContent className="bg-white dark:bg-white">
               <SelectItem value="todos">Todos los edificios</SelectItem>
               {edificios.map(edificio => (
                 <SelectItem key={edificio.id} value={String(edificio.id)}>
@@ -55,7 +55,7 @@ export const FiltrosEdificios = ({
             <SelectTrigger>
               <SelectValue placeholder="Filtrar por tipo de sala" />
             </SelectTrigger>
-            <SelectContent className="bg-white dark:bg-zinc-900">
+            <SelectContent className="bg-white dark:bg-white">
               <SelectItem value="todos">Todos los tipos</SelectItem>
               <SelectItem value="aula">Aula</SelectItem>
               <SelectItem value="laboratorio">Laboratorio</SelectItem>

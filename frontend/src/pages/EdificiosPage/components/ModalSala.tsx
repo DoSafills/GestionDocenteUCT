@@ -50,7 +50,7 @@ export const ModalSala = ({
               <SelectTrigger>
                 <SelectValue placeholder="Selecciona un edificio" />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-zinc-900">
+              <SelectContent className="bg-white dark:bg-white">
                 {edificios.map(edificio => (
                   <SelectItem key={edificio.id} value={String(edificio.id)}>
                     {edificio.nombre}
@@ -91,7 +91,7 @@ export const ModalSala = ({
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-zinc-900">
+              <SelectContent className="bg-white dark:bg-white">
                 <SelectItem value="aula">Aula</SelectItem>
                 <SelectItem value="laboratorio">Laboratorio</SelectItem>
                 <SelectItem value="auditorio">Auditorio</SelectItem>

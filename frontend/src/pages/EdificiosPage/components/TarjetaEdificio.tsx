@@ -70,4 +70,21 @@ export const TarjetaEdificio = ({
               key={sala.id}
               sala={sala}
               onEditar={() => onEditarSala(sala)}
-              onEliminar={() => onEliminarSala(sala
+              onEliminar={() => onEliminarSala(sala.id)}
+            />
+          ))}
+        </div>
+
+        {salas.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            <Monitor className="w-8 h-8 mx-auto mb-2" />
+            <p>No hay salas en este edificio</p>
+            <Button variant="outline" size="sm" className="mt-2" onClick={onAgregarSala}>
+              Agregar primera sala
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
