@@ -26,9 +26,7 @@ export class DocenteService implements IService<DocenteUsuario, DocenteConUsuari
     return m ? { status: Number(m[1]), detail: m[2]?.trim() } : {};
   }
 
-  // -------------------------
-  // LECTURAS
-  // -------------------------
+  
   async obtenerTodas(): Promise<DocenteUsuario[]> {
     try {
       const list = await this.repo.getAll(true);
@@ -49,15 +47,10 @@ export class DocenteService implements IService<DocenteUsuario, DocenteConUsuari
     }
   }
 
-  // -------------------------
-  // CREAR
-  // Firma requerida por IService:
   crearNueva(data: Omit<DocenteConUsuario, "id">): Promise<DocenteUsuario>;
-  // Conveniencia para tu forma "plana":
   crearNueva(data: DocenteCreateDTO): Promise<DocenteUsuario>;
   async crearNueva(data: any): Promise<DocenteUsuario> {
     try {
-      // Si viene en formato plano (DocenteCreateDTO)
       const isPlano =
         typeof data?.departamento === "string" &&
         typeof data?.nombre === "string" &&
@@ -69,11 +62,13 @@ export class DocenteService implements IService<DocenteUsuario, DocenteConUsuari
           email: String(data.email).toLowerCase(),
           activo: data.activo ?? true,
           departamento: normalize(data.departamento),
-        });
-        return this.factory(dto);
+          contrasena: data.contrasena,          
+          rol: "docente",
+        })
+        return this.factory(dto)
       }
 
-      // Caso: formato requerido por IService (Omit<DocenteConUsuario,"id">)
+
       const payload: Omit<DocenteConUsuario, "id"> = {
         nombre: normalize(data.nombre),
         email: String(data.email).toLowerCase(),
@@ -98,11 +93,7 @@ export class DocenteService implements IService<DocenteUsuario, DocenteConUsuari
     }
   }
 
-  // -------------------------
-  // ACTUALIZAR (parcial)
-  // Firma requerida por IService:
   actualizar(idUser: number, data: Partial<Omit<DocenteConUsuario, "id">>): Promise<DocenteUsuario>;
-  // Conveniencia para tu forma "plana":
   actualizar(idUser: number, data: Partial<DocenteCreateDTO>): Promise<DocenteUsuario>;
   async actualizar(idUser: number, data: any): Promise<DocenteUsuario> {
     try {
@@ -119,7 +110,6 @@ export class DocenteService implements IService<DocenteUsuario, DocenteConUsuari
         return this.factory(dto);
       }
 
-      // Caso: formato requerido por IService (parcial DocenteConUsuario sin id)
       const current = await this.repo.getById(idUser);
       const patch: Partial<Omit<DocenteConUsuario, "id">> = {
         ...(data.nombre !== undefined ? { nombre: data.nombre } : {}),
@@ -148,8 +138,6 @@ export class DocenteService implements IService<DocenteUsuario, DocenteConUsuari
     }
   }
 
-  // -------------------------
-  // ELIMINAR
   async eliminar(idUser: number): Promise<void> {
     try {
       await this.repo.delete(idUser);
@@ -160,8 +148,6 @@ export class DocenteService implements IService<DocenteUsuario, DocenteConUsuari
     }
   }
 
-  // -------------------------
-  // BUSCAR
   async buscar(term: string): Promise<DocenteUsuario[]> {
     const q = normalize(term);
     if (typeof this.repo.search === "function") {
@@ -177,7 +163,28 @@ export class DocenteService implements IService<DocenteUsuario, DocenteConUsuari
       )
       .map(this.factory);
   }
+
+  async activarUsuario(idUser: number): Promise<void> {
+  const anyRepo = this.repo as any
+  if (typeof anyRepo.activarUsuario === "function") {
+    await anyRepo.activarUsuario(idUser)
+  } else {
+    throw new Error("Activación no soportada por el repositorio actual")
+  }
 }
 
-// Puedes inyectar Mock en dev, igual que Campus:
+async desactivarUsuario(idUser: number): Promise<void> {
+  const anyRepo = this.repo as any
+  if (typeof anyRepo.desactivarUsuario === "function") {
+    await anyRepo.desactivarUsuario(idUser)
+  } else {
+    throw new Error("Desactivación no soportada por el repositorio actual")
+  }
+}
+
+}
+
+
+
+// export const docenteService = new DocenteService();
 export const docenteService = new DocenteService(new DocenteMockRepository());

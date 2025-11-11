@@ -107,7 +107,7 @@ export function ProfesoresPage() {
   const [items, setItems] = useState<DocenteConUsuario[]>([]);
   const [open, setOpen] = useState(false);
   const [editando, setEditando] = useState<DocenteConUsuario | null>(null);
-  const [form, setForm] = useState<FormState>({ nombre: "", email: "", departamento: "", activo: true });
+  const [form, setForm] = useState<FormState>({ nombre: "", email: "", departamento: "", activo: true, contrasena: "" });
   const [semana, setSemana] = useState<SemanaDisponibilidad>(defaultSemana());
 
   const [restriccionesLocal, setRestriccionesLocal] = useState<Record<number, RestriccionHorarioGuardar[]>>({});
@@ -119,7 +119,7 @@ export function ProfesoresPage() {
 
   const limpiar = () => {
     setEditando(null);
-    setForm({ nombre: "", email: "", departamento: "", activo: true });
+    setForm({ nombre: "", email: "", departamento: "", activo: true, contrasena: "" });
     setSemana(defaultSemana());
   };
 
@@ -146,7 +146,7 @@ export function ProfesoresPage() {
   const abrirEditar = (d: DocenteConUsuario) => {
     limpiar();
     setEditando(d);
-    setForm({ nombre: d.nombre, email: d.email, departamento: d.docente.departamento, activo: d.activo });
+    setForm({ nombre: d.nombre, email: d.email, departamento: d.docente.departamento, activo: d.activo, contrasena: "" });
     const actuales = restriccionesLocal[d.id] || [];
     setSemana(restriccionesASemana(actuales));
     setOpen(true);
@@ -155,28 +155,29 @@ export function ProfesoresPage() {
   const guardar = async () => {
     if (!form.nombre.trim()) return toast.error("El nombre es obligatorio");
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((form.email || "").trim())) return toast.error("Correo inválido");
+    if (!editando && !(form.contrasena || "").trim()) return toast.error("La contraseña es obligatoria");
     const err = validarSemana(semana);
     if (err) return toast.error(err);
 
     try {
       if (editando) {
-        // ✅ usa el service nuevo
-        await docenteService.actualizarParcial(editando.id, {
+        const updated = await docenteService.actualizar(editando.id, {
           nombre: form.nombre,
           email: form.email,
           activo: form.activo,
           departamento: form.departamento,
         });
-        const payload = semanaATransfer(semana, editando.id);
-        setRestriccionesLocal((prev) => ({ ...prev, [editando.id]: payload }));
+        const payload = semanaATransfer(semana, updated.id);
+        setRestriccionesLocal((prev) => ({ ...prev, [updated.id]: payload }));
         toast.success("Docente actualizado");
       } else {
-        // ✅ usa el service nuevo
-        const created = await docenteService.crear({
+        const created = await docenteService.crearNueva({
           nombre: form.nombre,
           email: form.email,
           departamento: form.departamento,
           activo: form.activo,
+          contrasena: form.contrasena,
+          rol: "docente",
         });
         const createdId = created.id;
         const restr = semanaATransfer(semana, createdId);
