@@ -41,9 +41,13 @@ export interface FiltrosHorario {
   seccionId?: string;
   docenteRut?: string;
   salaId?: string;
+  edificioId?: string;
+  campusId?: string;
+  carrera?: string;
   bloqueId?: string;
   dia?: number;
   estado?: string;
+  busqueda?: string;
 }
 
 export interface EstadisticasHorarios {

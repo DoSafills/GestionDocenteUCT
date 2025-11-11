@@ -7,11 +7,14 @@ import { AsignaturasPage } from '@pages/AsignaturasPage';
 import { HorariosPage } from '@pages/HorariosPage';
 import { RestriccionesPage } from '@pages/RestriccionesPage';
 import { CursosPage } from './components/cursos/CursosPage';
-import LoginForm from './pages/LoginPage/index';
-import { AuthProvider, useAuth } from './context/AuthContext';
+
+import LoginPage from './pages/LoginPage';
+import { AuthProvider } from './pages/LoginPage/hooks/AuthProvider';
+import { useAuthContext } from './pages/LoginPage/hooks/AuthProvider';
+
 import { Toaster } from 'sonner';
 
-type Pagina = 'dashboard' | 'profesores' | 'edificio' | 'asignaturas' | 'horarios' | 'restricciones' | 'cursos';
+type Pagina = 'dashboard' | 'profesores' | 'edificios' | 'asignaturas' | 'horarios' | 'restricciones' | 'cursos';
 
 const paginaMap: Record<Pagina, JSX.Element> = {
     dashboard: <DashboardPage />,
@@ -34,13 +37,13 @@ export default function App() {
 
 function MainApp() {
     const [paginaActual, setPaginaActual] = useState<Pagina>('dashboard');
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated } = useAuthContext(); // ⬅️ estado compartido
 
     if (!isAuthenticated) {
         return (
             <div className='min-h-screen flex items-center justify-center p-4'>
                 <div className='w-full max-w-sm'>
-                    <LoginForm />
+                    <LoginPage />
                 </div>
             </div>
         );

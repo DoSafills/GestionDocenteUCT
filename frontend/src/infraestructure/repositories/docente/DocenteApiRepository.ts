@@ -1,8 +1,8 @@
-// frontend/src/infraestructure/repositories/docente/DocenteApiRepository.ts
-import { ApiRepository } from "@/infraestructure/repositories/ApiRepository";
-import { ENDPOINTS } from "@/endpoints";
-import { normalize } from "@/utils/string";
-import type { DocenteConUsuario, DocenteCreateDTO, DocenteUpdateDTO } from "@/domain/docentes/types";
+import { ApiRepository } from "../ApiRepository";
+import { ENDPOINTS } from "../../endpoints";
+import { normalize } from "../../../utils/string";
+import type { DocenteConUsuario, DocenteCreateDTO, DocenteUpdateDTO } from "../../../domain/docentes/types";
+
 
 type DocenteRow = { id: number; user_id: number; departamento: string };
 type UserRow = {

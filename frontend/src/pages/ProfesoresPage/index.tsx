@@ -4,7 +4,7 @@ import { User } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import type { DiaSemana, RestriccionHorarioGuardar } from "../../types";
-import { docenteService } from "../../infraestructure/services/docente/DocenteService";
+import { docenteService } from "@/application/services/DocenteService";
 import type { DocenteConUsuario, DocenteCreateDTO} from "@/domain/docentes/types";
 import { normalize } from "@/utils/string";
 
