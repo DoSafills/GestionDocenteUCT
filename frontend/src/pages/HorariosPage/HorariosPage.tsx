@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from "../../components/ui/button";
 import { List } from "lucide-react";
-import { useHorarios } from './hooks';
+import { useHorarios } from '@/hooks/useHorarios';
 import { ListaHorarios } from './components/ListaHorarios';
 import { FiltrosHorarios } from './components/FiltrosHorarios';
 import type { FiltrosHorario } from './types/horario';
@@ -20,13 +20,12 @@ export function HorariosPage() {
   const edificioById = new Map(edificiosMock.map(e => [e.id, e]));
   const todasLasSalas = salasMock.map(s => {
     const edif = edificioById.get(s.edificio_id);
-    const edificioNombre = (edif?.nombre ?? "").trim();
-    const edificioCodigo = (edificioNombre.split(" ")[0] || "").trim();
+    const edificioNombre = edif?.nombre ?? "";
     const numero = (String(s.codigo).split(/[_-]/).pop() || String(s.codigo)).toString();
     return {
       ...s,
       numero,
-      edificio: { codigo: edificioCodigo, nombre: edificioNombre },
+      edificio: { codigo: edificioNombre, nombre: edificioNombre },
     };
   });
 

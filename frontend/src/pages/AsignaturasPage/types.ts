@@ -31,3 +31,10 @@ export interface Sala {
     edificio_id: number; // FK -> Edificio.id
     equipamiento: string; // lista o descripción de equipos
 }
+
+export interface AsignaturaFormDialogProps {
+    open: boolean;
+    asignaturaId?: number;
+    onOpenChange: (v: boolean) => void;
+    onSubmit: (data: Omit<Asignatura, 'id'>, secciones: Omit<Seccion, 'id' | 'asignatura_id'>[]) => void;
+}

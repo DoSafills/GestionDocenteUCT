@@ -4,7 +4,8 @@ import { Input } from "../../../components/ui/input";
 import { Button } from "../../../components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../../components/ui/dialog";
 import { Badge } from "../../../components/ui/badge";
-import { Search, X, HelpCircle, Calendar, MapPin, BookOpen, Filter } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
+import { Search, X, HelpCircle, Calendar, BookOpen, Filter, Building, GraduationCap } from "lucide-react";
 import type { FiltrosHorariosProps } from "../types/componentes";
 
 export function FiltrosHorarios({
@@ -12,40 +13,14 @@ export function FiltrosHorarios({
   onFiltroChange,
   salas,
   profesores,
+  asignaturas,
 }: FiltrosHorariosProps) {
   const [busquedaGlobal, setBusquedaGlobal] = useState('');
-  const [menuAbierto, setMenuAbierto] = useState(false); // desplegable
+  const [menuAbierto, setMenuAbierto] = useState(false);
 
   const handleBusquedaChange = (valor: string) => {
     setBusquedaGlobal(valor);
-    if (valor.trim()) {
-      const filtrosBusqueda: any = {};
-
-      // Nota: Sin filtro de bloques. No interpretamos valores numéricos como bloqueId.
-
-      // Buscar por docente (por nombre)
-      const docente = profesores.find(p =>
-        String(p.nombre || "").toLowerCase().includes(valor.toLowerCase())
-      );
-      if (docente) filtrosBusqueda.docenteRut = String((docente as any).id);
-
-      // Buscar por sala/edificio
-      const sala = salas.find(s =>
-        s.codigo?.toLowerCase().includes(valor.toLowerCase()) ||
-        s.numero?.toLowerCase().includes(valor.toLowerCase()) ||
-        s.edificio?.codigo?.toLowerCase().includes(valor.toLowerCase()) ||
-        s.edificio?.nombre?.toLowerCase().includes(valor.toLowerCase())
-      );
-      if (sala) {
-        filtrosBusqueda.salaId = sala.codigo.includes('_')
-          ? sala.codigo.split('_')[0]
-          : sala.codigo;
-      }
-
-      onFiltroChange({ ...filtros, ...filtrosBusqueda });
-    } else {
-      limpiarFiltros();
-    }
+    onFiltroChange({ ...filtros, busqueda: valor.trim() || undefined });
   };
 
   const handleFiltroRapido = (campo: keyof typeof filtros, valor: any) => {
@@ -58,9 +33,12 @@ export function FiltrosHorarios({
       seccionId: undefined,
       docenteRut: undefined,
       salaId: undefined,
+      edificioId: undefined,
+      campusId: undefined,
+      carrera: undefined,
       dia: undefined,
       estado: undefined,
-      // bloqueId intencionalmente omitido (no se usa)
+      busqueda: undefined,
     });
   };
 
@@ -72,15 +50,27 @@ export function FiltrosHorarios({
     { id: 2, nombre: 'Martes', corto: 'M' },
     { id: 3, nombre: 'Miércoles', corto: 'X' },
     { id: 4, nombre: 'Jueves', corto: 'J' },
-    { id: 5, nombre: 'Viernes', corto: 'V' },
-    { id: 6, nombre: 'Sábado', corto: 'S' },
+    { id: 5, nombre: 'Viernes', corto: 'V' }
   ];
 
   const estados = ['activo', 'cancelado', 'reprogramado'] as const;
 
   const edificios = Array.from(
-    new Set(salas.map((s: any) => s.edificio?.codigo || s.edificio?.nombre).filter(Boolean))
-  ) as string[];
+    new Set(
+      salas
+        .map((s: any) => {
+          const codigo = s.edificio?.codigo || s.codigo;
+          if (!codigo) return null;
+          const match = codigo.match(/^([A-Z]+\d+)/);
+          return match ? match[1] : codigo.split('-')[0];
+        })
+        .filter(Boolean)
+    )
+  ).sort();
+
+  const carreras = Array.from(
+    new Set(asignaturas.map((a: any) => a.carrera).filter(Boolean))
+  ).sort();
 
   return (
     <Card>
@@ -99,10 +89,11 @@ export function FiltrosHorarios({
                   <DialogTitle>Ayuda de Búsqueda</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-2 text-sm">
-                  <p>• Docente (por nombre): Ana, Luis, etc.</p>
-                  <p>• Sala o edificio: CJP07_101, CJP07</p>
-                  <p>• Día: usa los botones de días</p>
-                  <p>• Estado: usa los botones de estado</p>
+                  <p>• <strong>Búsqueda:</strong> busca en asignatura, docente, sala y sección</p>
+                  <p>• <strong>Carrera:</strong> filtra por carrera específica</p>
+                  <p>• <strong>Edificio:</strong> filtra por edificio específico (CJP07, CJP01, etc.)</p>
+                  <p>• <strong>Día:</strong> filtra por día de la semana</p>
+                  <p>• <strong>Estado:</strong> activo, cancelado o reprogramado</p>
                 </div>
               </DialogContent>
             </Dialog>
@@ -124,18 +115,39 @@ export function FiltrosHorarios({
 
       {menuAbierto && (
         <CardContent className="space-y-4">
-          {/* Search blanca con letras negras */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
-              placeholder="Buscar sección, docente, sala..."
+              placeholder="Buscar por asignatura, docente o sala..."
               value={busquedaGlobal}
               onChange={(e) => handleBusquedaChange(e.target.value)}
               className="pl-10 bg-white text-black placeholder:text-gray-500 border border-gray-300"
             />
           </div>
 
-          {/* Días */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <GraduationCap className="w-4 h-4" />
+              <span className="text-sm font-medium">Carrera:</span>
+            </div>
+            <Select
+              value={filtros.carrera || "todas"}
+              onValueChange={(value) => handleFiltroRapido('carrera', value === "todas" ? undefined : value)}
+            >
+              <SelectTrigger className="w-full bg-white border-gray-300">
+                <SelectValue placeholder="Todas las carreras" />
+              </SelectTrigger>
+              <SelectContent className="bg-white z-50 border border-gray-200 shadow-lg">
+                <SelectItem value="todas">Todas las carreras</SelectItem>
+                {carreras.map((carrera) => (
+                  <SelectItem key={carrera} value={carrera}>
+                    {carrera}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Calendar className="w-4 h-4" />
@@ -156,7 +168,6 @@ export function FiltrosHorarios({
             </div>
           </div>
 
-          {/* Estados */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <BookOpen className="w-4 h-4" />
@@ -168,7 +179,7 @@ export function FiltrosHorarios({
                   key={estado}
                   variant={filtros.estado === estado ? 'default' : 'outline'}
                   size="sm"
-                  className="h-8 px-3"
+                  className="h-8 px-3 capitalize"
                   onClick={() => handleFiltroRapido('estado', filtros.estado === estado ? undefined : estado)}
                 >
                   {estado}
@@ -177,20 +188,19 @@ export function FiltrosHorarios({
             </div>
           </div>
 
-          {/* Edificios */}
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <MapPin className="w-4 h-4" />
+              <Building className="w-4 h-4" />
               <span className="text-sm font-medium">Edificios:</span>
             </div>
             <div className="flex flex-wrap gap-2">
               {edificios.map((edif) => (
                 <Button
                   key={edif}
-                  variant={filtros.salaId === edif ? 'default' : 'outline'}
+                  variant={filtros.edificioId === edif ? 'default' : 'outline'}
                   size="sm"
                   className="h-8 px-3"
-                  onClick={() => handleFiltroRapido('salaId', filtros.salaId === edif ? undefined : edif)}
+                  onClick={() => handleFiltroRapido('edificioId', filtros.edificioId === edif ? undefined : edif)}
                 >
                   {edif}
                 </Button>
@@ -198,16 +208,37 @@ export function FiltrosHorarios({
             </div>
           </div>
 
-          {/* Chips de filtros activos */}
           <div className="flex flex-wrap gap-2 pt-2 border-t">
+            {filtros.busqueda && (
+              <Badge className="bg-blue-100 text-blue-800">
+                Búsqueda: {filtros.busqueda}
+              </Badge>
+            )}
             {filtros.docenteRut && (
               <Badge className="bg-green-100 text-green-800">
                 Docente: {profesores.find(p => String((p as any).id) === String(filtros.docenteRut))?.nombre ?? filtros.docenteRut}
               </Badge>
             )}
-            {filtros.salaId && <Badge className="bg-purple-100 text-purple-800">Edif/Sala: {filtros.salaId}</Badge>}
-            {typeof filtros.dia === "number" && <Badge className="bg-cyan-100 text-cyan-800">Día: {filtros.dia}</Badge>}
-            {filtros.estado && <Badge className="bg-gray-100 text-gray-800">Estado: {filtros.estado}</Badge>}
+            {filtros.carrera && (
+              <Badge className="bg-indigo-100 text-indigo-800">
+                Carrera: {filtros.carrera}
+              </Badge>
+            )}
+            {filtros.edificioId && (
+              <Badge className="bg-purple-100 text-purple-800">
+                Edificio: {filtros.edificioId}
+              </Badge>
+            )}
+            {typeof filtros.dia === "number" && (
+              <Badge className="bg-cyan-100 text-cyan-800">
+                Día: {diasSemana.find(d => d.id === filtros.dia)?.nombre}
+              </Badge>
+            )}
+            {filtros.estado && (
+              <Badge className="bg-gray-100 text-gray-800 capitalize">
+                Estado: {filtros.estado}
+              </Badge>
+            )}
           </div>
         </CardContent>
       )}

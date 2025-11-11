@@ -1,20 +1,20 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
-import { CalendarDays, Edit, Mail, Tags, Trash2, User } from "lucide-react";
-import type { Docente } from "../types";
+import { CalendarDays, Edit, Mail, Trash2, User } from "lucide-react";
+import type { DocenteConUsuario } from "@/domain/docentes/types";
 
 type Row = { dia: string; horario: string };
 
 type Props = {
-  docente: Docente;
+  docente: DocenteConUsuario;
   rows: Row[];
-  onEditar: (d: Docente) => void;
-  onEliminar: (d: Docente) => void;
+  onEditar: (d: DocenteConUsuario) => void;
+  onEliminar: (d: DocenteConUsuario) => void;
 };
 
 export default function TarjetaDocente({ docente, rows, onEditar, onEliminar }: Props) {
-  const especialidades = (docente.especialidad || "").split(",").map((s) => s.trim()).filter(Boolean);
+  const departamento = docente.docente?.departamento || "—";
 
   return (
     <Card className="rounded-xl shadow-sm hover:shadow-lg transition-shadow">
@@ -27,16 +27,30 @@ export default function TarjetaDocente({ docente, rows, onEditar, onEliminar }: 
             <div>
               <CardTitle className="text-lg">{docente.nombre}</CardTitle>
               <span className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-sm text-gray-700">
-                <span className={`inline-block w-1.5 h-1.5 rounded-full ${docente.esta_activo ? "bg-emerald-500" : "bg-gray-400"}`} />
-                {docente.esta_activo ? "activo" : "inactivo"}
+                <span
+                  className={`inline-block w-1.5 h-1.5 rounded-full ${
+                    docente.activo ? "bg-emerald-500" : "bg-gray-400"
+                  }`}
+                />
+                {docente.activo ? "activo" : "inactivo"}
               </span>
             </div>
           </div>
           <div className="flex gap-1">
-            <Button variant="ghost" size="sm" onClick={() => onEditar(docente)} aria-label={`Editar docente ${docente.nombre}`}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onEditar(docente)}
+              aria-label={`Editar docente ${docente.nombre}`}
+            >
               <Edit className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => onEliminar(docente)} aria-label={`Eliminar docente ${docente.nombre}`}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onEliminar(docente)}
+              aria-label={`Eliminar docente ${docente.nombre}`}
+            >
               <Trash2 className="w-4 h-4 text-destructive" />
             </Button>
           </div>
@@ -54,20 +68,15 @@ export default function TarjetaDocente({ docente, rows, onEditar, onEliminar }: 
 
         <div>
           <div className="flex items-center gap-2 font-medium mb-1">
-            <Tags className="h-4 w-4" />
-            <span>Especialidades</span>
+            <span>Departamento</span>
           </div>
-          <div className="flex flex-wrap gap-1">
-            {especialidades.length ? (
-              especialidades.map((e, i) => (
-                <Badge key={i} variant="outline" className="text-xs rounded-lg">
-                  {e}
-                </Badge>
-              ))
-            ) : (
-              <span className="text-xs text-muted-foreground">Sin especialidades</span>
-            )}
-          </div>
+          {departamento && departamento !== "—" ? (
+            <Badge variant="outline" className="text-xs rounded-lg">
+              {departamento}
+            </Badge>
+          ) : (
+            <span className="text-xs text-muted-foreground">Sin departamento</span>
+          )}
         </div>
 
         <div>
