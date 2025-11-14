@@ -9,16 +9,13 @@ import {
     Settings,
     Home,
     Calendar,
-    LogOut, // <-- importamos ícono de lucide-react
+    LogOut,
 } from 'lucide-react';
 import Header from './Header';
-
-import { useAuthContext as useAuth } from "@/pages/LoginPage/hooks/AuthProvider"; // <-- importamos logout
-
-
+import { useAuthContext as useAuth } from "@/pages/LoginPage/hooks/AuthProvider";
 import { useWindowWidth } from '@/hooks/useWindowWidth';
-const SIDEBAR_BREAKPOINT = 1024;
 
+const SIDEBAR_BREAKPOINT = 1024;
 
 interface LayoutProps {
     children: ReactNode;
@@ -26,24 +23,72 @@ interface LayoutProps {
     onPageChange: (page: string) => void;
 }
 
-const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'profesores', label: 'Profesores', icon: Users },
-    { id: 'edificios', label: 'Salas y Edificios', icon: Building },
-    { id: 'asignaturas', label: 'Asignaturas', icon: BookOpen },
-    { id: 'horarios', label: 'Horarios', icon: Calendar },
-    { id: 'restricciones', label: 'Restricciones', icon: Settings },
+// Definición de tipos de roles
+type UserRole = 'administrador' | 'docente' | 'estudiante';
+
+interface MenuItem {
+    id: string;
+    label: string;
+    icon: any;
+    allowedRoles: UserRole[]; // Roles que pueden ver este item
+}
+
+// Items del menú con sus roles permitidos
+const menuItems: MenuItem[] = [
+    { 
+        id: 'dashboard', 
+        label: 'Dashboard', 
+        icon: Home,
+        allowedRoles: ['administrador']
+    },
+    { 
+        id: 'profesores', 
+        label: 'Profesores', 
+        icon: Users,
+        allowedRoles: ['administrador', 'docente', 'estudiante']
+    },
+    { 
+        id: 'edificios', 
+        label: 'Salas y Edificios', 
+        icon: Building,
+        allowedRoles: ['administrador', 'docente']
+    },
+    { 
+        id: 'asignaturas', 
+        label: 'Asignaturas', 
+        icon: BookOpen,
+        allowedRoles: ['administrador', 'docente', 'estudiante']
+    },
+    { 
+        id: 'horarios', 
+        label: 'Horarios', 
+        icon: Calendar,
+        allowedRoles: ['administrador', 'docente', 'estudiante']
+    },
+    { 
+        id: 'restricciones', 
+        label: 'Restricciones', 
+        icon: Settings,
+        allowedRoles: ['administrador'] // Solo administradores
+    },
 ];
 
 export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
-    const { logout } = useAuth();
+    const { logout, user } = useAuth(); // Asumiendo que user contiene el rol
     const width = useWindowWidth();
     const isSidebarVisible = width >= SIDEBAR_BREAKPOINT;
+
+    // Obtener el rol del usuario (ajusta según tu estructura de datos)
+    const userRole = user?.rol as UserRole;
+
+    // Filtrar items del menú según el rol del usuario
+    const filteredMenuItems = menuItems.filter(item => 
+        item.allowedRoles.includes(userRole)
+    );
 
     return (
         <div className='min-h-screen bg-background flex flex-col text-black'>
             <Header />
-
             <div className='flex flex-1'>
                 {isSidebarVisible && (
                     <aside className='w-64 bg-card border-r min-h-[calc(100vh-80px)] text-black flex flex-col'>
@@ -51,15 +96,18 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
                             <CardContent className='p-4 space-y-2 flex flex-col h-full'>
                                 <div>
                                     <h3 className='text-sm mb-4'>NAVEGACIÓN</h3>
-                                    {menuItems.map((item) => {
+                                    {filteredMenuItems.map((item) => {
                                         const Icon = item.icon;
                                         const isActive = currentPage === item.id;
-
                                         return (
                                             <Button
                                                 key={item.id}
                                                 variant={isActive ? 'default' : 'ghost'}
-                                                className={`w-full justify-start gap-3 transition-colors duration-200 text-black ${isActive ? 'bg-primary text-primary-foreground-alt' : 'hover:bg-primary/10'}`}
+                                                className={`w-full justify-start gap-3 transition-colors duration-200 text-black ${
+                                                    isActive 
+                                                        ? 'bg-primary text-primary-foreground-alt' 
+                                                        : 'hover:bg-primary/10'
+                                                }`}
                                                 onClick={() => onPageChange(item.id)}
                                                 aria-current={isActive ? 'page' : undefined}
                                             >
@@ -69,7 +117,6 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
                                         );
                                     })}
                                 </div>
-
                                 <div className='mt-auto pt-4 border-t'>
                                     <Button
                                         variant='ghost'
@@ -84,7 +131,6 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
                         </Card>
                     </aside>
                 )}
-
                 <main className='flex-1 p-6 text-black'>{children}</main>
             </div>
         </div>
