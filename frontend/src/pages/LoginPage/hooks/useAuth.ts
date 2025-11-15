@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AuthState, LoginCredentials } from "../types/auth";
+import { authService } from "@/application/services/AuthService";
 import { loginRepo, refreshRepo, logoutRepo, getAccessTokenRepo } from "../repository/authRepository";
-// import { AuthService } from "@/infraestructure/services/AuthService";
 
 export function useAuth() {
   // TEMPORAL: Bypass de autenticación para desarrollo
@@ -24,6 +24,7 @@ export function useAuth() {
       if (!res.ok) {
         setState({ status: "error", message: res.error.message });
         logoutRepo();
+        authService.clear();                    
         setState({ status: "anonymous" });
         return;
       }
@@ -41,6 +42,9 @@ export function useAuth() {
     }
     setState({ status: "authenticated", tokens: res.value });
     scheduleRefresh(res.value.accessExpAt);
+
+    await authService.cargarUsuarioDesdeApi();
+
     return true;
   }, [scheduleRefresh]);
 
@@ -49,6 +53,7 @@ export function useAuth() {
     if (!res.ok) {
       setState({ status: "error", message: res.error.message });
       logoutRepo();
+      authService.clear();                    
       setState({ status: "anonymous" });
       return false;
     }
@@ -59,6 +64,7 @@ export function useAuth() {
 
   const logout = useCallback(() => {
     logoutRepo();
+    authService.clear();                      
     setState({ status: "anonymous" });
     if (refreshTimer.current) {
       window.clearTimeout(refreshTimer.current);
@@ -66,7 +72,6 @@ export function useAuth() {
     }
   }, []);
 
-  // refresh al volver de background si queda <60s
   useEffect(() => {
     const onVis = () => {
       if (document.visibilityState === "visible") {
@@ -80,7 +85,6 @@ export function useAuth() {
     return () => document.removeEventListener("visibilitychange", onVis);
   }, [state, refreshNow]);
 
-  // sincronizar entre pestañas por localStorage del refresh
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key === "auth.refresh.token") {

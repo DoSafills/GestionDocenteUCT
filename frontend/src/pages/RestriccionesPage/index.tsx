@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Filtros } from "./ui/componentes/Filtros";
 import { ResumenRestricciones } from "./ui/componentes/resumenrestricciones";
 import { ListaRestricciones } from "./ui/componentes/listarestricciones";
@@ -13,7 +13,7 @@ import {
 import { Button } from "../../components/ui/button";
 import { useRestriccionesPage } from "./application/usecases/useRestricciones";
 import type { RestriccionAcademica, TipoRestriccion } from "@domain/entities/restriccionespage/RestriccionAcademica";
-import { Table as TableIcon, XCircle, CheckCircle, AlertTriangle, Plus } from "lucide-react";
+import { Table as TableIcon, XCircle, CheckCircle, AlertTriangle } from "lucide-react";
 
 export function RestriccionesPage() {
   const {
@@ -38,8 +38,39 @@ export function RestriccionesPage() {
     setRestricciones,
   } = useRestriccionesPage();
 
-  const [modalEliminarAbierto, setModalEliminarAbierto] = useState(false);
-  const [restriccionParaEliminar, setRestriccionParaEliminar] = useState<RestriccionAcademica | null>(null);
+  const [modalEliminarAbierto, setModalEliminarAbierto] =
+    useState(false);
+  const [restriccionParaEliminar, setRestriccionParaEliminar] =
+    useState<RestriccionAcademica | null>(null);
+
+  const [usuario, setUsuario] = useState<UsuarioActual | null>(() =>
+    authService.getUsuarioActual()
+  );
+  const [cargandoPermisos, setCargandoPermisos] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    if (!usuario) {
+      setCargandoPermisos(true);
+      authService.cargarUsuarioDesdeApi().then((u) => {
+        if (mounted) {
+          setUsuario(u);
+          setCargandoPermisos(false);
+        }
+      });
+    }
+
+    const unsub = authService.onChange((u) => {
+      if (mounted) setUsuario(u);
+    });
+
+    return () => {
+      mounted = false;
+      unsub();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const cancelarEliminar = (): void => {
     setModalEliminarAbierto(false);
@@ -48,15 +79,14 @@ export function RestriccionesPage() {
 
   const confirmarEliminar = (): void => {
     if (restriccionParaEliminar) {
-      setRestricciones(prev =>
-        prev.filter(r => r.id !== restriccionParaEliminar.id)
+      setRestricciones((prev) =>
+        prev.filter((r) => r.id !== restriccionParaEliminar.id)
       );
       setModalEliminarAbierto(false);
       setRestriccionParaEliminar(null);
     }
   };
 
-  // 🔹 Iconos por tipo, capacidad incluye prerrequisito/secuencia temporal
   const iconosPorTipo: Record<TipoRestriccion, React.ReactNode> = {
     sala_prohibida: <AlertTriangle />,
     horario_conflicto: <XCircle />,
@@ -64,6 +94,17 @@ export function RestriccionesPage() {
     profesor_especialidad: <CheckCircle />,
   };
 
+  // 🔹 Guard de acceso
+  if (cargandoPermisos) {
+    return <div>Verificando permisos…</div>;
+  }
+
+  // si no hay usuario o no es ADMIN → mostramos el Dashboard
+  if (!usuario || !authService.hasRol("ADMINISTRADOR")) {
+    return <DashboardPage />;
+  }
+
+  // 🔹 Si llegó hasta aquí, es ADMIN → render normal
   return (
     <div className="space-y-6 p-6">
       {/* Header con título y botón de crear */}
@@ -80,7 +121,6 @@ export function RestriccionesPage() {
         </Button>
       </div>
 
-      {/* 🔹 Modal de creación / edición */}
       <Dialog open={modalAbierto} onOpenChange={setModalAbierto}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -109,7 +149,7 @@ export function RestriccionesPage() {
 
       {/* 🔹 Modal de confirmación de eliminación */}
       <Dialog open={modalEliminarAbierto} onOpenChange={setModalEliminarAbierto}>
-        <DialogContent className="max-w-md">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-red-600">
               <AlertTriangle className="w-5 h-5" />
@@ -136,7 +176,6 @@ export function RestriccionesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* 🔹 Filtros */}
       <Filtros
         busqueda={busqueda}
         setBusqueda={setBusqueda}
@@ -148,16 +187,14 @@ export function RestriccionesPage() {
         setFiltroActiva={setFiltroActiva}
       />
 
-      {/* 🔹 Resumen */}
       <ResumenRestricciones restricciones={restriccionesFiltradas} />
 
-      {/* 🔹 Lista de restricciones */}
       <ListaRestricciones
         restricciones={restriccionesFiltradas}
         setRestricciones={setRestricciones}
         abrirModalParaEditar={abrirModalParaEditar}
         handleToggle={toggleRestriccion}
-        iconosPorTipo={iconosPorTipo} // pasamos iconos actualizados
+        iconosPorTipo={iconosPorTipo}
         solicitarEliminar={(r: RestriccionAcademica) => {
           setRestriccionParaEliminar(r);
           setModalEliminarAbierto(true);
