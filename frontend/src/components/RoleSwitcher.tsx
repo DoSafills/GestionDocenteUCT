@@ -2,24 +2,45 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Shield, ChevronLeft, ChevronRight } from 'lucide-react';
+import { authService, type Rol } from '../application/services/AuthService';
 
 type UserRole = 'administrador' | 'docente' | 'estudiante';
 
-interface RoleSwitcherProps {
-  currentRole: UserRole;
-  onRoleChange: (role: UserRole) => void;
+// Mapear entre los tipos de rol
+function rolToUserRole(rol: Rol): UserRole {
+  return rol.toLowerCase() as UserRole;
 }
 
-export function RoleSwitcher({ currentRole, onRoleChange }: RoleSwitcherProps) {
+function userRoleToRol(role: UserRole): Rol {
+  return role.toUpperCase() as Rol;
+}
+
+export function RoleSwitcher() {
   const [isVisible, setIsVisible] = useState(false);
+  const [currentRole, setCurrentRole] = useState<UserRole>('estudiante');
+
+  // Suscribirse a cambios en el AuthService
+  useEffect(() => {
+    const unsubscribe = authService.onChange((user) => {
+      if (user) {
+        setCurrentRole(rolToUserRole(user.rol));
+      }
+    });
+
+    // Cargar rol inicial
+    const user = authService.getUsuarioActual();
+    if (user) {
+      setCurrentRole(rolToUserRole(user.rol));
+    }
+
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      // Mostrar si el mouse está en los primeros 100px desde arriba
       if (e.clientY < 100) {
         setIsVisible(true);
       } else if (e.clientY > 200) {
-        // Ocultar si el mouse está más abajo de 200px
         setIsVisible(false);
       }
     };
@@ -37,15 +58,24 @@ export function RoleSwitcher({ currentRole, onRoleChange }: RoleSwitcherProps) {
   const currentIndex = roles.findIndex(r => r.value === currentRole);
   const currentRoleData = roles[currentIndex];
 
+  const handleRoleChange = (role: UserRole) => {
+    authService.cambiarRolMock(userRoleToRol(role));
+  };
+
   const handlePrevious = () => {
     const newIndex = (currentIndex - 1 + roles.length) % roles.length;
-    onRoleChange(roles[newIndex].value);
+    handleRoleChange(roles[newIndex].value);
   };
 
   const handleNext = () => {
     const newIndex = (currentIndex + 1) % roles.length;
-    onRoleChange(roles[newIndex].value);
+    handleRoleChange(roles[newIndex].value);
   };
+
+  // No mostrar si no estamos en modo mock
+  if (!authService.isMock()) {
+    return null;
+  }
 
   return (
     <div 
@@ -87,12 +117,11 @@ export function RoleSwitcher({ currentRole, onRoleChange }: RoleSwitcherProps) {
             </Button>
           </div>
 
-          {/* Indicadores de posición */}
           <div className="flex justify-center gap-1.5 mt-3">
             {roles.map((role, index) => (
               <button
                 key={role.value}
-                onClick={() => onRoleChange(role.value)}
+                onClick={() => handleRoleChange(role.value)}
                 className={`h-1.5 rounded-full transition-all ${
                   index === currentIndex 
                     ? `w-6 ${role.color}` 

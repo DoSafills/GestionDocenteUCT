@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useState, createContext, useContext } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import {
@@ -14,16 +14,22 @@ import {
 import Header from './Header';
 import { useWindowWidth } from '@/hooks/useWindowWidth';
 import { RoleSwitcher } from './RoleSwitcher';
+import { authService, type Rol } from '../application/services/AuthService';
 
 const SIDEBAR_BREAKPOINT = 1024;
 
 // Definición de tipos de roles
 type UserRole = 'administrador' | 'docente' | 'estudiante';
 
+// Función para mapear entre tipos
+function rolToUserRole(rol: Rol): UserRole {
+    return rol.toLowerCase() as UserRole;
+}
+
 // Contexto para compartir el rol en toda la aplicación
 interface RoleContextType {
     currentRole: UserRole;
-    setCurrentRole: (role: UserRole) => void;
+    isAuthenticated: boolean;
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
@@ -94,29 +100,54 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
     const width = useWindowWidth();
     const isSidebarVisible = width >= SIDEBAR_BREAKPOINT;
 
-    // Estado para el rol mockeado
-    const [mockRole, setMockRole] = useState<UserRole>('administrador');
+    // Estado para el rol actual desde AuthService
+    const [currentRole, setCurrentRole] = useState<UserRole>('estudiante');
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    // Suscribirse a cambios en AuthService
+    useEffect(() => {
+        const unsubscribe = authService.onChange((user) => {
+            if (user) {
+                setCurrentRole(rolToUserRole(user.rol));
+                setIsAuthenticated(true);
+            } else {
+                setIsAuthenticated(false);
+            }
+        });
+
+        // Cargar usuario inicial
+        const user = authService.getUsuarioActual();
+        if (user) {
+            setCurrentRole(rolToUserRole(user.rol));
+            setIsAuthenticated(true);
+        } else {
+            // Si no hay usuario, intentar cargar desde API
+            authService.cargarUsuarioDesdeApi();
+        }
+
+        return unsubscribe;
+    }, []);
 
     // Filtrar items del menú según el rol del usuario
     const filteredMenuItems = menuItems.filter(item => 
-        item.allowedRoles.includes(mockRole)
+        item.allowedRoles.includes(currentRole)
     );
 
-    // Handler mock para logout
+    // Handler para logout
     const handleLogout = () => {
-        console.log('Logout simulado (mock mode)');
+        authService.clear();
+        // Aquí podrías redirigir al login o hacer otras acciones
+        console.log('Cerrando sesión...');
+        // Por ejemplo: window.location.href = '/login';
     };
 
     return (
-        <RoleContext.Provider value={{ currentRole: mockRole, setCurrentRole: setMockRole }}>
+        <RoleContext.Provider value={{ currentRole, isAuthenticated }}>
             <div className='min-h-screen bg-background flex flex-col text-black'>
                 <Header />
                 
-                {/* Role Switcher Mock */}
-                <RoleSwitcher 
-                    currentRole={mockRole} 
-                    onRoleChange={setMockRole}
-                />
+                {/* Role Switcher (solo visible en modo mock) */}
+                <RoleSwitcher />
                 
                 <div className='flex flex-1'>
                     {isSidebarVisible && (
@@ -146,6 +177,22 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
                                             );
                                         })}
                                     </div>
+                                    
+                                    {/* Información del usuario */}
+                                    {isAuthenticated && (
+                                        <div className='px-2 py-3 border-t'>
+                                            <div className='text-xs text-muted-foreground mb-1'>
+                                                Usuario actual
+                                            </div>
+                                            <div className='text-sm font-medium'>
+                                                {authService.getUsuarioActual()?.nombre}
+                                            </div>
+                                            <div className='text-xs text-muted-foreground'>
+                                                {currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}
+                                            </div>
+                                        </div>
+                                    )}
+                                    
                                     <div className='mt-auto pt-4 border-t'>
                                         <Button
                                             variant='ghost'
