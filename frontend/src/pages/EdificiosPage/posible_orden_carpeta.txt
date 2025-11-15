@@ -1,0 +1,11 @@
+pages/edificios/
+├── EdificiosPage.tsx          (Componente principal - orquestador)
+├── hooks/
+│   ├── useEdificios.ts        (Lógica de negocio - CRUD)
+│   └── useFiltrosEdificios.ts (Lógica de filtrado y búsqueda)
+└── components/
+    ├── ModalEdificio.tsx      (Modal crear/editar edificio)
+    ├── ModalSala.tsx          (Modal crear/editar sala)
+    ├── FiltrosEdificios.tsx   (Barra de filtros)
+    ├── TarjetaEdificio.tsx    (Card de edificio)
+    └── TarjetaSala.tsx        (Card de sala individual)

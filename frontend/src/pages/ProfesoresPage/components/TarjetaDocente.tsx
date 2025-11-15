@@ -68,7 +68,6 @@ export default function TarjetaDocente({ docente, rows, onEditar, onEliminar }: 
 
         <div>
           <div className="flex items-center gap-2 font-medium mb-1">
-            {/* usando Badge para el depto, reemplaza “Especialidades” */}
             <span>Departamento</span>
           </div>
           {departamento && departamento !== "—" ? (

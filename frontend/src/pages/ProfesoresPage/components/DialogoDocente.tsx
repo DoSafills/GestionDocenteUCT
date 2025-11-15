@@ -6,7 +6,7 @@ import { Input } from "../../../components/ui/input";
 import { Button } from "../../../components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
 import { Switch } from "../../../components/ui/switch";
-import { CalendarDays, Mail, Pencil, PlusCircle, Trash2 } from "lucide-react";
+import { CalendarDays, Mail, Pencil, PlusCircle, Trash2, Lock } from "lucide-react";
 import SelectorHora from "../components/SelectorHora";
 import type { DiaSemana } from "../../../types";
 import type { DocenteConUsuario, DocenteCreateDTO } from "@/domain/docentes/types";
@@ -44,42 +44,27 @@ export default function DialogoDocente({
       <DialogContent className="sm:max-w-[860px] max-h-[80vh] overflow-y-auto bg-white text-gray-900">
         <DialogHeader>
           <DialogTitle>{editando ? "Editar docente" : "Nuevo docente"}</DialogTitle>
-          <DialogDescription>
-            Completa los datos del docente y configura su disponibilidad semanal.
-          </DialogDescription>
+          <DialogDescription>Completa los datos del docente y configura su disponibilidad semanal.</DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2 md:col-span-2">
             <Label>Nombre</Label>
-            <Input
-              value={form.nombre}
-              onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-              placeholder="Ej. Ana Pérez"
-            />
+            <Input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Ej. Ana Pérez" />
           </div>
 
           <div className="space-y-2">
             <Label>Correo</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                className="pl-9"
-                value={(form.email || "").trim()}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="ana.perez@universidad.edu"
-              />
+              <Input className="pl-9" value={(form.email || "").trim()} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="ana.perez@universidad.edu" />
             </div>
           </div>
 
           <div className="space-y-2">
             <Label>Estado</Label>
-            {/* puedes dejar Select o cambiar a Switch; acá dejo Select como tu versión original */}
-            <Select
-              value={String(form.activo)}
-              onValueChange={(v: string) => setForm({ ...form, activo: v === "true" })}
-            >
-              <SelectTrigger className="rounded-xl bg-white text-gray-900 dark:bg-white dark:text-gray-900">
+            <Select value={String(form.activo)} onValueChange={(v: string) => setForm({ ...form, activo: v === "true" })}>
+              <SelectTrigger className="rounded-xl bg-white text-gray-900">
                 <SelectValue placeholder="Selecciona" />
               </SelectTrigger>
               <SelectContent className="bg-white text-gray-900 shadow-md rounded-md">
@@ -89,16 +74,27 @@ export default function DialogoDocente({
             </Select>
           </div>
 
+          {!editando && (
+            <div className="space-y-2 md:col-span-2">
+              <Label>Contraseña</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="password"
+                  className="pl-9"
+                  value={form.contrasena || ""}
+                  onChange={(e) => setForm({ ...form, contrasena: e.target.value })}
+                  placeholder="Mínimo 12 caracteres"
+                />
+              </div>
+            </div>
+          )}
+
           <div className="space-y-2 md:col-span-2">
             <Label>Departamento</Label>
-            <Input
-              value={form.departamento}
-              onChange={(e) => setForm({ ...form, departamento: e.target.value })}
-              placeholder="Ej. Matemáticas"
-            />
+            <Input value={form.departamento} onChange={(e) => setForm({ ...form, departamento: e.target.value })} placeholder="Ej. Matemáticas" />
           </div>
 
-          {/* Editor semanal */}
           <div className="md:col-span-2 border rounded-xl p-4 space-y-4">
             <div className="flex items-center gap-2">
               <CalendarDays className="h-4 w-4" />
@@ -136,9 +132,9 @@ export default function DialogoDocente({
                         <div className="mt-3 overflow-visible rounded-lg border">
                           <table className="w-full text-sm table-fixed">
                             <colgroup>
-                              <col className="w-35" /> {/* Desde */}
-                              <col className="w-35" /> {/* Hasta */}
-                              <col className="w-24" /> {/* Acciones */}
+                              <col className="w-35" />
+                              <col className="w-35" />
+                              <col className="w-24" />
                             </colgroup>
                             <thead className="bg-muted/50">
                               <tr className="text-left">
