@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { DialogTrigger } from "@/components/ui/dialog";
 import { Plus, Building } from "lucide-react";
+import { useRole } from "@/components/Layout";
 
 import { useEdificios } from "./hooks/useEdificios";
 import { useFiltrosEdificios } from "./hooks/useFiltrosEdificios";
@@ -17,6 +17,10 @@ import type { EdificioDTO } from "@/domain/edificios/types";
 import type { SalaDTO } from "@/domain/salas/types";
 
 export function EdificiosPage() {
+  // Obtener el rol actual del contexto
+  const { currentRole } = useRole();
+  const esAdministrador = currentRole === 'administrador';
+
   // Hook de lógica de negocio
   const {
     campus,
@@ -24,7 +28,6 @@ export function EdificiosPage() {
     salas,
     loading,
     getCampusNombre,
-    getSalasPorEdificio,
     crearEdificio,
     actualizarEdificio,
     eliminarEdificio,
@@ -162,44 +165,50 @@ export function EdificiosPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl">Gestión de Salas y Edificios</h2>
+      <div className="flex justify-between items-start gap-4">
+        <div className="flex-1">
+          <h2 className="text-3xl font-bold mb-2">Gestión de Salas y Edificios</h2>
           <p className="text-muted-foreground">
-            Administra la infraestructura y asignación de espacios físicos
+            {esAdministrador 
+              ? 'Administra la infraestructura y asignación de espacios físicos'
+              : 'Consulta la información de edificios y salas disponibles'}
           </p>
         </div>
 
-        <div className="flex gap-2">
+        {esAdministrador && (
           <Button variant="default" onClick={abrirModalCrearEdificio}>
             <Plus className="w-4 h-4 mr-2" />
             Agregar Edificio
           </Button>
-        </div>
+        )}
       </div>
 
-      {/* Modales */}
-      <ModalEdificio
-        abierto={modalEdificioAbierto}
-        onCambiarEstado={setModalEdificioAbierto}
-        formulario={formularioEdificio}
-        onCambiarFormulario={setFormularioEdificio}
-        campus={campus}
-        esEdicion={!!editandoEdificio}
-        onSubmit={handleSubmitEdificio}
-      />
+      {/* Modales - Solo renderizar si es administrador */}
+      {esAdministrador && (
+        <>
+          <ModalEdificio
+            abierto={modalEdificioAbierto}
+            onCambiarEstado={setModalEdificioAbierto}
+            formulario={formularioEdificio}
+            onCambiarFormulario={setFormularioEdificio}
+            campus={campus}
+            esEdicion={!!editandoEdificio}
+            onSubmit={handleSubmitEdificio}
+          />
 
-      <ModalSala
-        abierto={modalSalaAbierto}
-        onCambiarEstado={setModalSalaAbierto}
-        formulario={formularioSala}
-        onCambiarFormulario={setFormularioSala}
-        edificios={edificios}
-        edificioSeleccionado={editandoSala.edificioId}
-        onCambiarEdificio={(id) => setEditandoSala(prev => ({ ...prev, edificioId: id }))}
-        esEdicion={!!editandoSala.sala}
-        onSubmit={handleSubmitSala}
-      />
+          <ModalSala
+            abierto={modalSalaAbierto}
+            onCambiarEstado={setModalSalaAbierto}
+            formulario={formularioSala}
+            onCambiarFormulario={setFormularioSala}
+            edificios={edificios}
+            edificioSeleccionado={editandoSala.edificioId}
+            onCambiarEdificio={(id) => setEditandoSala(prev => ({ ...prev, edificioId: id }))}
+            esEdicion={!!editandoSala.sala}
+            onSubmit={handleSubmitSala}
+          />
+        </>
+      )}
 
       {/* Filtros */}
       <FiltrosEdificios
@@ -227,11 +236,11 @@ export function EdificiosPage() {
               edificio={edificio}
               campusNombre={getCampusNombre(edificio.campus_id)}
               salas={salasEdificio}
-              onAgregarSala={() => agregarSala(edificio.id)}
-              onEditarEdificio={() => editarEdificioClick(edificio)}
-              onEliminarEdificio={() => eliminarEdificio(edificio.id)}
-              onEditarSala={(sala) => editarSalaClick(edificio.id, sala)}
-              onEliminarSala={(salaId) => eliminarSala(salaId)}
+              onAgregarSala={esAdministrador ? () => agregarSala(edificio.id) : undefined}
+              onEditarEdificio={esAdministrador ? () => editarEdificioClick(edificio) : undefined}
+              onEliminarEdificio={esAdministrador ? () => eliminarEdificio(edificio.id) : undefined}
+              onEditarSala={esAdministrador ? (sala) => editarSalaClick(edificio.id, sala) : undefined}
+              onEliminarSala={esAdministrador ? (salaId) => eliminarSala(salaId) : undefined}
             />
           );
         })}
@@ -242,14 +251,22 @@ export function EdificiosPage() {
         <Card>
           <CardContent className="text-center py-12">
             <Building className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg mb-2">No hay edificios registrados</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              {busqueda ? 'No se encontraron resultados' : 'No hay edificios registrados'}
+            </h3>
             <p className="text-muted-foreground mb-4">
-              Comienza agregando tu primer edificio para gestionar las salas
+              {busqueda 
+                ? 'Intenta con otros términos de búsqueda'
+                : esAdministrador
+                  ? 'Comienza agregando tu primer edificio para gestionar las salas'
+                  : 'Aún no hay edificios disponibles en el sistema'}
             </p>
-            <Button onClick={abrirModalCrearEdificio}>
-              <Plus className="w-4 h-4 mr-2" />
-              Agregar Primer Edificio
-            </Button>
+            {esAdministrador && !busqueda && (
+              <Button onClick={abrirModalCrearEdificio}>
+                <Plus className="w-4 h-4 mr-2" />
+                Agregar Primer Edificio
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}
