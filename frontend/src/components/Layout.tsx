@@ -1,5 +1,6 @@
 // src/components/Layout.tsx
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import {
@@ -12,8 +13,8 @@ import {
     LogOut,
 } from 'lucide-react';
 import Header from './Header';
-import { useAuthContext as useAuth } from "@/pages/LoginPage/hooks/AuthProvider";
 import { useWindowWidth } from '@/hooks/useWindowWidth';
+import { RoleSwitcher } from './RoleSwitcher'; // Importar el componente mock
 
 const SIDEBAR_BREAKPOINT = 1024;
 
@@ -74,21 +75,36 @@ const menuItems: MenuItem[] = [
 ];
 
 export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
-    const { logout, user } = useAuth(); // Asumiendo que user contiene el rol
     const width = useWindowWidth();
     const isSidebarVisible = width >= SIDEBAR_BREAKPOINT;
 
-    // Obtener el rol del usuario (ajusta según tu estructura de datos)
-    const userRole = user?.rol as UserRole;
+    // Estado para el rol mockeado - iniciamos con 'administrador' por defecto
+    const [mockRole, setMockRole] = useState<UserRole>('administrador');
+
+    // Usar directamente el rol mockeado
+    const userRole = mockRole;
 
     // Filtrar items del menú según el rol del usuario
     const filteredMenuItems = menuItems.filter(item => 
         item.allowedRoles.includes(userRole)
     );
 
+    // Handler mock para logout (solo para desarrollo)
+    const handleLogout = () => {
+        console.log('Logout simulado (mock mode)');
+        // Aquí podrías agregar lógica adicional si lo necesitas
+    };
+
     return (
         <div className='min-h-screen bg-background flex flex-col text-black'>
             <Header />
+            
+            {/* Role Switcher Mock - Para testing de roles */}
+            <RoleSwitcher 
+                currentRole={userRole} 
+                onRoleChange={setMockRole}
+            />
+            
             <div className='flex flex-1'>
                 {isSidebarVisible && (
                     <aside className='w-64 bg-card border-r min-h-[calc(100vh-80px)] text-black flex flex-col'>
@@ -121,7 +137,7 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
                                     <Button
                                         variant='ghost'
                                         className='w-full justify-start gap-3 text-red-600 hover:bg-red-50'
-                                        onClick={logout}
+                                        onClick={handleLogout}
                                     >
                                         <LogOut className='w-4 h-4' />
                                         Cerrar sesión
