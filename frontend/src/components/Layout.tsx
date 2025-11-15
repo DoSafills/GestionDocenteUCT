@@ -15,6 +15,7 @@ import Header from './Header';
 import { useWindowWidth } from '@/hooks/useWindowWidth';
 import { RoleSwitcher } from './RoleSwitcher';
 import { authService, type Rol } from '../application/services/AuthService';
+import { useAuthContext as useAuth } from "@/pages/LoginPage/hooks/AuthProvider";
 
 const SIDEBAR_BREAKPOINT = 1024;
 
@@ -97,6 +98,7 @@ const menuItems: MenuItem[] = [
 ];
 
 export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
+    const { logout } = useAuth();
     const width = useWindowWidth();
     const isSidebarVisible = width >= SIDEBAR_BREAKPOINT;
 
@@ -132,14 +134,6 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
     const filteredMenuItems = menuItems.filter(item => 
         item.allowedRoles.includes(currentRole)
     );
-
-    // Handler para logout
-    const handleLogout = () => {
-        authService.clear();
-        // Aquí podrías redirigir al login o hacer otras acciones
-        console.log('Cerrando sesión...');
-        // Por ejemplo: window.location.href = '/login';
-    };
 
     return (
         <RoleContext.Provider value={{ currentRole, isAuthenticated }}>
@@ -197,7 +191,7 @@ export function Layout({ children, currentPage, onPageChange }: LayoutProps) {
                                         <Button
                                             variant='ghost'
                                             className='w-full justify-start gap-3 text-red-600 hover:bg-red-50'
-                                            onClick={handleLogout}
+                                            onClick={logout}
                                         >
                                             <LogOut className='w-4 h-4' />
                                             Cerrar sesión
