@@ -12,8 +12,24 @@ import {
 } from "../../components/ui/dialog";
 import { Button } from "../../components/ui/button";
 import { useRestriccionesPage } from "./application/usecases/useRestricciones";
-import type { RestriccionAcademica, TipoRestriccion } from "@domain/entities/restriccionespage/RestriccionAcademica";
-import { Table as TableIcon, XCircle, CheckCircle, AlertTriangle } from "lucide-react";
+import type {
+  RestriccionAcademica,
+  TipoRestriccion,
+} from "@domain/entities/restriccionespage/RestriccionAcademica";
+import {
+  Table as TableIcon,
+  XCircle,
+  CheckCircle,
+  AlertTriangle,
+  Plus,
+} from "lucide-react";
+
+import { DashboardPage } from "@pages/DashboardPage";
+
+import {
+  authService,
+  type UsuarioActual,
+} from "@/application/services/AuthService";
 
 export function RestriccionesPage() {
   const {
