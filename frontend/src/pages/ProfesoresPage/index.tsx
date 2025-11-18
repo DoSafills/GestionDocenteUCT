@@ -1,17 +1,20 @@
+// frontend/src/pages/ProfesoresPage/index.tsx
 import { useEffect, useMemo, useState } from "react";
-import { Card, CardContent } from "../../components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { User } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import type { DiaSemana, RestriccionHorarioGuardar } from "../../types";
+import type { DiaSemana, RestriccionHorarioGuardar } from "@/types";
 import { docenteService } from "@/application/services/DocenteService";
-import type { DocenteConUsuario, DocenteCreateDTO} from "@/domain/docentes/types";
+import type { DocenteConUsuario, DocenteCreateDTO } from "@/domain/docentes/types";
 import { normalize } from "@/utils/string";
 
 import AccionesHeader from "./components/AccionesHeader";
 import FiltrosListado from "./components/FiltrosListado";
 import DialogoDocente from "./components/DialogoDocente";
 import TarjetaDocente from "./components/TarjetaDocente";
+
+import { authService } from "@/application/services/AuthService";
 
 const DIA_LABEL: Record<DiaSemana, string> = { LUNES: "Lunes", MARTES: "Martes", MIERCOLES: "Miércoles", JUEVES: "Jueves", VIERNES: "Viernes", SABADO: "Sábado" };
 const ORD_DIAS: DiaSemana[] = ["LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO"];
@@ -25,6 +28,8 @@ function useDebouncedValue<T>(value: T, delay = 250) {
   useEffect(() => { const t = setTimeout(() => setDebounced(value), delay); return () => clearTimeout(t); }, [value, delay]);
   return debounced;
 }
+
+/* ---------- utilidades de disponibilidad (copiar/adaptadas de tu versión) ---------- */
 
 type Slot = { id: number; desde: string; hasta: string };
 type DiaConfig = { enabled: boolean; slots: Slot[]; editing: boolean };
@@ -101,6 +106,8 @@ function restriccionesASemana(restricciones: RestriccionHorarioGuardar[]): Seman
   return base;
 }
 
+/* -------------------- componente -------------------- */
+
 type FormState = DocenteCreateDTO;
 
 export function ProfesoresPage() {
@@ -116,6 +123,32 @@ export function ProfesoresPage() {
   const [busqueda, setBusqueda] = useState("");
   const debouncedSearch = useDebouncedValue(busqueda, 250);
   const [filtroEstado, setFiltroEstado] = useState<"todos" | "activo" | "inactivo">("todos");
+
+  // permisos
+  const [canCreate, setCanCreate] = useState<boolean>(false);
+  const [canEdit, setCanEdit] = useState<boolean>(false);
+  const [canDelete, setCanDelete] = useState<boolean>(false);
+
+  useEffect(() => {
+    setCanCreate(authService.canCreateProfesores());
+    setCanEdit(authService.canEditProfesores());
+    setCanDelete(authService.canDeleteProfesores());
+
+    if (!authService.getUsuarioActual()) {
+      void authService.cargarUsuarioDesdeApi().then(() => {
+        setCanCreate(authService.canCreateProfesores());
+        setCanEdit(authService.canEditProfesores());
+        setCanDelete(authService.canDeleteProfesores());
+      });
+    }
+
+    const unsub = authService.onChange(() => {
+      setCanCreate(authService.canCreateProfesores());
+      setCanEdit(authService.canEditProfesores());
+      setCanDelete(authService.canDeleteProfesores());
+    });
+    return unsub;
+  }, []);
 
   const limpiar = () => {
     setEditando(null);
@@ -142,8 +175,20 @@ export function ProfesoresPage() {
     });
   }, [items, debouncedSearch, filtroEstado]);
 
-  const abrirCrear = () => { limpiar(); setOpen(true); };
+  const abrirCrear = () => {
+    if (!canCreate) {
+      toast.error("No tienes permisos para crear docentes");
+      return;
+    }
+    limpiar();
+    setOpen(true);
+  };
+
   const abrirEditar = (d: DocenteConUsuario) => {
+    if (!canEdit) {
+      toast.error("No tienes permisos para editar docentes");
+      return;
+    }
     limpiar();
     setEditando(d);
     setForm({ nombre: d.nombre, email: d.email, departamento: d.docente.departamento, activo: d.activo, contrasena: "" });
@@ -171,6 +216,10 @@ export function ProfesoresPage() {
         setRestriccionesLocal((prev) => ({ ...prev, [updated.id]: payload }));
         toast.success("Docente actualizado");
       } else {
+        if (!canCreate) {
+          toast.error("No tienes permisos para crear docentes");
+          return;
+        }
         const created = await docenteService.crearNueva({
           nombre: form.nombre,
           email: form.email,
@@ -192,7 +241,15 @@ export function ProfesoresPage() {
     }
   };
 
-  const eliminarDocente = (d: DocenteConUsuario) => { setAEliminar(d); setConfirmOpen(true); };
+  const eliminarDocente = (d: DocenteConUsuario) => {
+    if (!canDelete) {
+      toast.error("No tienes permisos para eliminar docentes");
+      return;
+    }
+    setAEliminar(d);
+    setConfirmOpen(true);
+  };
+
   const confirmarEliminar = async () => {
     if (!aEliminar) return;
     try {
@@ -216,7 +273,7 @@ export function ProfesoresPage() {
 
   return (
     <div className="space-y-6 text-foreground">
-      <AccionesHeader onRecargar={listar} onNuevo={abrirCrear} />
+      <AccionesHeader onRecargar={listar} onNuevo={abrirCrear} canCreate={canCreate} />
 
       <DialogoDocente
         open={open}
@@ -254,6 +311,8 @@ export function ProfesoresPage() {
                 rows={filas}
                 onEditar={abrirEditar}
                 onEliminar={eliminarDocente}
+                canEdit={canEdit}
+                canDelete={canDelete}
               />
             );
           })}

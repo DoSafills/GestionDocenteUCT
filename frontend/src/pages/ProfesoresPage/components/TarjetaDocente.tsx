@@ -1,6 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
-import { Badge } from "../../../components/ui/badge";
-import { Button } from "../../../components/ui/button";
+// frontend/src/pages/ProfesoresPage/components/TarjetaDocente.tsx
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CalendarDays, Edit, Mail, Trash2, User } from "lucide-react";
 import type { DocenteConUsuario } from "@/domain/docentes/types";
 
@@ -11,9 +12,18 @@ type Props = {
   rows: Row[];
   onEditar: (d: DocenteConUsuario) => void;
   onEliminar: (d: DocenteConUsuario) => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 };
 
-export default function TarjetaDocente({ docente, rows, onEditar, onEliminar }: Props) {
+export default function TarjetaDocente({
+  docente,
+  rows,
+  onEditar,
+  onEliminar,
+  canEdit = false,
+  canDelete = false,
+}: Props) {
   const departamento = docente.docente?.departamento || "—";
 
   return (
@@ -37,22 +47,32 @@ export default function TarjetaDocente({ docente, rows, onEditar, onEliminar }: 
             </div>
           </div>
           <div className="flex gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onEditar(docente)}
-              aria-label={`Editar docente ${docente.nombre}`}
-            >
-              <Edit className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onEliminar(docente)}
-              aria-label={`Eliminar docente ${docente.nombre}`}
-            >
-              <Trash2 className="w-4 h-4 text-destructive" />
-            </Button>
+            {/* Mostrar botones condicionalmente según permisos */}
+            {canEdit ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEditar(docente)}
+                aria-label={`Editar docente ${docente.nombre}`}
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+            ) : (
+              <div />
+            )}
+
+            {canDelete ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEliminar(docente)}
+                aria-label={`Eliminar docente ${docente.nombre}`}
+              >
+                <Trash2 className="w-4 h-4 text-destructive" />
+              </Button>
+            ) : (
+              <div />
+            )}
           </div>
         </div>
       </CardHeader>
