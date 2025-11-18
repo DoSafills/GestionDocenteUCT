@@ -4,10 +4,10 @@ import { authService } from "@/application/services/AuthService";
 import { loginRepo, refreshRepo, logoutRepo, getAccessTokenRepo } from "../repository/authRepository";
 
 export function useAuth() {
-  const [state, setState] = useState<AuthState>(() => {
-    const { token, accessExpAt } = getAccessTokenRepo();
-    if (token) return { status: "authenticated", tokens: { access: token, refresh: "", expiresIn: 0, accessExpAt } };
-    return { status: "anonymous" };
+  // TEMPORAL: Bypass de autenticación para desarrollo
+  const [state, setState] = useState<AuthState>({
+    status: "authenticated",
+    tokens: { access: "dev-token", refresh: "dev-refresh", expiresIn: 9999999, accessExpAt: Date.now() + 9999999 }
   });
 
   const refreshTimer = useRef<number | null>(null);
