@@ -1,5 +1,5 @@
 import type { SeccionDTO } from '@/domain/entities/Seccion/types';
-import { ENDPOINTS } from '@/infraestructure/endpoints';
+import { ENDPOINTS } from '@/endpoints';
 import { ApiRepository } from '../ApiRepository';
 import { MockRepository } from '../MockRepository';
 import seccionesMock from '@/infraestructure/mocks/secciones.mock';
