@@ -15,6 +15,19 @@ export const docentesMock: DocenteConUsuario[] = [
     },
   },
   {
+    id: 999,
+    nombre: "Docente Demo",
+    email: "docente@uct.cl",
+    rol: "docente",
+    activo: true,
+    created_at: "2025-01-01T00:00:00Z",
+    updated_at: "2025-01-01T00:00:00Z",
+    docente: {
+      user_id: 999,
+      departamento: "Informática",
+    },
+  },
+  {
     id: 202,
     nombre: "Luis García",
     email: "luis.garcia@universidad.edu",

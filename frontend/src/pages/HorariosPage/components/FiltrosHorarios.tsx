@@ -4,8 +4,7 @@ import { Input } from "../../../components/ui/input";
 import { Button } from "../../../components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../../components/ui/dialog";
 import { Badge } from "../../../components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
-import { Search, X, HelpCircle, Calendar, BookOpen, Filter, Building, GraduationCap } from "lucide-react";
+import { Search, X, HelpCircle, Calendar, BookOpen, Filter, Building } from "lucide-react";
 import type { FiltrosHorariosProps } from "../types/componentes";
 
 export function FiltrosHorarios({
@@ -13,7 +12,6 @@ export function FiltrosHorarios({
   onFiltroChange,
   salas,
   profesores,
-  asignaturas,
 }: FiltrosHorariosProps) {
   const [busquedaGlobal, setBusquedaGlobal] = useState('');
   const [menuAbierto, setMenuAbierto] = useState(false);
@@ -35,7 +33,6 @@ export function FiltrosHorarios({
       salaId: undefined,
       edificioId: undefined,
       campusId: undefined,
-      carrera: undefined,
       dia: undefined,
       estado: undefined,
       busqueda: undefined,
@@ -68,10 +65,6 @@ export function FiltrosHorarios({
     )
   ).sort();
 
-  const carreras = Array.from(
-    new Set(asignaturas.map((a: any) => a.carrera).filter(Boolean))
-  ).sort();
-
   return (
     <Card>
       <CardHeader>
@@ -90,7 +83,6 @@ export function FiltrosHorarios({
                 </DialogHeader>
                 <div className="space-y-2 text-sm">
                   <p>• <strong>Búsqueda:</strong> busca en asignatura, docente, sala y sección</p>
-                  <p>• <strong>Carrera:</strong> filtra por carrera específica</p>
                   <p>• <strong>Edificio:</strong> filtra por edificio específico (CJP07, CJP01, etc.)</p>
                   <p>• <strong>Día:</strong> filtra por día de la semana</p>
                   <p>• <strong>Estado:</strong> activo, cancelado o reprogramado</p>
@@ -123,29 +115,6 @@ export function FiltrosHorarios({
               onChange={(e) => handleBusquedaChange(e.target.value)}
               className="pl-10 bg-white text-black placeholder:text-gray-500 border border-gray-300"
             />
-          </div>
-
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <GraduationCap className="w-4 h-4" />
-              <span className="text-sm font-medium">Carrera:</span>
-            </div>
-            <Select
-              value={filtros.carrera || "todas"}
-              onValueChange={(value) => handleFiltroRapido('carrera', value === "todas" ? undefined : value)}
-            >
-              <SelectTrigger className="w-full bg-white border-gray-300">
-                <SelectValue placeholder="Todas las carreras" />
-              </SelectTrigger>
-              <SelectContent className="bg-white z-50 border border-gray-200 shadow-lg">
-                <SelectItem value="todas">Todas las carreras</SelectItem>
-                {carreras.map((carrera) => (
-                  <SelectItem key={carrera} value={carrera}>
-                    {carrera}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           <div>
@@ -217,11 +186,6 @@ export function FiltrosHorarios({
             {filtros.docenteRut && (
               <Badge className="bg-green-100 text-green-800">
                 Docente: {profesores.find(p => String((p as any).id) === String(filtros.docenteRut))?.nombre ?? filtros.docenteRut}
-              </Badge>
-            )}
-            {filtros.carrera && (
-              <Badge className="bg-indigo-100 text-indigo-800">
-                Carrera: {filtros.carrera}
               </Badge>
             )}
             {filtros.edificioId && (

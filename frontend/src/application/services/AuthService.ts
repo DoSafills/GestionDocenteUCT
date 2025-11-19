@@ -1,5 +1,5 @@
-import { ENDPOINTS } from "@/infraestructure/endpoints";
 import { getAccessTokenRepo, logoutRepo } from "@/pages/LoginPage/repository/authRepository";
+import { apiGetMe } from "@/pages/LoginPage/services/authApi";
 
 export type Rol = "ADMINISTRADOR" | "DOCENTE" | "ESTUDIANTE";
 export interface UsuarioActual {
@@ -63,28 +63,36 @@ export class AuthService {
       return null;
     }
 
-    const res = await fetch(ENDPOINTS.AUTH_ME, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    try {
+      const result = await apiGetMe();
+      console.log('[AuthService] Resultado de apiGetMe:', result);
+      
+      if (!result.ok) {
+        console.error('[AuthService] Error en apiGetMe:', result.error);
+        logoutRepo();
+        this.setUsuario(null);
+        return null;
+      }
 
-    if (!res.ok) {
+      const data = result.value;
+      console.log('[AuthService] Datos del usuario:', data);
+
+      const user: UsuarioActual = {
+        id: data.id,
+        nombre: data.nombre,
+        email: data.email,
+        activo: data.activo,
+        rol: mapRol(data.rol || data.role || 'ESTUDIANTE'), // Flexibilidad en el campo rol
+      };
+
+      this.setUsuario(user);
+      return user;
+    } catch (error) {
+      console.error('[AuthService] Error al cargar usuario:', error);
       logoutRepo();
       this.setUsuario(null);
       return null;
     }
-
-    const data = await res.json();
-
-    const user: UsuarioActual = {
-      id: data.id,
-      nombre: data.nombre,
-      email: data.email,
-      activo: data.activo,
-      rol: mapRol(data.rol),
-    };
-
-    this.setUsuario(user);
-    return user;
   }
 
   clear() {

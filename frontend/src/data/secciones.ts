@@ -80,4 +80,8 @@ export const seccionesMock: Seccion[] = [
     // INF602 - Minería de Datos
     { id: 39, codigo: 'INF602-01', anio: 2025, semestre: 6, asignatura_id: 20, cupos: 36 },
     { id: 40, codigo: 'INF602-02', anio: 2025, semestre: 6, asignatura_id: 20, cupos: 34 },
+
+    // Secciones demo para el docente demo
+    { id: 26, codigo: 'DEMO101-01', anio: 2025, semestre: 1, asignatura_id: 21, cupos: 30 },
+    { id: 27, codigo: 'DEMO102-01', anio: 2025, semestre: 1, asignatura_id: 22, cupos: 25 },
 ];

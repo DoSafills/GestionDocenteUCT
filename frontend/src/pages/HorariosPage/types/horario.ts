@@ -1,12 +1,10 @@
-import type { Seccion, Bloque, Clase, Sala, Docente, Asignatura } from "../../../types";
-
 export interface HorarioCompleto {
-  clase: Clase;
-  seccion: Seccion;
-  bloque: Bloque;
-  sala: Sala;
-  docente: Docente;
-  asignatura: Asignatura;
+  clase: any;
+  seccion: any;
+  bloque: any;
+  sala: any;
+  docente: any;
+  asignatura: any;
 }
 
 export interface HorarioDetalle {
@@ -30,6 +28,7 @@ export interface HorarioDetalle {
     capacidad: number;
   };
   docente: {
+    id?: number;
     rut: string;
     nombre: string;
     email: string;
@@ -43,7 +42,6 @@ export interface FiltrosHorario {
   salaId?: string;
   edificioId?: string;
   campusId?: string;
-  carrera?: string;
   bloqueId?: string;
   dia?: number;
   estado?: string;

@@ -48,3 +48,21 @@ export async function apiRefresh(params: {
     return err(new AuthError("Network error", "NETWORK"));
   }
 }
+
+export async function apiGetMe(): Promise<Result<any, AuthError>> {
+  try {
+    const res = await fetch(ENDPOINTS.AUTH_ME, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      const code: AuthError["code"] =
+        res.status === 400 ? "BAD_REQUEST" : res.status === 401 ? "UNAUTHORIZED" : "UNKNOWN";
+      return err(new AuthError((data as any)?.message || res.statusText || "Get me failed", code));
+    }
+    return ok(data);
+  } catch {
+    return err(new AuthError("Network error", "NETWORK"));
+  }
+}

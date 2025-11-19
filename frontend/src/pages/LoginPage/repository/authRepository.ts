@@ -26,6 +26,9 @@ export async function loginRepo(creds: LoginCredentials): Promise<Result<Tokens,
   tokenStorage.setAccess(res.value.access_token, accessExpAt);
   tokenStorage.setRefresh(res.value.refresh_token);
 
+  // Guardar email para modo mock
+  localStorage.setItem('mock_login_email', valid.value.email);
+
   return ok({
     access: res.value.access_token,
     refresh: res.value.refresh_token,
@@ -60,6 +63,7 @@ export async function refreshRepo(): Promise<Result<Tokens, AuthError>> {
 export function logoutRepo(): void {
   tokenStorage.clearAccess();
   tokenStorage.clearRefresh();
+  localStorage.removeItem('mock_login_email');
 }
 
 export function getAccessTokenRepo(): { token: string | null; accessExpAt?: number } {

@@ -101,7 +101,6 @@ export interface EstadoHorarios {
   vistaCalendario: boolean;
   modalAbierto: boolean;
   editandoHorario: HorarioManual | null;
-  formulario: FormularioHorario;
   confirmacion: EstadoConfirmacion;
   cargando: boolean;
   error?: string;

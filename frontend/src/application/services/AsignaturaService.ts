@@ -1,6 +1,5 @@
 import {
     asignaturaMockRepository,
-    asignaturaApiRepository,
     type AsignaturaMockRepository,
     type AsignaturaApiRepository,
 } from '@infraestructure/repositories/Asignaturas';

@@ -8,7 +8,7 @@ import { bloquesMock } from "@data/bloques";
 import { edificiosMock } from "@data/edificios";
 import { salasMock } from "@data/salas";
 import { docentesMock } from "@data/docentes";
-import type { HorarioCompleto, HorarioDetalle, FiltrosHorario } from "@types/horario";
+import type { HorarioCompleto, HorarioDetalle, FiltrosHorario } from "@/pages/HorariosPage/types/horario";
  
 export class HorarioRepository {
   obtenerPorSeccionId(seccionId: string): HorarioCompleto[] {
@@ -36,7 +36,9 @@ export class HorarioRepository {
   }
 
   filtrar(filtros: FiltrosHorario): HorarioCompleto[] {
+    console.log('[HorarioRepository] Filtros recibidos:', filtros);
     let clasesFiltradas = [...clasesMock];
+    console.log('[HorarioRepository] Total clases mock:', clasesFiltradas.length);
 
     if (filtros.seccionId) {
       if (/^\d+$/.test(filtros.seccionId)) {
@@ -45,7 +47,14 @@ export class HorarioRepository {
     }
 
     if (filtros.docenteRut) {
-      clasesFiltradas = clasesFiltradas.filter((c) => String(c.docente_id) === String(filtros.docenteRut));
+      console.log('[HorarioRepository] Filtrando por docenteRut:', filtros.docenteRut);
+      const antes = clasesFiltradas.length;
+      clasesFiltradas = clasesFiltradas.filter((c) => {
+        const match = String(c.docente_id) === String(filtros.docenteRut);
+        console.log(`[HorarioRepository] Clase ${c.clase_id}: docente_id=${c.docente_id}, docenteRut=${filtros.docenteRut}, match=${match}`);
+        return match;
+      });
+      console.log(`[HorarioRepository] Clases después del filtro docente: ${clasesFiltradas.length} (antes: ${antes})`);
     }
 
     if (filtros.salaId) {
@@ -68,13 +77,6 @@ export class HorarioRepository {
     }
 
     let completos = this.construirHorariosCompletos(clasesFiltradas);
-
-    if (filtros.carrera) {
-      completos = completos.filter((h) => {
-        const carrera = (h as any).asignatura.carrera;
-        return carrera === filtros.carrera;
-      });
-    }
 
     if (filtros.seccionId && !/^\d+$/.test(filtros.seccionId)) {
       completos = completos.filter((h) => h.seccion.codigo?.includes(filtros.seccionId as string));
@@ -149,7 +151,7 @@ export class HorarioRepository {
           sala,
           docente,
           asignatura,
-        } as HorarioCompleto;
+        };
       })
       .filter(Boolean) as HorarioCompleto[];
   }
@@ -183,7 +185,8 @@ export class HorarioRepository {
         capacidad: Number((h as any).sala.capacidad ?? 0),
       },
       docente: {
-        rut: String((h as any).docente.id),   // usamos id como “rut”
+        id: Number((h as any).docente.id),     // ID numérico del docente
+        rut: String((h as any).docente.id),    // usamos id como "rut" para compatibilidad
         nombre: String((h as any).docente.nombre),
         email: String((h as any).docente.email ?? ""),
       },

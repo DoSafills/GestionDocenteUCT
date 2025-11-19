@@ -50,4 +50,11 @@ export const clasesMock: ClaseMock[] = [
 
   { id: 29, clase_id: "H-INF401-L1B3", seccion_id: 25, docente_id: 209, sala_codigo: "CJP07-102", bloque_id: 3, estado: "activo" },
   { id: 30, clase_id: "H-INF401-L3B1", seccion_id: 25, docente_id: 209, sala_codigo: "CJP07-102", bloque_id: 7, estado: "reprogramado" },
+
+  // Clases específicas para el docente demo (ID 999)
+  { id: 31, clase_id: "H-DEMO101-L1B1", seccion_id: 26, docente_id: 999, sala_codigo: "CJP01-101", bloque_id: 1, estado: "activo" },
+  { id: 32, clase_id: "H-DEMO101-L1B2", seccion_id: 26, docente_id: 999, sala_codigo: "CJP01-101", bloque_id: 2, estado: "activo" },
+  { id: 33, clase_id: "H-DEMO101-L3B1", seccion_id: 26, docente_id: 999, sala_codigo: "CJP01-102", bloque_id: 7, estado: "activo" },
+  { id: 34, clase_id: "H-DEMO102-L2B1", seccion_id: 27, docente_id: 999, sala_codigo: "CJP07-201", bloque_id: 4, estado: "activo" },
+  { id: 35, clase_id: "H-DEMO102-L4B1", seccion_id: 27, docente_id: 999, sala_codigo: "CJP10-302", bloque_id: 10, estado: "activo" },
 ];
