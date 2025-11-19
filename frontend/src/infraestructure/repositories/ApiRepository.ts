@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { getAccessToken } from '@/auth/tokenStore';
 import type { IRepository } from '@/domain/repositories/IRepository';
 
@@ -17,10 +18,10 @@ export class ApiRepository<T extends { id: number }> implements IRepository<T> {
         };
     }
 
-    private async handleResponse<R>(res: Response): Promise<R> {
-        if (!res.ok) throw new Error(`Error ${res.status}: ${(await res.text()) || res.statusText}`);
+    private async handleResponse<R>(res: any): Promise<R> {
+        if (res.status !== 200) throw new Error(`Error ${res.status}: ${res.statusText}`);
 
-        return res.json();
+        return res.data;
     }
 
     async getAll(forceRefresh = false): Promise<T[]> {
@@ -28,7 +29,7 @@ export class ApiRepository<T extends { id: number }> implements IRepository<T> {
             return structuredClone(this.cache);
         }
 
-        const res = await fetch(this.endpoint, { headers: this.getHeaders() });
+        const res = await axios.get(this.endpoint, { headers: this.getHeaders() });
 
         const data = await this.handleResponse<T[]>(res);
 
@@ -42,7 +43,7 @@ export class ApiRepository<T extends { id: number }> implements IRepository<T> {
 
         if (found) return structuredClone(found);
 
-        const res = await fetch(`${this.endpoint}/${id}`, { headers: this.getHeaders() });
+        const res = await axios.get(`${this.endpoint}/${id}`, { headers: this.getHeaders() });
         const data = await this.handleResponse<T>(res);
 
         this.cache.unshift(data);
@@ -51,11 +52,7 @@ export class ApiRepository<T extends { id: number }> implements IRepository<T> {
     }
 
     async create(item: Omit<T, 'id'>): Promise<T> {
-        const res = await fetch(this.endpoint, {
-            method: 'POST',
-            headers: this.getHeaders(),
-            body: JSON.stringify(item),
-        });
+        const res = await axios.post(this.endpoint, item, { headers: this.getHeaders() });
 
         const data = await this.handleResponse<T>(res);
 
@@ -65,11 +62,7 @@ export class ApiRepository<T extends { id: number }> implements IRepository<T> {
     }
 
     async update(id: number, item: Partial<Omit<T, 'id'>>): Promise<T> {
-        const res = await fetch(`${this.endpoint}/${id}`, {
-            method: 'PUT',
-            headers: this.getHeaders(),
-            body: JSON.stringify(item),
-        });
+        const res = await axios.put(`${this.endpoint}/${id}`, item, { headers: this.getHeaders() });
 
         const updated = await this.handleResponse<T>(res);
 
@@ -82,10 +75,7 @@ export class ApiRepository<T extends { id: number }> implements IRepository<T> {
     }
 
     async delete(id: number): Promise<void> {
-        const res = await fetch(`${this.endpoint}/${id}`, {
-            method: 'DELETE',
-            headers: this.getHeaders(),
-        });
+        const res = await axios.delete(`${this.endpoint}/${id}`, { headers: this.getHeaders() });
 
         await this.handleResponse(res);
 
